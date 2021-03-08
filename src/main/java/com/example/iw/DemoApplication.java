@@ -1,4 +1,4 @@
-package es.ucm.fdi.iw;
+package com.example.iw;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

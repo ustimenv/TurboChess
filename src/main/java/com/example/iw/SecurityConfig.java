@@ -1,4 +1,4 @@
-package es.ucm.fdi.iw;
+package com.example.iw;
 
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;

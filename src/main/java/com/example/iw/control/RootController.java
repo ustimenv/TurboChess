@@ -1,4 +1,4 @@
-package es.ucm.fdi.iw.controller;
+package com.example.iw.control;
 
 import java.util.Random;
 
