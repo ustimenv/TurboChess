@@ -1,4 +1,4 @@
-package com.example.iw;
+package es.ucm.fdi.iw.turbochess;
 
 public class Guess {
     public int guess;

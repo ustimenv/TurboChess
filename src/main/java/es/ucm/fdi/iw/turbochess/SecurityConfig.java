@@ -1,4 +1,4 @@
-package com.example.iw;
+package es.ucm.fdi.iw.turbochess;
 
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
