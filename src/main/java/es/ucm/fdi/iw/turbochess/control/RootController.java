@@ -21,6 +21,7 @@ public class RootController {
 
     @GetMapping("/game")
     public String game(Model model) {
+        model.addAttribute("title", "Turbochess");
         return "game";
     }
 
