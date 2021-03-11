@@ -85,3 +85,16 @@ li a.upBar:hover {
     top: -30px;
     background-color: #33333365;
   }
+
+  .bloqueEspc {
+    padding: 30px 0px 30px 0px;
+    height: 30%;
+    width: 23%;
+    text-decoration: none;
+    text-align: center;
+    font-weight: bold;
+    position: fixed;
+    background-color: #0a86da65;
+    left: 10px;
+    top: 75px;
+  }
