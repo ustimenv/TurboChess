@@ -20,3 +20,41 @@ li a.upBar {
 li a.upBar:hover {
     background-color: #111111;
 }
+
+.barraLateral {
+    height: 100%;
+    width: 160px;
+    position: fixed;
+    z-index: 1;
+    top: 8px;
+    right: 0px;
+    background-color: rgb(43, 42, 42);
+    overflow-x: hidden;
+    padding-top: 0px;
+  }
+  
+  .barraLateral a.friendBar {
+    padding: 30px 8px 30px 16px;
+    text-decoration: none;
+    text-align: center;
+    position: r;
+    top: 0px;
+    font-size: 30px;
+    color: #252525;
+    background-color: rgb(116, 105, 105);
+    display: block;
+    font-family: "Arial";
+  }
+
+  .barraLateral a {
+    padding: 12px 8px 12px 10px;
+    text-decoration: none;
+    font-size: 25px;
+    color: #818181;
+    display: block;
+    font-family: "Arial";
+  }
+  
+  .barraLateral a:hover {
+    color: #f1f1f1;
+  }
