@@ -23,7 +23,7 @@ li a.upBar:hover {
 
 .barraLateral {
     height: 100%;
-    width: 160px;
+    width: 190px;
     position: fixed;
     z-index: 1;
     top: 8px;
@@ -37,7 +37,6 @@ li a.upBar:hover {
     padding: 30px 8px 30px 16px;
     text-decoration: none;
     text-align: center;
-    position: r;
     top: 0px;
     font-size: 30px;
     color: #252525;
@@ -57,4 +56,32 @@ li a.upBar:hover {
   
   .barraLateral a:hover {
     color: #f1f1f1;
+  }
+
+  .partidaImg {
+    padding: 16px 0px 10px 0px;
+    position: fixed;
+    right: 210px;
+  }
+
+  .chat {
+    padding: 30px 0px 30px 0px;
+    height: 40%;
+    width: 23%;
+    text-decoration: none;
+    text-align: center;
+    position: fixed;
+    background-color: #81818165;
+    left: 10px;
+    bottom: 0;
+  }
+  .chat a.chatBar{
+    padding: 10px 10px 10px 10px;
+    text-decoration: none;
+    text-align: center;
+    position: relative;
+    display: block;
+    text-align: center;
+    top: -30px;
+    background-color: #33333365;
   }
