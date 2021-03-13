@@ -127,3 +127,11 @@ li a.upBar:hover {
     margin: auto;
     position: relative;
   }
+  .footer {
+    position: absolute;
+    bottom: 5px;
+    text-align: center;
+    margin: auto;
+    left: 0;
+    right: 0;
+  }

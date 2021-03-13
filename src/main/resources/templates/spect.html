@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html>
-    <head>
+    <head >
         <meta charset="UTF-8"/>
         <title th:text="${title}"> Titulo</title>
         <link rel="stylesheet" type="text/css" href="css/estilos.css"/></link>
@@ -11,5 +11,6 @@
         <img class="partidaSpectImg" border="0" alt="partida" src="images/partidaPlaceholder.png" width="43%" height="70%">
         <div th:replace="frags/chatPartida :: chatPartida"></div>
         <div th:replace="frags/chat :: chat"></div>
+        <footer th:replace="frags/footer.html"> footer</footer>
     </body>
 </html>
