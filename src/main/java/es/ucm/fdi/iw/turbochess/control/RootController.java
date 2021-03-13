@@ -27,6 +27,7 @@ public class RootController {
 
     @GetMapping("/spect")
     public String spect(Model model) {
+        model.addAttribute("title", "Turbochess Spect");
         return "spect";
     }
 

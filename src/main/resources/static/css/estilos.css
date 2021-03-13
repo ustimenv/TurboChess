@@ -64,6 +64,14 @@ li a.upBar:hover {
     right: 210px;
   }
 
+  .partidaSpectImg {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    margin: auto;
+    right: 210px;
+  }
+
   .chat {
     padding: 30px 0px 30px 0px;
     height: 40%;
@@ -97,4 +105,25 @@ li a.upBar:hover {
     background-color: #0a86da65;
     left: 10px;
     top: 75px;
+  }
+
+  .chatPartida {
+
+    height: 70%;
+    width: 44%;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left:  20px;
+    margin: auto;
+    text-decoration: none;
+    text-align: center;
+    font-weight: bold;
+    background-color: #097691;
+  }
+  .chatPartida span {
+    top: 50%;
+    bottom: 50%;
+    margin: auto;
+    position: relative;
   }
