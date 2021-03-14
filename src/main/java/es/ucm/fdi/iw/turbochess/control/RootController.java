@@ -83,3 +83,4 @@ public class RootController {
     public String getUserLoginPage() {
     return "login";
 }
+}
