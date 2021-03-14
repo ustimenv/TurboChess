@@ -25,9 +25,11 @@ hs_err_pid*
 # IDE stuff
 *.iml
 .idea
+.vscode
 out
 .classpath
 .factorypath
 .project
 .settings
 lib/
+target
