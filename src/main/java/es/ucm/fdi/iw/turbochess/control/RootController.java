@@ -50,6 +50,11 @@ public class RootController {
     public String profile(Model model) {
         return "profile";
     }
+    
+    @GetMapping("/othersProfile")
+    public String othersProfile(Model model) {
+        return "othersProfile";
+    }
 
     @GetMapping("/admin")
     public String admin(Model model) {
