@@ -25,7 +25,7 @@
         <div class="cabeceraImagenPerfil">
           
             <a href="/my_profile">
-                <img src="/imagen/<%=usr.email%>" alt="Imagen de perfil" class="cabeceraFotoPerfil">
+                <img th:src="@{/imagen/<%=usr.email%>}" alt="Imagen de perfil" class="cabeceraFotoPerfil">
             </a>
          
         </div>

@@ -1,6 +1,8 @@
 package es.ucm.fdi.iw.turbochess.control;
 
 import es.ucm.fdi.iw.turbochess.Usario;
+import jdk.internal.org.jline.utils.Log;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -17,6 +19,9 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import es.ucm.fdi.iw.turbochess.GeneralUtils;
@@ -58,9 +63,14 @@ public class RootController {
         return "ranks";
     }
     
-    @GetMapping("/othersProfile")
-    public String erothersProfileror(Model model) {
+    @GetMapping(path = "/users/{username}")
+    public String erothersProfileror(Model model, @PathVariable(value="username", required = true) String username) {
         model.addAttribute("title", "Turbochess Error");
+        if(!username.equals("")){
+            model.addAttribute("username", username);
+        } else{
+            System.err.println("Empty username!!");
+        } 
         return "othersProfile";
     }
 

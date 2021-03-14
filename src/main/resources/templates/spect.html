@@ -3,7 +3,7 @@
     <head >
         <meta charset="UTF-8"/>
         <title th:text="${title}"> Titulo</title>
-        <link rel="stylesheet" type="text/css" href="css/estilos.css"/></link>
+        <link rel="stylesheet" type="text/css" th:href="@{/css/estilos.css}"/></link>
     </head>
     <body>
         <div th:replace="frags/barraSuperior :: barraSuperior"></div>
