@@ -45,4 +45,16 @@ public class RootController {
     public String ranks(Model model) {
         return "ranks";
     }
+    
+    @GetMapping("/othersProfile")
+    public String erothersProfileror(Model model) {
+        model.addAttribute("title", "Turbochess Error");
+        return "othersProfile";
+    }
+
+    @GetMapping("/error")
+    public String error(Model model) {
+        model.addAttribute("title", "Turbochess Error");
+        return "error";
+    }
 }
