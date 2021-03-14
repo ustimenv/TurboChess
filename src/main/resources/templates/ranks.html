@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8"/>
+        <title th:text="${title}"> Rankings</title>
+        <link rel="stylesheet" type="text/css" href="css/estilos.css"/></link>
+    </head>
+    <body>
+        <div th:replace="frags/barraSuperior :: barraSuperior"></div>
+        <div th:replace="frags/barraLateral :: barraLateral"></div>
+        <table border="1">
+            <tr>
+                <td>Plazo</td>
+                <td>ELO</td>
+                <td>Nombre</td>
+                <td>Foto</td>
+                <td>Liga</td>
+            </tr>
+            <tr th:each="usario: ${rankings}">
+                <td th:text="${usario.plazo}">First Name</td>
+                <td th:text="${usario.ELO}">Last Name</td>
+                <td th:text="${usario.nombre}">Last Name</td>
+                <td th:text="${usario.avatar}">Last Name</td>
+                <td th:text="${usario.liga}">Last Name</td>
+            </tr>
+        </table>
+
+
+    </body>
+</html>
