@@ -79,4 +79,7 @@ public class RootController {
         model.addAttribute("title", "Turbochess Error");
         return "error";
     }
+        @GetMapping("/login")
+    public String getUserLoginPage() {
+    return "login";
 }
