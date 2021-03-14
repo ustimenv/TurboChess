@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8"/>
+        <title th:text="${title}"> Titulo</title>
+        <link rel="stylesheet" type="text/css" href="../static/css/estilos.css" th:href="@{/css/estilos.css}"/></link>
+    </head>
+    <body>
+        <div th:replace="frags/barraSuperior :: barraSuperior"></div>
+        <div th:replace="frags/fotoPerfil :: fotoPerfil"></div>
+        <div th:replace="frags/infoPerfil :: infoPerfil"></div>
+        <div th:replace="frags/barraLateral :: barraLateral"></div>
+        <div th:replace="frags/chat :: chat"></div>
+        <div th:replace="frags/historial :: historial"></div>
+        <footer th:replace="frags/footer.html"> footer</footer>
+    </body>
+</html>

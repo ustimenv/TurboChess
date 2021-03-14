@@ -8,10 +8,10 @@
 		<version>2.4.3</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>com.example</groupId>
-	<artifactId>iw</artifactId>
+	<groupId>es.ucm.fdi.iw</groupId>
+	<artifactId>turbochess</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>iw</name>
+	<name>turbochess</name>
 	<description>Demo project for Spring Boot</description>
 	<properties>
 		<java.version>1.8</java.version>
