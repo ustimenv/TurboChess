@@ -1,8 +1,7 @@
 <!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8" />
-</head>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="head.html"> </head>
+
 
 <body>
     <header>
@@ -21,15 +20,17 @@
                     <a class="upBar" href="/profile">Profile</a> 
                 </li>
                 <li class="upBar">
-                    <a class="upBar" href="/game">Game</a> 
-                </li>
-                <li class="upBar">
                     <a class="upBar" href="/login">Login/Logout</a> 
                 </li>
+                <span th:text="#{lang.change}"></span>:
+                <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                    <a class="dropdown-item" th:href="@{/(lang=en)}">English</a>
+                    <a class="dropdown-item" th:href="@{/(lang=es)}">Spanish</a>
+                </div>
                  <input type="text" placeholder="Player Username.." name="search">
                  <a class="search" href="othersProfile">Search</a>
-            
                     
+
             </ul>
        
         </div>

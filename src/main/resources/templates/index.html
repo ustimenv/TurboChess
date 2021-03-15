@@ -1,21 +1,22 @@
 <!DOCTYPE html>
 <html>
-    <head th:replace="head.html"> </head>
+    <html lang="es" xmlns:th="http://www.thymeleaf.org"></html>
+    <head th:replace="head.html"> </head>    
     <body>
     <div th:replace="frags/barraSuperior :: barraSuperior"></div>
     <div class= Inicio-menu>
         <dl class="Inicio-menu">
             <dt class="Inicio-menu">
-               <a class="button" href="/game" >Play online</a> 
+               <a class="button" href="/game" th:text="#{Play.play}" ></a> 
             </dt>
             <dt class="Inicio-menu">
-                <a class="button" href="/game" >Play Ranked</a> 
+                <a class="button" href="/game" th:text="#{Play.ranked}" ></a> 
             </dt>
             <dt class="Inicio-menu">
-                <a class="button" href="/game" >Play private game</a> 
+                <a class="button" href="/game" th:text="#{Play.private}" ></a> 
             </dt>
             <dt class="Inicio-menu">
-                <a class="button" href="/spect" >Spect</a> 
+                <a class="button" href="/spect" th:text="#{Play.spect}" ></a> 
             </dt>         
         </dl>
     </div>
