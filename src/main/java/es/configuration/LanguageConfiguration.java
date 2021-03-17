@@ -17,7 +17,7 @@ public class LanguageConfiguration implements WebMvcConfigurer {
 	@Bean
 	public MessageSource messageSource() {
 		ReloadableResourceBundleMessageSource messageSource = new ReloadableResourceBundleMessageSource();
-		messageSource.setBasename("classpath:language/messages_es");
+		messageSource.setBasename("classpath:language/messages");
 		messageSource.setDefaultEncoding("UTF-8");
 		return messageSource;
 	}
@@ -27,7 +27,7 @@ establece el lugar en donde se almacenará la información del idioma que utiliz
 	@Bean
 	public LocaleResolver localeResolver() {
 		SessionLocaleResolver localeResolver = new SessionLocaleResolver();
-		localeResolver.setDefaultLocale(Locale.getDefault());
+		localeResolver.setDefaultLocale(Locale.US);
 		return localeResolver;
 	}
 /* will switch to a new locale based on the value of the lang parameter appended to a request*/
