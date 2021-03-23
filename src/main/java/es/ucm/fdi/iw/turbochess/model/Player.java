@@ -1,5 +1,4 @@
 package es.ucm.fdi.iw.turbochess.model;
-import java.util.List;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
