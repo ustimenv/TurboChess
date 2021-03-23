@@ -8,28 +8,24 @@ import lombok.Data;
 
 @Entity
 @Data
-public class User {
+public class Player {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @OneToMany(targetEntity = User.class)
-    private List<User> friends;
+    @OneToOne
+    User user;
+
+    @OneToOne
+    Game game;
 
     @NotNull
-    private String nickname;
+    boolean isWhite;
 
     @NotNull
-    private String password;
-
-    private String avatar;
+    int result;
 
     @NotNull
-    private int elo;
-
-    //Admin = 1 , Normal user = 0
-    @NotNull
-    private int permission;
-	
+    int secondsLeft;
 }
