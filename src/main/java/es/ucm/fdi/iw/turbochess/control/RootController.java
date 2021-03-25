@@ -1,6 +1,5 @@
 package es.ucm.fdi.iw.turbochess.control;
 
-import es.ucm.fdi.iw.turbochess.Usario;
 
 //import jdk.internal.org.jline.utils.Log;
 
@@ -26,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import es.ucm.fdi.iw.turbochess.GeneralUtils;
+import es.ucm.fdi.iw.turbochess.model.User;
 
 @Controller
 public class RootController {
@@ -64,7 +64,7 @@ public class RootController {
 
     @GetMapping("/ranks")
     public String ranks(Model model) {
-        List <Usario> rankings = GeneralUtils.JSONtoList("src/main/resources/examples/rankings.json");
+        List <User> rankings = GeneralUtils.JSONtoList("src/main/resources/examples/rankings.json");
         model.addAttribute("rankings", rankings);
         return "ranks";
     }
