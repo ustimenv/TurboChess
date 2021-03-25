@@ -15,15 +15,13 @@
 	<description>Demo project for Spring Boot</description>
 	<properties>
 		<java.version>1.8</java.version>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
+
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-data-jpa</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-security</artifactId>
+			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -31,27 +29,55 @@
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-web</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-websocket</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.thymeleaf.extras</groupId>
-			<artifactId>thymeleaf-extras-springsecurity5</artifactId>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-jpa</artifactId>
 		</dependency>
 
+		<!--
+			BD concreta (H2)
+		-->
 		<dependency>
 			<groupId>com.h2database</groupId>
 			<artifactId>h2</artifactId>
 			<scope>runtime</scope>
 		</dependency>
+
+		<!--
+			Seguridad
+		-->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-security</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-messaging</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.thymeleaf.extras</groupId>
+			<artifactId>thymeleaf-extras-springsecurity5</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.googlecode.owasp-java-html-sanitizer</groupId>
+			<artifactId>owasp-java-html-sanitizer</artifactId>
+			<version>20180219.1</version>
+		</dependency>
+
+		<!--
+			Generación de getters, setters, constructores, equals/hashcode
+		-->
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
 			<optional>true</optional>
 		</dependency>
+
+		<!--
+			Pruebas
+		-->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
@@ -60,41 +86,138 @@
 		<dependency>
 			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-test</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.13.1</version>
+			<scope>test</scope>
+		</dependency>
+		<!--
+			para generar mockups (falsos objetos que simulan ser objetos reales)
+			en tus pruebas unitarias
+			https://mvnrepository.com/artifact/org.mockito/mockito-core
+		-->
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-core</artifactId>
+			<version>3.2.4</version>
+			<scope>test</scope>
+		</dependency>
+
+		<!--
+			integración entre karate y junit4
+			https://mvnrepository.com/artifact/com.intuit.karate/karate-junit4
+		-->
+		<dependency>
+			<groupId>com.intuit.karate</groupId>
+			<artifactId>karate-junit4</artifactId>
+			<version>1.0.0</version>
+			<scope>test</scope>
+		</dependency>
+		<!--
+			karate usa chrome u otro navegador para automatizar pruebas
+			https://mvnrepository.com/artifact/com.intuit.karate/karate-core
+		-->
+		<dependency>
+			<groupId>com.intuit.karate</groupId>
+			<artifactId>karate-core</artifactId>
+			<version>1.0.0</version>
+			<scope>test</scope>
+		</dependency>
+		<!--
+			karate sólo quiere parsear xml válido, pero lo normal es escribir
+			html que no es xhtml válido. JSoup permite convertir lo uno a lo otro
+			https://mvnrepository.com/artifact/org.jsoup/jsoup
+			(solo hace falta cuando usas Karate para probar APIs;
+			si automatizas navegador, no es necesario)
+		-->
+		<dependency>
+			<groupId>org.jsoup</groupId>
+			<artifactId>jsoup</artifactId>
+			<version>1.13.1</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-    		<groupId>javax.validation</groupId>
-   			<artifactId>validation-api</artifactId>
-   			<version>2.0.1.Final</version>
-		</dependency>
-
-    	<dependency>
-    		<groupId>javax.xml.bind</groupId>
-    		<artifactId>jaxb-api</artifactId>
-    		<version>2.3.0</version>
-		</dependency>
-
-
-		<dependency>
-    		<groupId>org.hibernate.validator</groupId>
-    		<artifactId>hibernate-validator</artifactId>
-    		<version>6.0.13.Final</version>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-tomcat</artifactId>
 		</dependency>
 	</dependencies>
 
 	<build>
+
+		<!--
+			para poder tener todos los recursos de prueba
+			mezclados con las pruebas en sí en src/test/java
+			(esto dice "los recursos están ahí, pero no incluyen los .java")
+		-->
+		<testResources>
+			<testResource>
+				<directory>src/test/java</directory>
+				<excludes>
+					<exclude>**/*.java</exclude>
+				</excludes>
+			</testResource>
+		</testResources>
+
 		<plugins>
+			<!--
+				Downgrading until fixed in maven:
+				https://issues.apache.org/jira/projects/MRESOURCES/issues/MRESOURCES-272?filter=allopenissues
+			-->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-resources-plugin</artifactId>
+				<version>3.1.0</version>
+			</plugin>
+
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+			</plugin>
+
+			<!--
+				surefire se encarga de pasar pruebas JUnit. No queremos
+				que se ejecute Karate siempre, sólo si se especifica
+
+				mvn test -Dtest=KarateTests
+				(ojo: sólo se pueden pasar con la aplicación funcionando!)
+			-->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>2.22.1</version>
 				<configuration>
 					<excludes>
-						<exclude>
-							<groupId>org.projectlombok</groupId>
-							<artifactId>lombok</artifactId>
-						</exclude>
+						<exclude>karate/**/*.java</exclude>
 					</excludes>
+					<includes>
+						<include>es/**/*.java</include>
+					</includes>
 				</configuration>
+			</plugin>
+
+			<!--
+				para ejecutar karate desde fuera (pruebas externas de interfaz):
+
+				mvn test -Dexec.args=src/test/karate-ui/login.feature
+			-->
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>exec-maven-plugin</artifactId>
+				<version>1.1.1</version>
+				<executions>
+					<execution>
+						<phase>test</phase>
+						<goals>
+							<goal>java</goal>
+						</goals>
+						<configuration>
+							<classpathScope>test</classpathScope>
+							<mainClass>com.intuit.karate.cli.Main</mainClass>
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>
