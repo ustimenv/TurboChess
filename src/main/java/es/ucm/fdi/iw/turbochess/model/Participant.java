@@ -1,6 +1,4 @@
 package es.ucm.fdi.iw.turbochess.model;
-import java.util.List;
-import javax.validation.constraints.NotNull;
 import javax.persistence.*;
 
 import lombok.Data;
@@ -19,7 +17,7 @@ public class Participant {
     @ManyToOne
     Competition competition;
 
-    @NotNull
+    @Column(nullable = false)
     int points;
 
 }
