@@ -85,8 +85,15 @@ public class RootController {
         model.addAttribute("title", "Turbochess Error");
         return "error";
     }
-        @GetMapping("/login")
-    public String getUserLoginPage() {
-    return "login";
-}
+    @GetMapping("/login")
+    public String getUserLoginPage(Model model) {
+        model.addAttribute("title", "Turbochess LogIn");
+        return "login";
+    }
+
+    @GetMapping("/register")
+    public String register(Model model) {
+        model.addAttribute("title", "Turbochess Sing Up");
+        return "register";
+    }
 }
