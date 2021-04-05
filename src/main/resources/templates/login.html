@@ -1,11 +1,6 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="UTF-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"></meta>
-    <title th:text="${title}"> Titulo</title>
-    <link rel="stylesheet" type="text/css" th:href="@{/css/estilos.css}"/></link>
-  </head>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="head.html"> </head>
   <body>
     <div th:replace="frags/barraSuperior :: barraSuperior"></div>
      <div class="container">
@@ -23,6 +18,6 @@
         </p>
         <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
       </form>
-</div>
+     </div>
 <footer th:replace="frags/footer.html"> footer</footer>
 </body></html>
