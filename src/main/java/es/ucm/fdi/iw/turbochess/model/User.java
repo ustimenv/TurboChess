@@ -75,13 +75,28 @@ public class User implements Transferable<User.Transfer> {
 				.anyMatch(r -> r.equals(roleName));
 	}
 
+	public String getPassword(){
+		return this.password;
+	}
+
+	public String getRoles(){
+		return this.roles;
+	}
+
+	public String getUsername(){
+		return this.username;
+	}
     @Getter
     @AllArgsConstructor
     public static class Transfer {
+		
+
 		private long id;
         private String username;
 		private int totalReceived;
 		private int totalSent;
+
+
     }
 
 	@Override
