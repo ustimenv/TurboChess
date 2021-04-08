@@ -41,16 +41,17 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import es.ucm.fdi.iw.turbochess.LocalData;
+// import es.ucm.fdi.iw.turbochess.LocalData;
 import es.ucm.fdi.iw.turbochess.model.Message;
 import es.ucm.fdi.iw.turbochess.model.User;
-import es.ucm.fdi.iw.turbochess.model.User.Role;
+import es.ucm.fdi.iw.turbochess.model.UserRole;
 
 /**
  * User-administration controller
  * 
  */
 @Controller()
-@RequestMapping("user")
+@RequestMapping("/user")
 public class UserController {
 	
 	private static final Logger log = LogManager.getLogger(UserController.class);
@@ -128,13 +129,13 @@ public class UserController {
 		
 		User requester = (User)session.getAttribute("u");
 		if (requester.getId() != target.getId() &&
-				! requester.hasRole(Role.ADMIN)) {
+				! (requester.getRole() == UserRole.ADMIN)) {
 			throw new NoEsTuPerfilException();
 		}
 		
-		if (edited.getPassword() != null && edited.getPassword().equals(pass2)) {
+		if (edited.getPasswordHash() != null && edited.getPasswordHash().equals(pass2)) {
 			// save encoded version of password
-			target.setPassword(encodePassword(edited.getPassword()));
+			target.setPassword(encodePassword(edited.getPasswordHash()));
 		}		
 		target.setUsername(edited.getUsername());
 		//target.setFirstName(edited.getFirstName());
@@ -212,7 +213,7 @@ public class UserController {
 		// check permissions
 		User requester = (User)session.getAttribute("u");
 		if (requester.getId() != target.getId() &&
-				! requester.hasRole(Role.ADMIN)) {
+				! (requester.getRole() == UserRole.ADMIN)) {
 			response.sendError(HttpServletResponse.SC_FORBIDDEN, 
 					"No eres administrador, y éste no es tu perfil");
 			return "user";

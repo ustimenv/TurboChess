@@ -5,14 +5,22 @@ import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
+import javax.persistence.Table;
 import javax.persistence.Transient;
+import javax.swing.ImageIcon;
+
+import com.google.gson.Gson;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -27,35 +35,31 @@ import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 
 @Entity
-@Data
-public class User implements Transferable<User.Transfer> {
+@Table(name = "users")
+public class User {
 	private static Logger log = LogManager.getLogger(User.class);	
 
-	public enum Role {
-		USER,			// used for logged-in, non-priviledged users
-		ADMIN,			// used for maximum priviledged users
-	}
+    @Id @GeneratedValue(strategy = GenerationType.TABLE)	// the table auto-increments user IDs
+    @Column(name="id")
+	private int id;
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    @Column(name="username", nullable = false)
+    private String username;
+
+	@Column(name="password_hash", nullable = false)
+	private String passwordHash;
+
+	@Enumerated(EnumType.ORDINAL)
+	private UserRole role;
+
+	@Column(name="elo", nullable = false)
+	private int elo;
+
+	@Column(name="avatar")
+    private byte[] avatar;
 
     @OneToMany(targetEntity = User.class)
     private List<User> friends;
-
-    @Column(nullable = false, unique = true)
-    private String username;
-
-    @Column(nullable = false)
-    private String password;
-
-    @Column(nullable = false)
-	private String roles; // split by ',' to separate roles
-
-    private String avatar;
-
-    @Column(nullable = false)
-    private int elo;
 
     @OneToMany
 	@JoinColumn(name = "sender_id")
@@ -64,49 +68,37 @@ public class User implements Transferable<User.Transfer> {
 	@JoinColumn(name = "recipient_id")	
 	private List<Message> received = new ArrayList<>();
 
- 	/**
-	 * Checks whether this user has a given role.
-	 * @param role to check
-	 * @return true iff this user has that role.
-	 */
-	public boolean hasRole(Role role) {
-		String roleName = role.name();
-		return Arrays.stream(roles.split(","))
-				.anyMatch(r -> r.equals(roleName));
+    
+	public String toString(){
+		Gson gson = new Gson();
+		return gson.toJson(this);
 	}
 
-	public String getPassword(){
-		return this.password;
-	}
 
-	public String getRoles(){
-		return this.roles;
+	public int getId() {
+		return id;
 	}
-
 	public String getUsername(){
-		return this.username;
+		return username;
+	}	
+	public String getPasswordHash(){
+		return passwordHash;
 	}
-    @Getter
-    @AllArgsConstructor
-    public static class Transfer {
-		
-
-		private long id;
-        private String username;
-		private int totalReceived;
-		private int totalSent;
+	public UserRole getRole(){
+		return role;
+	}
+	public int getElo(){
+		return elo;
+	}
 
 
+    public void setPassword(String password) {
+		passwordHash = password;
     }
 
-	@Override
-    public Transfer toTransfer() {
-		return new Transfer(id,	username, received.size(), sent.size());
-	}
-	
-	@Override
-	public String toString() {
-		return toTransfer().toString();
-	}
+
+    public void setUsername(String username) {
+		this.username = username;
+    }
 	
 }

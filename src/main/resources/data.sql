@@ -1,4 +1,10 @@
 DROP TABLE IF EXISTS user_roles;
+DROP TABLE IF EXISTS user_relationship_types;
+DROP TABLE IF EXISTS user_relationships;
+DROP TABLE IF EXISTS messages;
+DROP TABLE IF EXISTS users cascade;
+
+
 CREATE TABLE user_roles (
        id int PRIMARY KEY,
        role_name VARCHAR(250) NOT NULL
@@ -8,13 +14,12 @@ VALUES (0,  'USER'),
        (1,  'ADMIN');
 
 --------------------------------------------------------------
-DROP TABLE IF EXISTS users;
 CREATE TABLE users (
        id INT AUTO_INCREMENT  PRIMARY KEY,
        username VARCHAR(250) NOT NULL,
        password_hash VARCHAR(250) NOT NULL,
-       role_id int,
-       elo int,
+       role_id int default 0,
+       elo int default 0,
        avatar BLOB,
        FOREIGN KEY (role_id) REFERENCES user_roles(id)
 );
@@ -25,7 +30,6 @@ VALUES ('PEPE',  '{bcrypt}$2a$10$xLFtBIXGtYvAbRqM95JhcOaG23fHRpDoZIJrsF2cCff9xEH
 --------------------------------------------------------------
 
 
-DROP TABLE IF EXISTS user_relationship_types;
 CREATE TABLE user_relationship_types (
        id int PRIMARY KEY,
        relationship_name VARCHAR(250) NOT NULL
@@ -41,7 +45,6 @@ VALUES (0, 'NOT FRIENDS WITH'),
        (6, 'IS BLOCKED BY');
 --------------------------------------------------------------
 
-DROP TABLE IF EXISTS user_relationships;
 CREATE TABLE user_relationships (
        userID1 VARCHAR(250) NOT NULL,
        userID2 VARCHAR(250) NOT NULL,
@@ -60,7 +63,6 @@ VALUES (1, 2, 2), -- 1 SENT FRIEND REQUEST TO 2
        (3, 2, 6); -- 3 IS BLOCKED BY 2
 --------------------------------------------------------------
 
-DROP TABLE IF EXISTS messages;
 CREATE TABLE messages (
        id int AUTO_INCREMENT PRIMARY KEY,
        sender_id INT NOT NULL,

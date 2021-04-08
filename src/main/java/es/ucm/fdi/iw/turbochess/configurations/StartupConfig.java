@@ -1,4 +1,4 @@
-package es.ucm.fdi.iw.turbochess.Configurations;
+package es.ucm.fdi.iw.turbochess.configurations;
 
 
 import java.text.SimpleDateFormat;

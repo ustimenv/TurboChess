@@ -1,4 +1,6 @@
-package es.ucm.fdi.iw.turbochess.Configurations;
+package es.ucm.fdi.iw.turbochess.configurations;
+
+import static es.ucm.fdi.iw.turbochess.model.UserRole.ADMIN;
 
 import java.io.IOException;
 
@@ -9,6 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import es.ucm.fdi.iw.turbochess.model.User;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,7 +67,7 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler {
                 .replaceFirst("/[^/]*$", "/ws"));	// .../foo		 => .../ws
 
         // redirects to 'admin' or 'user/{id}', depending on the user
-        response.sendRedirect(u.hasRole(User.Role.ADMIN) ?
+        response.sendRedirect(u.getRole() == ADMIN ?
                 "/" :
                 "/" + u.getId());
     }

@@ -1,4 +1,4 @@
-package es.ucm.fdi.iw.turbochess.Configurations;
+package es.ucm.fdi.iw.turbochess.configurations;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
