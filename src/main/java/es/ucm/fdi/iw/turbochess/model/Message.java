@@ -78,7 +78,10 @@ public class Message {
 		return gson.toJson(this);
 	}
 
-
+	public User getRecipient(){
+		return recipient;
+	}
+	
 	public void setRecipient(User u) {
 		recipient = u;
 	}
