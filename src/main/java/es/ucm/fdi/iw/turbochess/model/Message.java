@@ -11,14 +11,12 @@ import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.google.gson.Gson;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import lombok.Data;
-import lombok.Getter;
-import lombok.AllArgsConstructor;
+
 
 
 @Entity
@@ -73,33 +71,4 @@ public class Message {
 	// 		text, id
     //     );
     // }
-	public String toString(){
-		Gson gson = new Gson();
-		return gson.toJson(this);
-	}
-
-
-	public void setRecipient(User u) {
-		recipient = u;
-	}
-
-
-	public void setSender(User u) {
-		sender = u;
-	}
-
-
-    public void setDateSent(LocalDateTime t) {
-		dateSent = t;
-    }
-
-
-	public void setText(String t) {
-		text = t;
-	}
-
-
-	public long getId() {
-		return id;
-	}
 }

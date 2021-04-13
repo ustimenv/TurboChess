@@ -44,7 +44,6 @@ import es.ucm.fdi.iw.turbochess.LocalData;
 // import es.ucm.fdi.iw.turbochess.LocalData;
 import es.ucm.fdi.iw.turbochess.model.Message;
 import es.ucm.fdi.iw.turbochess.model.User;
-import es.ucm.fdi.iw.turbochess.model.UserRole;
 
 /**
  * User-administration controller
@@ -129,13 +128,13 @@ public class UserController {
 		
 		User requester = (User)session.getAttribute("u");
 		if (requester.getId() != target.getId() &&
-				! (requester.getRole() == UserRole.ADMIN)) {
+				! (requester.hasRole(User.Role.ADMIN))) {
 			throw new NoEsTuPerfilException();
 		}
 		
-		if (edited.getPasswordHash() != null && edited.getPasswordHash().equals(pass2)) {
+		if (edited.getPassword() != null && edited.getPassword().equals(pass2)) {
 			// save encoded version of password
-			target.setPassword(encodePassword(edited.getPasswordHash()));
+			target.setPassword(encodePassword(edited.getPassword()));
 		}		
 		target.setUsername(edited.getUsername());
 		//target.setFirstName(edited.getFirstName());
@@ -213,7 +212,7 @@ public class UserController {
 		// check permissions
 		User requester = (User)session.getAttribute("u");
 		if (requester.getId() != target.getId() &&
-				! (requester.getRole() == UserRole.ADMIN)) {
+				! (requester.hasRole(User.Role.ADMIN))) {
 			response.sendError(HttpServletResponse.SC_FORBIDDEN, 
 					"No eres administrador, y éste no es tu perfil");
 			return "user";

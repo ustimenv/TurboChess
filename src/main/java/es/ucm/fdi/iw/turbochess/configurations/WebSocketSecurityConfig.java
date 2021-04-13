@@ -1,7 +1,7 @@
 package es.ucm.fdi.iw.turbochess.configurations;
 
 
-import static es.ucm.fdi.iw.turbochess.model.UserRole.ADMIN;
+import static es.ucm.fdi.iw.turbochess.model.User.Role.ADMIN;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.messaging.MessageSecurityMetadataSourceRegistry;
