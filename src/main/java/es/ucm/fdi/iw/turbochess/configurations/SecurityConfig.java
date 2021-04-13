@@ -53,15 +53,14 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
      */
     protected void configure(HttpSecurity http) throws Exception {
         http
-                .authorizeRequests()
-                .antMatchers("**").permitAll()
+            .authorizeRequests()
                 .antMatchers("/css/**", "/js/**", "/img/**", "/", "/error").permitAll()
                 .antMatchers("/admin/**").hasRole("ADMIN")		  // <-- administration
                 .anyRequest().authenticated()
-                .and()
+            .and()
                 .formLogin()
-                .loginPage("/login").failureUrl("/login-error.html")
-                .permitAll().successHandler(loginSuccessHandler); // <-- called when login Ok; can redirect
+                .loginPage("/login").failureUrl("/login-error.html").permitAll()
+                .successHandler(loginSuccessHandler); // <-- called when login Ok; can redirect
     }
 
     /**
