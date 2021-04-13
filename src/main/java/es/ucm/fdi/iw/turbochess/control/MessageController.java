@@ -1,29 +1,40 @@
 package es.ucm.fdi.iw.turbochess.control;
 
 
+import java.security.Principal;
+
 import javax.persistence.EntityManager;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.handler.annotation.Header;
+import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.Payload;
+import org.springframework.messaging.handler.annotation.SendTo;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import es.ucm.fdi.iw.turbochess.model.Message;
 
-/**
- * User-administration controller
- * 
- * @author mfreire
- */
+
 @Controller()
-@RequestMapping("message")
-public class MessageController {
-	
+public class MessageController {	
 	private static final Logger log = LogManager.getLogger(MessageController.class);
+
+	@Autowired private SimpMessagingTemplate template;
 	
-	@Autowired 
-	private EntityManager entityManager;
-		
+	@MessageMapping("/hello")
+	@SendTo("/queue/chat")
+  	public String greeting(Object foo) throws Exception {
+    	Thread.sleep(1000); 
+    	return "Hello";
+  	}
+
+	  
+
+
 	// @GetMapping("/")
 	// public String getMessages(Model model, HttpSession session) {
 	// 	model.addAttribute("users", entityManager.createQuery(

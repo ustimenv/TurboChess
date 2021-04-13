@@ -88,4 +88,9 @@ public class RootController {
         model.addAttribute("title", "Turbochess Sing Up");
         return "register";
     }
+    
+    @GetMapping("/chat")
+    public String chat(Model model) {
+        return "chat";
+    }
 }
