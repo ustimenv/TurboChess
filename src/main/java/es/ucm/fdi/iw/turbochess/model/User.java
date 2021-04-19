@@ -31,6 +31,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
+import es.ucm.fdi.iw.model.Transferable;
 
 /**
  * A user; can be an Admin, a User, or a Moderator
@@ -55,6 +56,7 @@ import lombok.AllArgsConstructor;
                         + "WHERE u.username = :username")
 })
 public class User implements Transferable<User.Transfer> {
+
 
 
 	private static Logger log = LogManager.getLogger(User.class);	
