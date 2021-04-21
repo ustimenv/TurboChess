@@ -7,6 +7,11 @@
     <div class="login-box">
         <h2>Login</h2>
         <form class="form-signin" method="post" th:action="@{/login}">
+            <div th:if="${param.error}">
+                <div class="alert alert-danger">
+                    Invalid username or password.
+                </div>
+            </div>
             <div class="user-box">
                 <input type="text" id="username" name="username"
                        class="form-control" required="required">
