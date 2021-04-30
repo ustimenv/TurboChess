@@ -14,7 +14,8 @@ public class MessagePacket{
         TEXT,
         JOIN_ROOM,
         LEAVE_ROOM,
-        VOTE_KICK
+        VOTE_KICK,
+        BET_RAISE
     }
 
 }

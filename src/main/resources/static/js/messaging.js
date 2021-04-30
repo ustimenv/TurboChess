@@ -4,19 +4,21 @@ var usernamePage = document.querySelector('#username-page');    // root containe
 var chatPage = document.querySelector('#chat-page');            //
 var usernameInput = document.querySelector('#usernameInput');
 var messageForm = document.querySelector('#messageForm');
-var messageInputBox = document.querySelector('#message-input-box');
 var messagesBox = document.querySelector('#messages-box');      // has two children: event box (join/leave) & chat box; put msgs in correct boxes based on TYPE enum
 var connecting = document.querySelector('.connecting-to-room');
 
-messageForm.addEventListener('submit', sendMessage, true)
-usernameInput.addEventListener('submit', connect, true)
+var messageInputBox = document.querySelector('#message-input-box');
+var betInputBox = document.querySelector('#bet-input-box');
 
-var peopleInRoom=0;
+messageForm.addEventListener('submit', sendMessage, true);
+usernameInput.addEventListener('submit', connect, true);
+betInputBox.addEventListener('submit', raiseBet, true);
+
+
 var stompClient = null;
 var username = null;
 
-var colours = ['#e30e1f', '#0e0ee3', '#cde01d', '#cde01d', '#070806', '#e010b7', '#467a7a',
-];
+var colours = ['#e30e1f', '#0e0ee3', '#cde01d', '#cde01d', '#070806', '#e010b7', '#467a7a'];
 
 function connect(e) {
     username = document.querySelector('#name').value.trim();
@@ -54,25 +56,47 @@ function sendMessage(e) {
     e.preventDefault();
 }
 
-function onMessageReceived(payload) {
-    var message = JSON.parse(payload.body);
+function raiseBet(e) {          // TODO DOESN'T WORK
+     if(betInputBox && stompClient) {
+         var packet = {
+             from: username,
+             text: betInputBox.value,
+             type: 'BET_RAISE'
+         };
+
+         stompClient.send("/app/chat.raiseBet", {}, JSON.stringify(packet));
+     }
+     e.preventDefault();
+}
+
+function onMessageReceived(messageReceived) {
+    var message = JSON.parse(messageReceived.body);
 
     var messageElement = document.createElement('li');
+    // by the end of the switch, we will have initialised either an event msg or a chat msg
     switch(message.type){
+    // CHAT
     case 'TEXT':
-        messageElement.classList.add('chat-message');
+        messageElement.classList.add('chat-message');                       // make a pretty avatar &  display the msg
         var avatarElement = document.createElement('i');
-        var avatarText = document.createTextNode(message.from[0]);
-        avatarElement.appendChild(avatarText);
-        avatarElement.style['background-color'] = colours[Math.abs(hashString(message.from) % colours.length)];
-        peopleInRoom++;
-        messageElement.appendChild(avatarElement);
+        avatarElement.appendChild(document.createTextNode(message.from[0]));        // user's initials
+        avatarElement.style['background-color'] = colours[Math.abs(hashString(message.from) % colours.length)]; //user's avatar colour
+        messageElement.appendChild(avatarElement);     // msgElem contains avatar & 1st letter
 
-        var usernameElement = document.createElement('span');
-        var usernameText = document.createTextNode(message.from);
-        usernameElement.appendChild(usernameText);
-        messageElement.appendChild(usernameElement);
+        var usernameElement = document.createElement('span');           // now display username
+        var usernameText = document.createTextNode(message.from);       // the actual text will be appended afterwards
+        usernameElement.appendChild(usernameText);                  // the initial setup is done here to place the text
+        messageElement.appendChild(usernameElement);    // in the correct div (we want to keep events & chats separate)
     break;
+    case 'BET_RAISE':
+        messageElement.classList.add('event-message');
+        message.text = message.from + ' has increased their bet to ' + message.text + '!';
+    break;
+
+    case 'VOTE_KICK':
+        alert("VOTE KICK TO-DO!");
+    break;
+
     case 'JOIN_ROOM':
         messageElement.classList.add('event-message');
         message.text = message.from + ' joined!';
@@ -80,9 +104,6 @@ function onMessageReceived(payload) {
     case 'LEAVE_ROOM':
         messageElement.classList.add('event-message');
         message.text = message.from + ' left!';
-    break;
-    case 'VOTE_KICK':
-        alert("VOTE KICK TO-DO!");
     break;
     default:
         alert("Unexpected arg " + message.type);
@@ -107,3 +128,10 @@ function hashString(str) {
   }
   return hash;
 }
+
+//function incrementValue(){
+//    var value = parseInt(betInputBox.value, 10);
+//    value = isNaN(value) ? 0 : value;
+//    value+=5;
+//    betInputBox.value = value;
+//}

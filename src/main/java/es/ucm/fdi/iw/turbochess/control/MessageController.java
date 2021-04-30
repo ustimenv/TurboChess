@@ -21,6 +21,13 @@ public class MessageController {
 		return messagePacket;
 	}
 
+	@MessageMapping("/chat.raiseBet")
+	@SendTo("/queue/public")
+	public MessagePacket raiseBet(@Payload MessagePacket messagePacket) {
+		return messagePacket;
+	}
+
+
 	@MessageMapping("/chat.addUser")
 	@SendTo("/queue/public")
 	public MessagePacket addUser(@Payload MessagePacket messagePacket,
