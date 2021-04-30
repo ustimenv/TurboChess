@@ -52,7 +52,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
      * login information available.
      */
     protected void configure(HttpSecurity http) throws Exception {
-        http
+      /*  http
             .authorizeRequests()
                 .antMatchers("/css/**", "/js/**", "/img/**", "/", "/error").permitAll()
                 .antMatchers("/admin/**").hasRole("ADMIN")		  // <-- administration
@@ -60,7 +60,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             .and()
                 .formLogin()
                 .loginPage("/login").failureUrl("/login-error.html").permitAll()
+                .defaultSuccessUrl("/index.html", true)
                 .successHandler(loginSuccessHandler); // <-- called when login Ok; can redirect
+
+       */
     }
 
     /**

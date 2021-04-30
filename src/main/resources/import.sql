@@ -18,6 +18,12 @@ INSERT INTO user(id,enabled,username,password,roles,elo) VALUES (
 	'USER',
 	1350
 );
+INSERT INTO user(id,enabled,username,password,roles,elo) VALUES (
+	3, 1, 'pepa',
+	'pepa',
+	'USER',
+	1350
+);
 
 -- Unos pocos auto-mensajes de prueba
 INSERT INTO MESSAGE VALUES(1,NULL,'2020-03-23 10:48:11.074000','probando 1',1,1);
