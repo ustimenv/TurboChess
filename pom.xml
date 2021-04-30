@@ -20,7 +20,7 @@
 	<artifactId>turbochess</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>turbochess</name>
-	<description>Web Chess Rocks!</description>
+	<description>Online Chess Rocks!</description>
 	<properties>
 		<java.version>1.8</java.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>	
