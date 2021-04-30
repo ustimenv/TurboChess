@@ -1,31 +1,15 @@
 package es.ucm.fdi.iw.turbochess.control;
 
-import es.ucm.fdi.iw.turbochess.Usario;
-
-//import jdk.internal.org.jline.utils.Log;
-
-import java.io.File;
-import java.io.IOException;
 import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.Set;
 
-import javax.servlet.http.HttpSession;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import es.ucm.fdi.iw.turbochess.GeneralUtils;
+import es.ucm.fdi.iw.turbochess.model.User;
 
 @Controller
 public class RootController {
@@ -33,6 +17,18 @@ public class RootController {
     @GetMapping("/")
     public String index(Model model) {
         return "index";
+    }
+
+    @GetMapping("/login")
+    public String getUserLoginPage(Model model) {
+        model.addAttribute("title", "Turbochess LogIn");
+        return "login";
+    }
+
+    @RequestMapping("/login-error.html")
+    public String loginError(Model model) {
+        model.addAttribute("loginError", true);
+        return "login.html";
     }
 
     @GetMapping("/game")
@@ -64,7 +60,7 @@ public class RootController {
 
     @GetMapping("/ranks")
     public String ranks(Model model) {
-        List <Usario> rankings = GeneralUtils.JSONtoList("src/main/resources/examples/rankings.json");
+        List <User> rankings = GeneralUtils.JSONtoList("src/main/resources/examples/rankings.json");
         model.addAttribute("rankings", rankings);
         return "ranks";
     }
@@ -85,8 +81,16 @@ public class RootController {
         model.addAttribute("title", "Turbochess Error");
         return "error";
     }
-        @GetMapping("/login")
-    public String getUserLoginPage() {
-    return "login";
-}
+
+
+    @GetMapping("/register")
+    public String register(Model model) {
+        model.addAttribute("title", "Turbochess Sing Up");
+        return "register";
+    }
+    
+    @GetMapping("/chat")
+    public String chat(Model model) {
+        return "chat";
+    }
 }

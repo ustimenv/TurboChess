@@ -6,11 +6,11 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-
+import es.ucm.fdi.iw.turbochess.model.User;
 public abstract class GeneralUtils {
-    public static List<Usario> JSONtoList(final String pathToJSON) {
+    public static List<User> JSONtoList(final String pathToJSON) {
         try {
-            Usario[] usarios = new ObjectMapper().readValue(new File(pathToJSON), Usario[].class);
+            User[] usarios = new ObjectMapper().readValue(new File(pathToJSON), User[].class);
             return Arrays.asList(usarios);
         } catch (IOException e) {
             // TODO Auto-generated catch block

@@ -1,6 +1,7 @@
 package es.ucm.fdi.iw.turbochess.model;
 
 import java.util.List;
+import java.util.HashMap;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import javax.persistence.*;
@@ -31,8 +32,11 @@ public class Game{
     @OneToMany
     private List<Player> players = new ArrayList<>();
 
+    //FEN notation [FEN "r2qk2r/pbp1bpp1/1pnp3p/8/3NP3/2P3P1/PP1N1PP1/R2QKB1R w KQkq - 1 12"]
     private String gameState;
 
-    // missing: state, moves, time, ...
-    // state can be string using FEN notation:     [FEN "r2qk2r/pbp1bpp1/1pnp3p/8/3NP3/2P3P1/PP1N1PP1/R2QKB1R w KQkq - 1 12"]
+    //seconds
+    private int time ;
+// Hashmap <gameState, Player.user.nickname>>
+    private HashMap<String, String> moves = new HashMap<String,String>();    
 }

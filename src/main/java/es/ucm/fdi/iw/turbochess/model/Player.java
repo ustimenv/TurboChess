@@ -1,7 +1,6 @@
 package es.ucm.fdi.iw.turbochess.model;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotNull;
 
 import lombok.Data;
 
@@ -19,12 +18,12 @@ public class Player {
     @OneToOne
     Game game;
 
-    @NotNull
+    @Column(nullable = false)
     boolean isWhite;
 
-    @NotNull
+    @Column(nullable = false)
     int result;
 
-    @NotNull
+    @Column(nullable = false)
     int secondsLeft;
 }
