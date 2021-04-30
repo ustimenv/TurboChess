@@ -13,15 +13,15 @@ import org.springframework.security.config.annotation.web.socket.AbstractSecurit
  * Similar a SecurityConfig, pero para websockets con STOMP.
  *
  */
-@Configuration
-public class WebSocketSecurityConfig
-        extends AbstractSecurityWebSocketMessageBrokerConfigurer {
-
-
-    protected void configureInbound(MessageSecurityMetadataSourceRegistry messages) {
-        messages
-                .simpSubscribeDestMatchers("/topic/admin")	// solo admines pueden suscribirse a este topic
-                .hasRole(ADMIN.toString())
-                .anyMessage().authenticated(); 				// todo tiene que proceder de sesiones autenticadas
-    }
+//@Configuration
+public class WebSocketSecurityConfig{
+//        extends AbstractSecurityWebSocketMessageBrokerConfigurer {
+//
+//
+//    protected void configureInbound(MessageSecurityMetadataSourceRegistry messages) {
+//        messages
+//                .simpSubscribeDestMatchers("/topic/admin")	// solo admines pueden suscribirse a este topic
+//                .hasRole(ADMIN.toString())
+//                .anyMessage().authenticated(); 				// todo tiene que proceder de sesiones autenticadas
+//    }
 }

@@ -29,7 +29,7 @@
 	new simpleDatatables.DataTable(
 		'#datatable', { 
 		    ajax: {
-		        url: config.rootUrl + "message/received", // empieza siempre por config.rootUrl
+		        url: config.rootUrl + "messagePacket/received", // empieza siempre por config.rootUrl
 		        load: function(xhr) {
 		        	let data = JSON.parse(xhr.responseText);
 		        	for (let i=0; i<data.length; i++) {

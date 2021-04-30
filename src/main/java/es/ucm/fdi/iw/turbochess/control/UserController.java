@@ -7,7 +7,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.time.LocalDateTime;
 
 import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletResponse;
@@ -27,22 +26,18 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import es.ucm.fdi.iw.turbochess.LocalData;
 // import es.ucm.fdi.iw.turbochess.LocalData;
-import es.ucm.fdi.iw.turbochess.model.Message;
 import es.ucm.fdi.iw.turbochess.model.User;
 
 /**
@@ -164,42 +159,42 @@ public class UserController {
 		};
 	}
 	
-	@PostMapping("/{id}/msg")
-	@ResponseBody
-	@Transactional
-	public String postMsg(@PathVariable long id, 
-			@RequestBody JsonNode o, Model model, HttpSession session) 
-		throws JsonProcessingException {
-		
-		String text = o.get("message").asText();
-		User u = entityManager.find(User.class, id);
-		User sender = entityManager.find(
-				User.class, ((User)session.getAttribute("u")).getId());
-		model.addAttribute("user", u);
-		
-		// construye mensaje, lo guarda en BD
-		Message m = new Message();
-		m.setRecipient(u);
-		m.setSender(sender);
-		m.setDateSent(LocalDateTime.now());
-		m.setText(text);
-		entityManager.persist(m);
-		entityManager.flush(); // to get Id before commit
-		
-		// construye json
-		ObjectMapper mapper = new ObjectMapper();
-		ObjectNode rootNode = mapper.createObjectNode();
-		rootNode.put("from", sender.getUsername());
-		rootNode.put("to", u.getUsername());
-		rootNode.put("text", text);
-		rootNode.put("id", m.getId());
-		String json = mapper.writeValueAsString(rootNode);
-		
-		log.info("Sending a message to {} with contents '{}'", id, json);
-
-		messagingTemplate.convertAndSend("/user/"+u.getUsername()+"/queue/updates", json);
-		return "{\"result\": \"message sent.\"}";
-	}	
+//	@PostMapping("/{id}/msg")
+//	@ResponseBody
+//	@Transactional
+//	public String postMsg(@PathVariable long id,
+//			@RequestBody JsonNode o, Model model, HttpSession session)
+//		throws JsonProcessingException {
+//
+//		String text = o.get("message").asText();
+//		User u = entityManager.find(User.class, id);
+//		User sender = entityManager.find(
+//				User.class, ((User)session.getAttribute("u")).getId());
+//		model.addAttribute("user", u);
+//
+//		// construye mensaje, lo guarda en BD
+//		Message m = new Message();
+//		m.setRecipient(u);
+//		m.setFrom(sender);
+//		m.setDateSent(LocalDateTime.now());
+//		m.setText(text);
+//		entityManager.persist(m);
+//		entityManager.flush(); // to get Id before commit
+//
+//		// construye json
+//		ObjectMapper mapper = new ObjectMapper();
+//		ObjectNode rootNode = mapper.createObjectNode();
+//		rootNode.put("from", sender.getUsername());
+//		rootNode.put("to", u.getUsername());
+//		rootNode.put("text", text);
+//		rootNode.put("id", m.getId());
+//		String json = mapper.writeValueAsString(rootNode);
+//
+//		log.info("Sending a message to {} with contents '{}'", id, json);
+//
+//		messagingTemplate.convertAndSend("/user/"+u.getUsername()+"/queue/updates", json);
+//		return "{\"result\": \"message sent.\"}";
+//	}
 	
 	@PostMapping("/{id}/photo")
 	public String postPhoto(
