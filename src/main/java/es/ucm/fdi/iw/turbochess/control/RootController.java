@@ -89,8 +89,8 @@ public class RootController {
         return "register";
     }
     
-    @GetMapping("/chat")
+    @GetMapping("/chatroom")
     public String chat(Model model) {
-        return "chat";
+        return "chatroom";
     }
 }
