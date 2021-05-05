@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="head.html"> </head>
+<body>
+<div th:replace="frags/barraSuperior :: barraSuperior"></div>
+<div class="container text-center">
+    <h3 th:text=" 'Congratulations '+ ${name} + ' you have signed up successfully!'"> </h3>
+    <h4>Now you can Login</h4>
+    <button class="loginButton" id="loginButton" ><a th:href="@{/login}">Login</a>
+        </button>
+</div>
+
+</body>
+</html>

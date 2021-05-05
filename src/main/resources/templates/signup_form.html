@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="head.html"> </head>
+<body>
+<div th:replace="frags/barraSuperior :: barraSuperior"></div>
+    <div class="container text-center">
+
+
+        <div class="login-box">
+            <h2>Sign up</h2>
+        <form class="form-signup" method="post" th:action="@{/signup_form}" th:object="${user}">
+            <div th:if="${param.error}">
+                <div class="alert alert-danger">
+                    User name already exists.
+                </div>
+            </div>
+            <div class="alert alert-danger">
+                <p th:text="${msg}"></p>
+            </div>
+            <div class="user-box">
+                <input type="text" th:field="*{username}" class="form-control"
+                       required minlength="2" maxlength="20"/>
+                <label>User name</label>
+            </div>
+            <div class="user-box">
+                <input type="password" th:field="*{password}" class="form-control"
+                       required minlength="6" maxlength="10"/>
+                <label>Password</label>
+            </div>
+            <div class="user-box">
+                <input type="password" th:field="*{passwordConfirm}" class="form-control"
+                       required minlength="6" maxlength="10"/>
+                <label>Confirm password</label>
+            </div>
+
+            <button class="loginButton" id="loginButton"  type="submit">
+                Sign up</button>
+        </form>
+        </div>
+    </div>
+</body>
+</html>
