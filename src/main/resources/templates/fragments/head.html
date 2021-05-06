@@ -1,12 +1,15 @@
 <!DOCTYPE html>
 <html 
 	xmlns:th="http://www.thymeleaf.org">
+	xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
-	<title>IW 2019-20</title>
+	<title>IW 2020-21</title>
+	<link rel="Turbo Chess" href="favicon.ico" type="image/x-icon">
 	<th:block th:fragment="header">
 	<meta charset="utf-8">
 	<link rel="stylesheet" th:href="@{/css/main.css}" href="css/main.css" type="text/css"/>
-	<script type="text/javascript">
+
+		<script type="text/javascript">
 		const config = {
 			socketUrl: "[[${session.ws}?:'']]",	// vacío indica falso
 			rootUrl: "[[${session.ws}?@{/}:'']]",

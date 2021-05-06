@@ -58,7 +58,7 @@ public class RootController {
 
     @GetMapping("/profile")
     public String profile(Model model) {
-        return "profile";
+        return "user";
     }
     
     @GetMapping("/othersProfile")
@@ -124,9 +124,10 @@ public class RootController {
                 model.addAttribute("msg", user.getUsername()+" already exists");
                 return "signup_form";
             }
-        }else
+        }else {
             model.addAttribute("msg", "The password should be the same");
             return "signup_form";
+        }
 
     }
     
