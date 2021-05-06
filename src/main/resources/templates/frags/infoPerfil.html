@@ -5,8 +5,10 @@
 <body>
     <header>
         <div th:fragment="infoPerfil" class="infoPerfil">
-            <p >Username: ChessMaster</p>
-            <p>elo: 1500000</p>
+            <h2 th:text=" ${user.username}"></h2>
+
+            <p th:text="   ${user.username}">Username: ChessMaster</p>
+            <p th:text=" ' ELO: ' + ${user.elo}"></p>
             <p><b>Edit</b> (si es cuenta ajena no se muestra esta opcion)</p>
         </div>
     </header>

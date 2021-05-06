@@ -40,7 +40,7 @@ a.button:active {
   border-radius: 10px;
 }
 
-.login-box h2 {
+.login-box h2 h4 {
   margin: 0 0 30px;
   padding: 0;
   color: #fff;
@@ -81,7 +81,7 @@ a.button:active {
   font-size: 12px;
 }
 
-.login-box form a,button {
+.login-box .loginButton form a,button {
 background: rgba(0,0,0,.5);
   position: relative;
   display: inline-block;
@@ -90,6 +90,22 @@ background: rgba(0,0,0,.5);
   font-size: 16px;
   text-decoration: none;
   text-transform: uppercase;
+  text-align: center;
+  overflow: hidden;
+  transition: .5s;
+  margin-top: 40px;
+  letter-spacing: 4px
+}
+.login-box  .loginButton a,button {
+background: rgba(0,0,0,.5);
+  position: relative;
+  display: inline-block;
+  padding: 10px 20px;
+  color: #03e9f4;
+  font-size: 16px;
+  text-decoration: none;
+  text-transform: uppercase;
+  text-align: center;
   overflow: hidden;
   transition: .5s;
   margin-top: 40px;
@@ -104,6 +120,7 @@ background: rgba(0,0,0,.5);
               0 0 25px #03e9f4,
               0 0 50px #03e9f4,
               0 0 100px #03e9f4;
+              text-align: center;
 }
 
 

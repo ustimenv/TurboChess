@@ -5,8 +5,6 @@ import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -22,16 +20,14 @@ import javax.swing.ImageIcon;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.password.PasswordEncoder;
 
-import lombok.AccessLevel;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import es.ucm.fdi.iw.model.Transferable;
+
 
 /**
  * A user; can be an Admin, a User, or a Moderator
@@ -79,6 +75,7 @@ public class User implements Transferable<User.Transfer> {
 	/** encoded password; use setPassword(SecurityConfig.encode(plaintextPassword)) to encode it  */
 	@Column(nullable = false)
 	private String password;
+	private String passwordConfirm;
 	@Column(nullable = false)
 	private String roles; // split by ',' to separate roles
 	private byte enabled;
@@ -123,5 +120,9 @@ public class User implements Transferable<User.Transfer> {
 	@Override
 	public String toString() {
 		return toTransfer().toString();
+	}
+
+	public boolean samePasword(){
+		return (this.password == this.passwordConfirm);
 	}
 }
