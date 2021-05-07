@@ -40,8 +40,8 @@ public class RootController {
 
     @RequestMapping("/login-error.html")
     public String loginError(Model model) {
-        model.addAttribute("loginError", true);
-        return "login-error";
+        model.addAttribute("msg", "Invalid username or password.");
+        return "login";
     }
 
     @GetMapping("/game")

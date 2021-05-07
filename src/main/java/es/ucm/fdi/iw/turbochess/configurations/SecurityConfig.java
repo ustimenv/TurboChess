@@ -52,18 +52,18 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
      * login information available.
      */
     protected void configure(HttpSecurity http) throws Exception {
-      /*  http
+        http
             .authorizeRequests()
-                .antMatchers("/css/**", "/js/**", "/img/**", "/", "/error").permitAll()
+                .antMatchers("/css/**", "/js/**", "/img/**", "/", "/error","/register","/register_success","/signup_form").permitAll()
                 .antMatchers("/admin/**").hasRole("ADMIN")		  // <-- administration
                 .anyRequest().authenticated()
             .and()
                 .formLogin()
                 .loginPage("/login").failureUrl("/login-error.html").permitAll()
-                .defaultSuccessUrl("/index.html", true)
+            //    .defaultSuccessUrl("/index.html", true)
                 .successHandler(loginSuccessHandler); // <-- called when login Ok; can redirect
 
-       */
+
     }
 
     /**

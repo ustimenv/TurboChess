@@ -50,7 +50,7 @@ import es.ucm.fdi.iw.turbochess.model.User;
  * 
  */
 @Controller()
-@RequestMapping("/user")
+@RequestMapping("user")
 public class UserController {
 	
 	private static final Logger log = LogManager.getLogger(UserController.class);
