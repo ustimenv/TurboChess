@@ -23,7 +23,11 @@
                     <a class="upBar" href="/game">Game</a> 
                 </li>
                 <li class="upBar">
-                    <a class="upBar" href="/login">Login/Logout</a> 
+                    <th:unless="${session.u}"
+                    a class="upBar" th:href="@{/login}">Login</a>
+                    <form th:if="${session.u}" th:action="@{/logout}" method="post">
+                        <button type="submit">logout</button>
+                    </form>
                 </li>
                 <li class="upBar">
                     <a class="upBar" href="/register">Sign Up</a> 

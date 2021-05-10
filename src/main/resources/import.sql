@@ -20,7 +20,7 @@ INSERT INTO user(id,enabled,username,password,roles,elo) VALUES (
 );
 INSERT INTO user(id,enabled,username,password,roles,elo) VALUES (
 	3, 1, 'pepa',
-	'pepa',
+	'{bcrypt}$2y$12$UPSoHZIxhYcEDJCI4nLeKeRrIh7uHlx98eXA7nxkjWuRqTgMMF1Zu',
 	'USER',
 	1350
 );

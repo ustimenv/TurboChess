@@ -63,6 +63,7 @@ public class User implements Transferable<User.Transfer> {
 	/** encoded password; use setPassword(SecurityConfig.encode(plaintextPassword)) to encode it  */
 	@Column(nullable = false)
 	private String password;
+	@Transient
 	private String passwordConfirm;
 	@Column(nullable = false)
 	private String roles; // split by ',' to separate roles
