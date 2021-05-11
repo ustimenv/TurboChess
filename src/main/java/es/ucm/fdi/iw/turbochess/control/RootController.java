@@ -104,7 +104,11 @@ public class RootController {
         model.addAttribute("user", new User());
         return "signup_form";
     }
-
+    @GetMapping("/logout")
+    public String logout(Model model) {
+        model.addAttribute("title", "Turbochess");
+        return "/";
+    }
 
     @PostMapping("/signup_form")
     @Transactional
