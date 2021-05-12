@@ -12,6 +12,9 @@
                     Invalid username or password.
                 </div>
             </div>
+            <div class="alert alert-danger">
+                <p th:text="${msg}"></p>
+            </div>
             <div class="user-box">
                 <input type="text" id="username" name="username"
                        class="form-control" required="required">

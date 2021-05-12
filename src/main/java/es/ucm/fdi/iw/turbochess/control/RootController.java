@@ -5,6 +5,7 @@ import java.util.List;
 import antlr.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,6 +24,8 @@ import javax.transaction.Transactional;
 
 @Controller
 public class RootController {
+    @Autowired
+    PasswordEncoder passwordEncoder;
     @PersistenceContext
    // @Autowired
     private EntityManager entityManager;
@@ -40,8 +43,8 @@ public class RootController {
 
     @RequestMapping("/login-error.html")
     public String loginError(Model model) {
-        model.addAttribute("loginError", true);
-        return "login-error";
+        model.addAttribute("msg", "Invalid username or password.");
+        return "login";
     }
 
     @GetMapping("/game")
@@ -101,12 +104,17 @@ public class RootController {
         model.addAttribute("user", new User());
         return "signup_form";
     }
+    @GetMapping("/logout")
+    public String logout(Model model) {
+        model.addAttribute("title", "Turbochess");
+        return "/";
+    }
 
     @PostMapping("/signup_form")
     @Transactional
     public String processRegister(User user,Model model) {
         if(user.getPassword().compareTo(user.getPasswordConfirm()) == 0) {
-            BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+
             String encodedPassword = passwordEncoder.encode(user.getPassword());
             user.setPassword(encodedPassword);
             user.setRoles("USER");
