@@ -17,7 +17,7 @@
                     <a class="upBar" href="/spect">Spectate</a> 
                 </li>
                 <li class="upBar">
-                    <a class="upBar" href="/profile">Profile</a> 
+                    <a class="upBar" href="/profile">Profile</a>
                 </li>
                 <li class="upBar">
                     <a class="upBar" href="/game">Game</a> 
@@ -29,7 +29,7 @@
                      class="upBar" th:href="@{/login}">Login</a>
                 </li>
                 <li class="upBar">
-                    <a class="upBar" href="/register">Sign Up</a> 
+                    <a th:unless="${session.u}" class="upBar" href="/register">Sign Up</a>
                 </li>
                  <input type="text" placeholder="Player Username.." name="search">
                  <a class="search" href="othersProfile">Search</a>

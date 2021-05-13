@@ -3,7 +3,12 @@ package es.ucm.fdi.iw.turbochess.control;
 import java.util.List;
 
 import antlr.StringUtils;
+import es.ucm.fdi.iw.turbochess.configurations.IwUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
@@ -20,6 +25,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
+import javax.servlet.http.HttpSession;
 import javax.transaction.Transactional;
 
 @Controller
@@ -29,6 +35,9 @@ public class RootController {
     @PersistenceContext
    // @Autowired
     private EntityManager entityManager;
+
+    @Autowired
+    private IwUserDetailsService service;
 
     @GetMapping("/")
     public String index(Model model) {
@@ -60,8 +69,9 @@ public class RootController {
     }
 
     @GetMapping("/profile")
-    public String profile(Model model) {
-        return "user";
+    public String profile( Model model,HttpSession session) {
+        User user = (User)session.getAttribute("u");
+     return "redirect:user/" +user.getId();
     }
     
     @GetMapping("/othersProfile")
