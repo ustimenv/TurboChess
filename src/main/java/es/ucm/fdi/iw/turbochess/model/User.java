@@ -71,6 +71,10 @@ public class User implements Transferable<User.Transfer> {
 
 	@Column(name="elo", nullable=false)
 	private int elo;
+	@Column(name="matches_won", nullable=false)
+	private int matches_won;
+	@Column(name="matches_played", nullable=false)
+	private int matches_played;
 
 	@OneToMany
 	@JoinColumn(name = "sender_id")

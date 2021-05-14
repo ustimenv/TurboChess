@@ -129,6 +129,8 @@ public class RootController {
             user.setPassword(encodedPassword);
             user.setRoles("USER");
             user.setElo(0);
+            user.setMatches_played(0);
+            user.setMatches_played(0);
             user.setEnabled((byte) 1);
 
             Query query = entityManager.createNamedQuery("User.byUsername");
