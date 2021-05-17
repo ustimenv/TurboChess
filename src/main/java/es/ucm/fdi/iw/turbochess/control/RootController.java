@@ -39,6 +39,9 @@ public class RootController {
     @Autowired
     private IwUserDetailsService service;
 
+    @Autowired
+    private HttpSession session;
+
     @GetMapping("/")
     public String index(Model model) {
         return "index";
@@ -151,8 +154,9 @@ public class RootController {
 
     }
     
-    @GetMapping("/chatroom")
-    public String chat(Model model) {
-        return "chatroom";
+    @GetMapping("/room")
+    public String room(Model model) {
+        model.addAttribute("username", ((User) session.getAttribute("u")).getUsername());
+        return "room";
     }
 }
