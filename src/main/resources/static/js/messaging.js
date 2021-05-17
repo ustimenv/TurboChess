@@ -2,17 +2,20 @@
 
 var usernamePage = document.querySelector('#username-page');    // root container
 var chatPage = document.querySelector('#chat-page');            //
+
 var usernameInput = document.querySelector('#usernameInput');
-var messageForm = document.querySelector('#messageForm');
-var messagesBox = document.querySelector('#messages-box');      // has two children: event box (join/leave) & chat box; put msgs in correct boxes based on TYPE enum
 var connecting = document.querySelector('.connecting-to-room');
 
+var messageForm = document.querySelector('#messageForm');
+var messagesBox = document.querySelector('#messages-box');      // has two children: event box (join/leave) & chat box; put msgs in correct boxes based on TYPE enum
 var messageInputBox = document.querySelector('#message-input-box');
+
+var betForm = document.querySelector('#betForm');
 var betInputBox = document.querySelector('#bet-input-box');
 
 messageForm.addEventListener('submit', sendMessage, true);
 usernameInput.addEventListener('submit', connect, true);
-betInputBox.addEventListener('submit', raiseBet, true);
+betForm.addEventListener('submit', betRaise, true);
 
 
 var stompClient = null;
@@ -56,7 +59,7 @@ function sendMessage(e) {
     e.preventDefault();
 }
 
-function raiseBet(e) {          // TODO DOESN'T WORK
+function betRaise(e) {          // TODO add logic
      if(betInputBox && stompClient) {
          var packet = {
              from: username,
@@ -64,7 +67,7 @@ function raiseBet(e) {          // TODO DOESN'T WORK
              type: 'BET_RAISE'
          };
 
-         stompClient.send("/app/chat.raiseBet", {}, JSON.stringify(packet));
+         stompClient.send("/app/chat.betRaise", {}, JSON.stringify(packet));
      }
      e.preventDefault();
 }
@@ -129,9 +132,9 @@ function hashString(str) {
   return hash;
 }
 
-//function incrementValue(){
-//    var value = parseInt(betInputBox.value, 10);
-//    value = isNaN(value) ? 0 : value;
-//    value+=5;
-//    betInputBox.value = value;
-//}
+function incrementValue(){
+    var value = parseInt(betInputBox.value, 10);
+    value = isNaN(value) ? 0 : value;
+    value+=5;
+    betInputBox.value = value;
+}
