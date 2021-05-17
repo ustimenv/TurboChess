@@ -11,8 +11,15 @@
             <a>Amigo 1</a>
             <a>Amigo 2</a>
             <a>Amigo 3</a>
+            <h1>th:each</h1>
+
+            <ul>
+                <p th:each="result, iterstat : ${friends}">
+                    <li th:text="${result}" th:id="|td${iterstat.index}|">amigo</li>
+                </p>
+            </ul>
         </div>
     </header>
 </body>
 
-</html>+
+</html>

@@ -74,6 +74,13 @@ public class RootController {
     @GetMapping("/profile")
     public String profile( Model model,HttpSession session) {
         User user = (User)session.getAttribute("u");
+        Query query = entityManager.createNativeQuery("SELECT user.username FROM user_friends " +
+                "LEFT JOIN user on user_friends.friends_id =user.id WHERE user_id= :userid " +
+                "UNION ALL" +
+                " SELECT  user.username FROM user_friends LEFT JOIN user on user_friends.user_id=user.id WHERE friends_id = :userid");
+        query.setParameter("userid", user.getId());
+        List result = query.getResultList();
+        model.addAttribute("friends", result);
      return "redirect:user/" +user.getId();
     }
     

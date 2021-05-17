@@ -47,6 +47,13 @@ INSERT INTO user(id,enabled,username,password,roles,elo,matches_won,matches_play
 	2000, 8,15
 );
 
+INSERT INTO user_friends(user_id, friends_id) VALUES(1,2);
+INSERT INTO user_friends(user_id, friends_id) VALUES(2,3);
+INSERT INTO user_friends(user_id, friends_id) VALUES(1,3);
+INSERT INTO user_friends(user_id, friends_id) VALUES(1,4);
+INSERT INTO user_friends(user_id, friends_id) VALUES(1,5);
+INSERT INTO user_friends(user_id, friends_id) VALUES(6,1);
+
 -- Unos pocos auto-mensajes de prueba
 INSERT INTO MESSAGE VALUES(1,NULL,'2020-03-23 10:48:11.074000','probando 1',1,1);
 INSERT INTO MESSAGE VALUES(2,NULL,'2020-03-23 10:48:15.149000','probando 2',1,1);
