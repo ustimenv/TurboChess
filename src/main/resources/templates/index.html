@@ -10,13 +10,13 @@
                <a class="button" href="/game" >Play online</a> 
             </dt>
             <dt class="Inicio-menu">
-                <a class="button" href="/game" >Play Ranked</a> 
+                <a th:if="${session.u}" class="button" href="/game" >Play Ranked</a>
             </dt>
             <dt class="Inicio-menu">
-                <a class="button" href="/game" >Play private game</a> 
+                <a th:if="${session.u}" class="button" href="/game" >Play private game</a>
             </dt>
             <dt class="Inicio-menu">
-                <a class="button" href="/spect" >Spect</a> 
+                <a th:if="${session.u}" class="button" href="/spect" >Spect</a>
             </dt>         
         </dl>
     </div>
