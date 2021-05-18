@@ -40,7 +40,8 @@ public class RootController {
     private IwUserDetailsService service;
 
     @GetMapping("/")
-    public String index(Model model) {
+    public String index(Model model,HttpSession session) {
+       // if (session.getAttribute("u")!= null)
         return "index";
     }
 
@@ -71,16 +72,16 @@ public class RootController {
     @GetMapping("/profile")
     public String profile( Model model,HttpSession session) {
         User user = (User)session.getAttribute("u");
-        Query query = entityManager.createNativeQuery("SELECT user.username FROM user_friends " +
-                "LEFT JOIN user on user_friends.friends_id =user.id WHERE user_id= :userid " +
-                "UNION ALL" +
-                " SELECT  user.username FROM user_friends LEFT JOIN user on user_friends.user_id=user.id WHERE friends_id = :userid");
-        query.setParameter("userid", user.getId());
-        List result = query.getResultList();
-        model.addAttribute("friends", result);
+  /*      List<User> friends = (List<User>) entityManager.createNativeQuery("User.friends", User.class)
+                .setParameter("userid", user.getId())
+                .getResultList();
+        friends.stream().forEach((n) -> {
+            System.out.println(n.getUsername());
+        });
+        model.addAttribute("friends", friends);*/
      return "redirect:user/" +user.getId();
     }
-    
+
     @GetMapping("/othersProfile")
     public String othersProfile(Model model) {
         return "othersProfile";
