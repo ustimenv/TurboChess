@@ -76,6 +76,9 @@ public class User implements Transferable<User.Transfer> {
 	@Column(name="matches_played", nullable=false)
 	private int matches_played;
 
+	@Column(name="coins", nullable=false)	// coins can be gained by betting as an observer or playing matches
+	private int coins;
+
 	@OneToMany
 	@JoinColumn(name = "sender_id")
 	private List<Message> sent = new ArrayList<>();
@@ -121,6 +124,6 @@ public class User implements Transferable<User.Transfer> {
 	}
 
 	public boolean samePasword(){
-		return (this.password == this.passwordConfirm);
+		return this.password.equals(this.passwordConfirm);
 	}
 }

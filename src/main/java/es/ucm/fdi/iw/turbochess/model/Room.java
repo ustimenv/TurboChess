@@ -1,38 +1,36 @@
 package es.ucm.fdi.iw.turbochess.model;
 
-import java.util.*;
-import java.util.concurrent.ThreadLocalRandom;
+import lombok.Data;
 
-public class Room{
-    static int codeLengths=4;
-    static Set<String> roomCodes = new HashSet<>();
-    final String code;      // room code
-    private CodeGenerator codeGenerator = new CodeGenerator();
+import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
+@Entity
+@Data
+public class Room{                        // includes two players and an undetermined number of observers
 
-    public Room(){
-        String code = "";
-        while(!roomCodes.contains(code)){
-            code = codeGenerator.generate();
-        }
-        this.code = code;
+    @Id
+    private final String code;            // a room is uniquely identified by its code
 
+    @Enumerated(EnumType.STRING)
+    private GameResult gameResult;
+
+    @Enumerated(EnumType.STRING)
+    private GameType gameType;
+
+    @OneToMany
+    private List <Participant> participants=new ArrayList<>();
+
+    public Room(String code){
+        this.code=code;
     }
 
-    private static class CodeGenerator{
-        private static final String letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-        private final Random random;
+    public enum GameType {
+        NORMAL, RANKED, PRIVATE
+    }
 
-        private CodeGenerator(){
-            random = ThreadLocalRandom.current();
-        }
-
-        private String generate(){
-            StringBuilder sb = new StringBuilder();
-            for(int i=0; i<Room.codeLengths; i++){
-                sb.append(letters.charAt(random.nextInt(letters.length())));
-            }
-            return sb.toString();
-        }
+    public enum GameResult {
+        PAUSED, RUNNING, WHITE_WON, BLACK_WON, DRAW
     }
 }
