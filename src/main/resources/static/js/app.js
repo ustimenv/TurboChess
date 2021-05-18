@@ -1,38 +1,46 @@
 'use strict';
 
-var usernamePage = document.querySelector('#username-page');    // root container
+var usernamePage = document.querySelector('#username-page');    // primary container
 var chatPage = document.querySelector('#chat-page');            //
-var usernameInput = document.querySelector('#usernameInput');
-var messageForm = document.querySelector('#messageForm');
-var messagesBox = document.querySelector('#messages-box');      // has two children: event box (join/leave) & chat box; put msgs in correct boxes based on TYPE enum
+
 var connecting = document.querySelector('.connecting-to-room');
 
+
+var createRoomForm = document.querySelector('#createRoomForm');
+var roomCodeForm = document.querySelector('#roomCodeForm');
+
+
+var messageForm = document.querySelector('#messageForm');
+var messagesBox = document.querySelector('#messages-box');      // has two children: event box (join/leave) & chat box; put msgs in correct boxes based on TYPE enum
 var messageInputBox = document.querySelector('#message-input-box');
+
+var betForm = document.querySelector('#betForm');
 var betInputBox = document.querySelector('#bet-input-box');
 
+createRoomForm.addEventListener('submit', createRoomInit, true);
+roomCodeForm.addEventListener('submit', joinRoomInit, true);
 messageForm.addEventListener('submit', sendMessage, true);
-usernameInput.addEventListener('submit', connect, true);
-betInputBox.addEventListener('submit', raiseBet, true);
+betForm.addEventListener('submit', betRaise, true);
 
 
 var stompClient = null;
-var username = null;
+//var username = null;
 
 var colours = ['#e30e1f', '#0e0ee3', '#cde01d', '#cde01d', '#070806', '#e010b7', '#467a7a'];
 
-function connect(e) {
-    username = document.querySelector('#name').value.trim();
-
-    if(username) {                              // once a valid username was entered
-        usernamePage.classList.add('hidden');   // username input page goes away
-        chatPage.classList.remove('hidden');    // the main chatroom page becomes visible, while we attempt to establish connection
-
-        var socket = new SockJS('/ws');         // TODO websockets vs sockjs
-        stompClient = Stomp.over(socket);
-        stompClient.connect({}, onConnected, {});
-    }
-    e.preventDefault();
-}
+//function connect(e) {
+//    username = document.querySelector('#name').value.trim();
+//
+//    if(username) {                              // once a valid username was entered
+//        usernamePage.classList.add('hidden');   // username input page goes away
+//        chatPage.classList.remove('hidden');    // the main chatroom page becomes visible, while we attempt to establish connection
+//
+//        var socket = new SockJS('/ws');         // TODO websockets vs sockjs
+//        stompClient = Stomp.over(socket);
+//        stompClient.connect({}, onConnected, {});
+//    }
+//    e.preventDefault();
+//}
 
 
 function onConnected() {
@@ -56,7 +64,7 @@ function sendMessage(e) {
     e.preventDefault();
 }
 
-function raiseBet(e) {          // TODO DOESN'T WORK
+function betRaise(e) {          // TODO add logic
      if(betInputBox && stompClient) {
          var packet = {
              from: username,
@@ -64,7 +72,7 @@ function raiseBet(e) {          // TODO DOESN'T WORK
              type: 'BET_RAISE'
          };
 
-         stompClient.send("/app/chat.raiseBet", {}, JSON.stringify(packet));
+         stompClient.send("/app/chat.betRaise", {}, JSON.stringify(packet));
      }
      e.preventDefault();
 }
@@ -93,8 +101,8 @@ function onMessageReceived(messageReceived) {
         message.text = message.from + ' has increased their bet to ' + message.text + '!';
     break;
 
-    case 'VOTE_KICK':
-        alert("VOTE KICK TO-DO!");
+    case 'CREATE_ROOM':
+        alert("creating room?");
     break;
 
     case 'JOIN_ROOM':
@@ -129,9 +137,38 @@ function hashString(str) {
   return hash;
 }
 
-//function incrementValue(){
-//    var value = parseInt(betInputBox.value, 10);
-//    value = isNaN(value) ? 0 : value;
-//    value+=5;
-//    betInputBox.value = value;
-//}
+function incrementValue(){
+    var value = parseInt(betInputBox.value, 10);
+    value = isNaN(value) ? 0 : value;
+    value+=5;
+    betInputBox.value = value;
+}
+
+//
+function createRoomInit(){
+
+    alert("name = " + username);
+    //TODO call AJAX
+//    usernamePage.classList.add('hidden');           // username input page goes away
+//    chatPage.classList.remove('hidden');
+
+}
+
+function joinRoomInit(e){
+    var code = document.getElementsByClassName('roomCodeForm')[0].value;
+
+    if(code) {                                  // once a valid username was entered
+        usernamePage.classList.add('hidden');   // username input page goes away
+        chatPage.classList.remove('hidden');    // the main chatroom page becomes visible, while we attempt to establish connection
+
+        var socket = new SockJS('/ws');         // TODO websockets vs sockjs
+        stompClient = Stomp.over(socket);
+        stompClient.connect({}, onConnected, {});
+    }
+    e.preventDefault();
+}
+
+function setUsername(name){
+    username=name;
+    alert("USER NAME IS " + username);
+}

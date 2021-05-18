@@ -39,6 +39,9 @@ public class RootController {
     @Autowired
     private IwUserDetailsService service;
 
+    @Autowired
+    private HttpSession session;
+
     @GetMapping("/")
     public String index(Model model) {
         return "index";
@@ -71,6 +74,13 @@ public class RootController {
     @GetMapping("/profile")
     public String profile( Model model,HttpSession session) {
         User user = (User)session.getAttribute("u");
+        Query query = entityManager.createNativeQuery("SELECT user.username FROM user_friends " +
+                "LEFT JOIN user on user_friends.friends_id =user.id WHERE user_id= :userid " +
+                "UNION ALL" +
+                " SELECT  user.username FROM user_friends LEFT JOIN user on user_friends.user_id=user.id WHERE friends_id = :userid");
+        query.setParameter("userid", user.getId());
+        List result = query.getResultList();
+        model.addAttribute("friends", result);
      return "redirect:user/" +user.getId();
     }
     
@@ -129,6 +139,8 @@ public class RootController {
             user.setPassword(encodedPassword);
             user.setRoles("USER");
             user.setElo(0);
+            user.setMatches_played(0);
+            user.setMatches_played(0);
             user.setEnabled((byte) 1);
 
             Query query = entityManager.createNamedQuery("User.byUsername");
@@ -149,8 +161,9 @@ public class RootController {
 
     }
     
-    @GetMapping("/chatroom")
-    public String chat(Model model) {
-        return "chatroom";
+    @GetMapping("/room")
+    public String room(Model model) {
+        model.addAttribute("username", ((User) session.getAttribute("u")).getUsername());
+        return "room";
     }
 }

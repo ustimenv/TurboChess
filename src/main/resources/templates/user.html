@@ -5,28 +5,36 @@
     <body>
 
         <div th:replace="frags/barraSuperior :: barraSuperior"></div>
-        <div th:replace="frags/fotoPerfil :: fotoPerfil"></div>
-      <!--  <div th:replace="frags/infoPerfil :: infoPerfil"></div>
-               <div th:replace="frags/barraLateral :: barraLateral"></div>
-        <div th:replace="frags/chat :: chat"></div>
-        <div th:replace="frags/historial :: historial"></div>
-       -->
-        <div class="contenedor">
-            <div class="PaneltituloPagina">
-                <h2 th:text=" 'Your profile ' + ${user.username}"> </h2>
+
+
+        <div id="card">
+
+            <h1 th:text=" ${user.username}"> </h1>
+            <div class="image-crop">
+                <!-- <img th:src="@{/user/{id}/photo(id=${user.id})}"  class="imagenPerfil">-->
+                <img id="avatar" src="https://drive.google.com/uc?id=1EVA3KUBLxCXF2EGmTf4LUB8F4yAvBrjl"></img>
             </div>
-            <div th:if="(${session.u.id} eq ${user.id}) or ${session.u.hasRole('ADMIN')}">
-            <div class="panelPerfil">
-                <div class="fotoPerfil">
-                    <img th:src="@{/user/{id}/photo(id=${user.id})}"  class="imagenPerfil">
+
+            <div id="stats">
+                <div class="col">
+                    <p th:text="${user.matches_won}"class="stat">108</p>
+                    <p class="label">Matches won</p>
                 </div>
-                <div class="datosPerfil">
-                    <p th:text="   ${user.username}">Username: ChessMaster</p>
-                    <p th:text=" ' ELO: ' + ${user.elo}"></p>
+                <div class="col">
+                    <p th:text="${user.matches_played}"class="stat">457</p>
+                    <p class="label">Matches played</p>
+                </div>
+                <div class="col">
+                    <p  th:text="${user.elo}"  class="stat">229</p>
+                    <p class="label" >ELO</p>
                 </div>
             </div>
+            <div id="buttons">
+                <button th:unless="(${session.u.id} eq ${user.id}) or ${session.u.hasRole('ADMIN')}">Follow</button>
+                <button th:unless="(${session.u.id} eq ${user.id}) or ${session.u.hasRole('ADMIN')}" id="msg">Message</button>
+                <button th:if="(${session.u.id} eq ${user.id}) or ${session.u.hasRole('ADMIN')}" id="msg">Edit</button>
             </div>
-            </div>
+
         <footer th:replace="frags/footer.html"> footer</footer>
     </body>
 </html>

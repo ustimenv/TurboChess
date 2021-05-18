@@ -12,6 +12,7 @@ public class MessagePacket{
 
     public enum MessageType {
         TEXT,
+        CREATE_ROOM,
         JOIN_ROOM,
         LEAVE_ROOM,
         VOTE_KICK,

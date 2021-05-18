@@ -21,9 +21,9 @@ public class MessageController {
 		return messagePacket;
 	}
 
-	@MessageMapping("/chat.raiseBet")
+	@MessageMapping("/chat.betRaise")
 	@SendTo("/queue/public")
-	public MessagePacket raiseBet(@Payload MessagePacket messagePacket) {
+	public MessagePacket betRaise(@Payload MessagePacket messagePacket) {
 		return messagePacket;
 	}
 
@@ -36,6 +36,8 @@ public class MessageController {
 		headerAccessor.getSessionAttributes().put("username", messagePacket.getFrom());
 		return messagePacket;
 	}
+
+
 
 
 }
