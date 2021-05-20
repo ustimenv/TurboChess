@@ -17,7 +17,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestMethod;
 import es.ucm.fdi.iw.turbochess.GeneralUtils;
 import es.ucm.fdi.iw.turbochess.model.User;
 
@@ -75,13 +76,19 @@ public class RootController {
     @GetMapping("/profile")
     public String profile( Model model,HttpSession session) {
         User user = (User)session.getAttribute("u");
-  /*      List<User> friends = (List<User>) entityManager.createNativeQuery("User.friends", User.class)
-                .setParameter("userid", user.getId())
-                .getResultList();
-        friends.stream().forEach((n) -> {
-            System.out.println(n.getUsername());
-        });
-        model.addAttribute("friends", friends);*/
+      // List<User> friends = (List<User>) entityManager.createQuery("User.friends", User.class)
+       //         .setParameter("userid", user.getId())
+       //         .getResultList();
+    //    Query query = entitymanager.createQuery("SELECT * FROM user_friends " +
+    //    "LEFT JOIN user on user_friends.friends_id =user.id WHERE user_id= :userid " +
+    //    "UNION ALL" +
+    //    " SELECT  * FROM user_friends LEFT JOIN user on user_friends.user_id=user.id WHERE friends_id= :userid")
+    //    .setParameter("userid", user.getId());
+    //    List<User> friends = (List<User>) query.getResultList( );
+    //    friends.stream().forEach((n) -> {
+    //         System.out.println(n.getUsername());
+    //     });
+    //     model.addAttribute("friends", friends);
      return "redirect:user/" +user.getId();
     }
 
@@ -166,5 +173,15 @@ public class RootController {
     public String room(Model model) {
         model.addAttribute("username", ((User) session.getAttribute("u")).getUsername());
         return "room";
+    }
+
+    @RequestMapping(value = "/search", method = RequestMethod.GET)
+    public String search(@RequestParam(value = "search", required = false) String username, Model model) {
+        List<User> searchResults = (List<User>) entityManager.createNamedQuery("User.search_result", User.class)
+        .setParameter("username","%"+ username+"%").getResultList();
+         
+        model.addAttribute("search", searchResults);
+        return "redirect:userlist";
+
     }
 }

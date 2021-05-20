@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="head.html"> </head>
+  <body>
+    <div th:replace="frags/barraSuperior :: barraSuperior"></div>
+    <div th:if="${not #lists.isEmpty(search)}">
+        <h2>Search Results</h2>
+       <ul>
+           <li>
+            <a th:each="search : ${search}" th:text="${result.username}" th:href="@{user/(${result.username}) }" class="enlacePersona">
+            </a>
+           </li>
+       </ul>
+    </div>
+    <div th:unless="${not #lists.isEmpty(search)}">
+        
+    </div>
+    <footer th:replace="frags/footer.html"> footer</footer>
+</body></html>

@@ -31,6 +31,12 @@
                 <li class="upBar">
                     <a th:unless="${session.u}" class="upBar" href="/register">Sign Up</a>
                 </li>
+                <li>
+                    <form action="#" th:action="@{/search}" th:object="${search}">
+                        <label for="search_input">Search:</label>
+                         <input name="search" id="search" placeholder="Player Username.."></input>
+                    </form>
+                </li>
                  <input type="text" placeholder="Player Username.." name="search">
                  <a class="search" href="othersProfile">Search</a>
             </ul>

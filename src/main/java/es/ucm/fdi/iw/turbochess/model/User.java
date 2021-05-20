@@ -32,6 +32,10 @@ import es.ucm.fdi.iw.model.Transferable;
 @NoArgsConstructor
 
 @NamedQueries({
+	@NamedQuery(name="User.search_result",
+	query="SELECT u FROM User u "
+			+ "WHERE u.username like :username AND u.enabled = 1"),
+
 		@NamedQuery(name="User.byUsername",
                 query="SELECT u FROM User u "
                         + "WHERE u.username = :username AND u.enabled = 1"),
