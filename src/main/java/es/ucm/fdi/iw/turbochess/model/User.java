@@ -94,10 +94,10 @@ public class User implements Transferable<User.Transfer> {
 	@JoinColumn(name = "recipient_id")	
 	private List<Message> received = new ArrayList<>();
 
-	@OneToMany
-	List<User> friendshipRequests;
-
 	@ManyToMany
+	@JoinTable(name="friends",
+			joinColumns=@JoinColumn(name = "subject_id"),
+			inverseJoinColumns=@JoinColumn(name = "friend_id"))
 	List<User> friends;
 	// utility methods
 	

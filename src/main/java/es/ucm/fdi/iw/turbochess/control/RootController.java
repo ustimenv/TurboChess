@@ -45,7 +45,19 @@ public class RootController {
 
     @GetMapping("/")
     public String index(Model model,HttpSession session) {
-       // if (session.getAttribute("u")!= null)
+        if (session.getAttribute("u")!= null){
+            User user = (User)session.getAttribute("u");
+            Query query = entityManager.createNativeQuery("SELECT * FROM Friends " +
+                    "LEFT JOIN User on Friends.friend_id =User.id WHERE Friends.SUBJECT_ID= :userid " +
+                    "UNION ALL" +
+                    " SELECT  * FROM Friends LEFT JOIN User on Friends.SUBJECT_ID=User.id WHERE friend_id= :userid",User.class)
+                    .setParameter("userid", user.getId());
+            List<User> friends = (List<User>) query.getResultList();
+            friends.stream().forEach((n) -> {
+                System.out.println(n.getUsername());
+            });
+            model.addAttribute("friends", friends);
+        }
         return "index";
     }
 
@@ -76,19 +88,6 @@ public class RootController {
     @GetMapping("/profile")
     public String profile( Model model,HttpSession session) {
         User user = (User)session.getAttribute("u");
-      // List<User> friends = (List<User>) entityManager.createQuery("User.friends", User.class)
-       //         .setParameter("userid", user.getId())
-       //         .getResultList();
-    //    Query query = entitymanager.createQuery("SELECT * FROM user_friends " +
-    //    "LEFT JOIN user on user_friends.friends_id =user.id WHERE user_id= :userid " +
-    //    "UNION ALL" +
-    //    " SELECT  * FROM user_friends LEFT JOIN user on user_friends.user_id=user.id WHERE friends_id= :userid")
-    //    .setParameter("userid", user.getId());
-    //    List<User> friends = (List<User>) query.getResultList( );
-    //    friends.stream().forEach((n) -> {
-    //         System.out.println(n.getUsername());
-    //     });
-    //     model.addAttribute("friends", friends);
      return "redirect:user/" +user.getId();
     }
 
