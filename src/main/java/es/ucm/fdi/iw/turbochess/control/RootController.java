@@ -181,7 +181,7 @@ public class RootController {
         .setParameter("username","%"+ username+"%").getResultList();
          
         model.addAttribute("search", searchResults);
-        return "redirect:userlist";
+        return "userlist";
 
     }
 }

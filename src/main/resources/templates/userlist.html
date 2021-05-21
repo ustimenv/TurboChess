@@ -6,14 +6,16 @@
     <div th:if="${not #lists.isEmpty(search)}">
         <h2>Search Results</h2>
        <ul>
-           <li>
-            <a th:each="search : ${search}" th:text="${result.username}" th:href="@{user/(${result.username}) }" class="enlacePersona">
+           <li th:each="result : ${search}">
+
+            <a   th:href="@{user/{id}(id=${result.id}) }" class="enlacePersona">
+                <h2 th:text="${result.username}"></h2>
             </a>
            </li>
        </ul>
     </div>
-    <div th:unless="${not #lists.isEmpty(search)}">
-        
+    <div th:if="${ #lists.isEmpty(search)}">
+        <h2>There isn't exists users with that name</h2>
     </div>
     <footer th:replace="frags/footer.html"> footer</footer>
 </body></html>

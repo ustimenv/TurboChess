@@ -33,12 +33,11 @@
                 </li>
                 <li>
                     <form action="#" th:action="@{/search}" th:object="${search}">
-                        <label for="search_input">Search:</label>
-                         <input name="search" id="search" placeholder="Player Username.."></input>
+                        <input type="text" name="search" placeholder="Player Username.."></input>
+                        <a class="search"  for="search_input">Search user:</a>
                     </form>
                 </li>
-                 <input type="text" placeholder="Player Username.." name="search">
-                 <a class="search" href="othersProfile">Search</a>
+
             </ul>
        
         </div>
