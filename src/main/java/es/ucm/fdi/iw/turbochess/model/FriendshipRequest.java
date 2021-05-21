@@ -58,4 +58,21 @@ public class FriendshipRequest {
     public void setState(State state) {
         this.state = state;
     }
+
+        /*
+@NamedQueries({
+        /*http://www.it.uc3m.es/jaf/aw/practicas/6-spring/
+        busca solicitudes de amistad dados un usuario que las recibe y un
+        estado que se proporcionen como parámetros del mismo.
+         Devuelve la lista de objetos FriendshipRequest que
+         cumplan con el criterio de búsqueda*/
+ /*   @NamedQuery(name="friendshipRequest.receiverAndState",
+            query="SELECT req.sender_id, req.state FROM friendship_request req "
+                    + "WHERE req.receiver_id = :id"),
+    /*es similar, pero filtra además por el usuario que la envía.*/
+/*    @NamedQuery(name="friendshipRequest.findSerderAndReceiver",
+            query="SELECT req.sender_id,req.receiver_id, req.state "
+                    + "FROM friendship_request req "
+                    + "WHERE req.receiver_id = :id"),
+})*/
 }
