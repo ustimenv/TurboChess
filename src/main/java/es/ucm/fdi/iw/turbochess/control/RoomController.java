@@ -1,6 +1,7 @@
 package es.ucm.fdi.iw.turbochess.control;
 
 
+import es.ucm.fdi.iw.turbochess.model.Participant;
 import es.ucm.fdi.iw.turbochess.model.Room;
 import es.ucm.fdi.iw.turbochess.model.messaging.MessagePacket;
 import es.ucm.fdi.iw.turbochess.model.messaging.ResponsePacket;
@@ -16,12 +17,14 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 
 @Controller
 public class RoomController{
-	Map<String, Room> rooms = new HashMap<>();
+	Set<Room> rooms = new HashSet<>();
 
 //STOMP
 	@MessageMapping("/{room}.chat.sendMessage")
@@ -52,23 +55,29 @@ public class RoomController{
 	@RequestMapping(value = "/api/createroom", method=RequestMethod.POST, produces = "application/json")
 	@ResponseBody
 	public ResponsePacket createRoom(@RequestBody MessagePacket packet) {
+		String code = SessionKeeper.INSTANCE.generateRoomCode();	// todo this needs to be refactored
+		int capacity = Integer.parseInt(packet.getPayload());
+		Room r = new Room(code, capacity);
 
-		String code = SessionKeeper.INSTANCE.generateRoomCode();
-		//TODO SQL query to get user by username
-
-
-//		Room r = new Room(code);
-//		r.addParticipant(new Participant());
-//		rooms.add(new Room(code));
-
-		ResponsePacket response = new ResponsePacket();
-//		response.setPayload(code);
-		response.setPayload(code);
-
-		return response;
+		r.addParticipant(new Participant());	//TODO SQL query to get user by username
+		if(rooms.contains(r)){
+			return null;						//TODO not sure whether to return null or not-okay
+		}
+		rooms.add(r);
+		return new ResponsePacket(code);
 	}
 
-
-
-
+	@RequestMapping(value = "/api/joinroom", method=RequestMethod.POST, produces = "application/json")
+	@ResponseBody
+	public ResponsePacket joinRoom(@RequestBody MessagePacket packet) {
+		rooms.add(new Room("X", 3));		//____________ for testing ONLY!!___________________________________________________________
+		String code = packet.getPayload();
+		for(Room room : rooms){
+			if(room.getCode().equals(code)){
+				room.addParticipant(new Participant());
+				return new ResponsePacket("oki");
+			}
+		}
+		return null;
+	}
 }

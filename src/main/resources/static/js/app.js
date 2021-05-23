@@ -147,21 +147,48 @@ function onMessageReceived(messageReceived) {
 *           AJAX
 */
 function handleJoinRoom(e){
-    var code = document.getElementsByClassName('roomCodeForm')[0].value;
-
-    if(code){                                  // once a valid username was entered
-        connect();
-    }
     e.preventDefault();
+    var code = document.getElementById("roomcode").value;
+
+    if(code){
+        setCSRFtoken();
+        var data = {}
+        data['from'] = username;
+        data['type']='JOIN_ROOM';
+        data['payload']=code;
+
+        $.ajax({
+                type : 'POST',
+                contentType : 'application/json',
+                dataType : 'json',
+                data : JSON.stringify(data),
+                url : '/api/joinroom',
+                success : function(response) {      // todo parse for failure
+                    connect();
+                },
+                error : function(e) {
+                    console.log('ERROR: ', e);
+                },
+                done : function(e) {
+                    console.log('done...');
+                }
+            });
+    }
 }
 
-function handleCreateRoom(e){        //todo hide current view, show the room view
+function handleCreateRoom(e){
     e.preventDefault();
+    var capacity = document.getElementById('createRoomForm')[0].value;      // todo validate capacity on-the-fly
+    if(capacity < 2){       // todo display the error msg in a div
+        alert("Room capacity must be at least 2!");
+        return;
+    }
+
     setCSRFtoken();
     var data = {}
     data['from'] = username;
     data['type']='CREATE_ROOM';
-    data['payload']='';
+    data['payload']=capacity;
 
     $.ajax({
         type : 'POST',
@@ -171,7 +198,7 @@ function handleCreateRoom(e){        //todo hide current view, show the room vie
         url : '/api/createroom',
         success : function(response) {
             roomCode = response.payload;
-            alert('NAME=' + username + ', '+ 'ROOM '+ roomCode);
+            alert('ROOM '+ roomCode);
             connect();
         },
         error : function(e) {

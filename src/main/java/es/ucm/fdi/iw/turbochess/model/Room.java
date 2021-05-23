@@ -48,4 +48,18 @@ public class Room{                        // includes two players and an undeter
         return true;
     }
 
+    // TODO might store Rooms in a HashSet later on
+    @Override
+    public int hashCode(){
+        return code.hashCode();
+    }
+    @Override
+    public boolean equals(Object other){
+        if( !(other instanceof Room) ){
+            return false;
+        } else{
+            return this.code.equals(((Room) other).getCode());
+        }
+    }
+
 }
