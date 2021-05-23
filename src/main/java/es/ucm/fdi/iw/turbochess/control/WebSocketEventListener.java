@@ -1,6 +1,7 @@
 package es.ucm.fdi.iw.turbochess.control;
 
-import es.ucm.fdi.iw.turbochess.model.MessagePacket;
+import es.ucm.fdi.iw.turbochess.model.messaging.MessagePacket;
+import es.ucm.fdi.iw.turbochess.model.messaging.MessageType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +34,7 @@ public class WebSocketEventListener{
             logger.info("User Disconnected : " + username);
 
             MessagePacket messagePacket = new MessagePacket();
-            messagePacket.setType(MessagePacket.MessageType.LEAVE_ROOM);
+            messagePacket.setType(MessageType.LEAVE_ROOM);
             messagePacket.setFrom(username);
 
             messagingTemplate.convertAndSend("/queue/public", messagePacket);

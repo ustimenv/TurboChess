@@ -1,5 +1,11 @@
 'use strict';
 
+var script = document.createElement('script');
+script.src = 'https://code.jquery.com/jquery-3.4.1.min.js';
+script.type = 'text/javascript';
+document.getElementsByTagName('head')[0].appendChild(script);
+
+
 var usernamePage = document.querySelector('#username-page');    // primary container
 var chatPage = document.querySelector('#chat-page');            //
 
@@ -24,6 +30,7 @@ betForm.addEventListener('submit', betRaise, true);
 
 
 var stompClient = null;
+var roomCode = null;
 //var username = null;
 
 var colours = ['#e30e1f', '#0e0ee3', '#cde01d', '#cde01d', '#070806', '#e010b7', '#467a7a'];
@@ -118,7 +125,7 @@ function onMessageReceived(messageReceived) {
     }
 
     var textElement = document.createElement('p');
-    var messageText = document.createTextNode(message.text);
+    var messageText = document.createTextNode(message.payload);
     textElement.appendChild(messageText);
     messageElement.appendChild(textElement);
     messagesBox.appendChild(messageElement);
@@ -148,7 +155,7 @@ function incrementValue(){
 function createRoomInit(){
 
     alert("name = " + username);
-    //TODO call AJAX
+    foo();
 //    usernamePage.classList.add('hidden');           // username input page goes away
 //    chatPage.classList.remove('hidden');
 
@@ -168,7 +175,57 @@ function joinRoomInit(e){
     e.preventDefault();
 }
 
-function setUsername(name){
-    username=name;
-    alert("USER NAME IS " + username);
+//function setUsername(name){
+//    username=name;
+//    alert("USER NAME IS " + username);
+//}
+
+/////////////////
+//jQuery(document).ready(function($) {
+//        $("#search-form").submit(function(event) {
+//
+//            // Prevent the form from submitting via the browser.
+//            event.preventDefault();
+//            searchViaAjax();
+//
+//        });
+//    });
+
+function foo() {
+
+    var token = $("meta[name='_csrf']").attr("content");
+    var header = $("meta[name='_csrf_header']").attr("content");
+
+    $(document).ajaxSend(function(e, xhr, options) {
+        xhr.setRequestHeader(header, token);
+      });
+
+    var data = {}
+    data["from"] = username;
+    data["type"]="CREATE_ROOM";
+    data["payload"]="";
+
+    $.ajax({
+        type : "POST",
+        contentType : "application/json",
+        dataType : 'json',
+        data : JSON.stringify(data),
+        url : "/api/createroom",
+        success : function(response) {
+//            var resp = JSON.parse(response);
+//            console.log(typeof response)
+//            console.log(response);
+//            console.log(response.payload);
+            roomCode = response.payload;
+            alert("NAME=" + username + ", "+ "ROOM "+roomCode);
+        },
+        error : function(e) {
+            alert("ERROR " + e);
+            console.log("ERROR: ", e);
+        },
+        done : function(e) {
+            alert("Done");
+            console.log("DONE");
+        }
+    });
 }

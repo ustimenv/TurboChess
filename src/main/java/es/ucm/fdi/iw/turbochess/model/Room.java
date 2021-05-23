@@ -33,4 +33,8 @@ public class Room{                        // includes two players and an undeter
     public enum GameResult {
         PAUSED, RUNNING, WHITE_WON, BLACK_WON, DRAW
     }
+    public void addParticipant(Participant p){
+        participants.add(p);
+    }
+
 }
