@@ -8,16 +8,9 @@
     <header>
         <div th:fragment="barraLateral" class="barraLateral">
             <a class="friendBar">Foto de Perfil</a>
-            <a>Amigo 1</a>
-            <a>Amigo 2</a>
-            <a>Amigo 3</a>
-            <h1>th:each</h1>
-
-            <ul>
-                <p th:each="result, iterstat : ${friends}">
-                    <li th:text="${result}" th:id="|td${iterstat.index}|">amigo</li>
-                </p>
-            </ul>
+                    <a th:each="result: ${friends}"  th:href="@{user/{id}(id=${result.id}) }" class="enlacePersona">
+                        <p th:text="${result.username}"></p>
+                    </a>
         </div>
     </header>
 </body>
