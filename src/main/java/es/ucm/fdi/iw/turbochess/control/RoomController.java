@@ -1,26 +1,20 @@
 package es.ucm.fdi.iw.turbochess.control;
 
 
-
-import es.ucm.fdi.iw.turbochess.model.Participant;
 import es.ucm.fdi.iw.turbochess.model.Room;
-import es.ucm.fdi.iw.turbochess.model.RoomPOJO;
-import es.ucm.fdi.iw.turbochess.model.User;
 import es.ucm.fdi.iw.turbochess.model.messaging.MessagePacket;
 import es.ucm.fdi.iw.turbochess.model.messaging.ResponsePacket;
-import org.hibernate.Criteria;
-import org.hibernate.Session;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 
-import javax.persistence.EntityManager;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.servlet.http.HttpSession;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -29,41 +23,32 @@ import java.util.Map;
 public class RoomController{
 	Map<String, Room> rooms = new HashMap<>();
 
-
-	//STOMP
-	@MessageMapping("/chat.sendMessage")
-	@SendTo("/queue/public")
-	public MessagePacket sendMessage(@Payload MessagePacket messagePacket) {
-		return messagePacket;
-	}
-
-	@MessageMapping("/chat.betRaise")
-	@SendTo("/queue/public")
-	public MessagePacket betRaise(@Payload MessagePacket messagePacket) {
+//STOMP
+	@MessageMapping("/{room}.chat.sendMessage")
+	@SendTo("/queue/{room}")
+	public MessagePacket sendMessage(@DestinationVariable String room, @Payload MessagePacket messagePacket) {
 		return messagePacket;
 	}
 
 
-	@MessageMapping("/chat.addUser")
-	@SendTo("/queue/public")
-	public MessagePacket addUser(@Payload MessagePacket messagePacket,
+	@MessageMapping("/{room}.chat.betRaise")
+	@SendTo("/queue/{room}")
+	public MessagePacket betRaise(@DestinationVariable String room, @Payload MessagePacket messagePacket) {
+		return messagePacket;
+	}
+
+
+	@MessageMapping("/{room}.chat.addUser")
+	@SendTo("/queue/{room}")
+	public MessagePacket addUser(@DestinationVariable String room, @Payload MessagePacket messagePacket,
 								 SimpMessageHeaderAccessor headerAccessor) {
 		// Add username in web socket session
 		headerAccessor.getSessionAttributes().put("username", messagePacket.getFrom());
 		return messagePacket;
 	}
 
-//	@MessageMapping("/chat.addUser")
-//	@SendTo("/queue/public")
-//	public MessagePacket addUser(@Payload MessagePacket messagePacket,
-//								 SimpMessageHeaderAccessor headerAccessor) {
-//		// Add username in web socket session
-//		headerAccessor.getSessionAttributes().put("username", messagePacket.getFrom());
-//		return messagePacket;
-//	}
 
-
-	// AJAX
+// AJAX
 	@RequestMapping(value = "/api/createroom", method=RequestMethod.POST, produces = "application/json")
 	@ResponseBody
 	public ResponsePacket createRoom(@RequestBody MessagePacket packet) {
@@ -77,7 +62,9 @@ public class RoomController{
 //		rooms.add(new Room(code));
 
 		ResponsePacket response = new ResponsePacket();
+//		response.setPayload(code);
 		response.setPayload(code);
+
 		return response;
 	}
 

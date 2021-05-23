@@ -6,7 +6,6 @@ import lombok.Data;
 
 @Entity
 @Data
-@AllArgsConstructor
 public class Participant {        // User present in a room
 
     @Id
@@ -14,13 +13,13 @@ public class Participant {        // User present in a room
     private long id;            // internally (within the roon) assigned id
 
     @ManyToOne                  // user may participate in many rooms simultaneously
-    User user;
+    private User user;
 
     @ManyToOne
-    Room room;
+    private Room room;
 
     @Column(nullable = false)
-    int currentBet;
+    private int currentBet=0;
 
     @Enumerated(EnumType.STRING)
     private Role role;          // we'll store the roles as strings for clarity
