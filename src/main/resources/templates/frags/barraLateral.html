@@ -8,9 +8,13 @@
     <header>
         <div th:fragment="barraLateral" class="barraLateral">
             <a class="friendBar">Foto de Perfil</a>
+                <h2>Friends</h2>
                     <a th:each="result: ${friends}"  th:href="@{user/{id}(id=${result.id}) }" class="enlacePersona">
                         <p th:text="${result.username}"></p>
                     </a>
+            <div th:if="${peticiones}">
+                <h2>Friendship request</h2>
+            </div>
         </div>
     </header>
 </body>

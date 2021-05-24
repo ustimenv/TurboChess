@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -96,8 +97,8 @@ public class UserController {
 	 */
 	public String encodePassword(String rawPassword) {
 		return passwordEncoder.encode(rawPassword);
-	}	
-
+	}
+		private List<Long> f;
 	@GetMapping("/{id}")
 	public String getUser(@PathVariable long id, Model model, HttpSession session) 			
 			throws JsonProcessingException {		
@@ -107,6 +108,21 @@ public class UserController {
 		// construye y envía mensaje JSON
 		User requester = (User)session.getAttribute("u");
 
+		// carga la lista de amigos
+		List<User> friends = (List<User>) entityManager.createNativeQuery("SELECT * FROM Friends " +
+				"LEFT JOIN User on Friends.friend_id =User.id WHERE Friends.SUBJECT_ID= :userid " +
+				"UNION ALL" +
+				" SELECT  * FROM Friends LEFT JOIN User on Friends.SUBJECT_ID=User.id WHERE friend_id= :userid", User.class)
+				.setParameter("userid", requester.getId()).getResultList();
+
+		f = new ArrayList<>();
+		for (User name : friends) {
+			f.add(name.getId());
+		}
+		if(f.contains(id)){
+			model.addAttribute("isFriend","true" );
+		}
+		model.addAttribute("friends", friends);
 		//para saber si se ha enviado peticion de amistad o no
 		List<Friendship> requests = friendshipRepository.findBySenderAndReceiverAndState(requester, u, Friendship.State.OPEN);
 		if (!requests.isEmpty()) {
@@ -119,6 +135,10 @@ public class UserController {
 				model.addAttribute("request", null);
 			}
 		}
+		//obtiene la lista de peticiones de amistad
+		List<Friendship> peticiones =friendshipRepository.findByReceiverAndState(requester, Friendship.State.OPEN);
+		model.addAttribute("peticiones", peticiones);
+
 
 		ObjectMapper mapper = new ObjectMapper();
 		ObjectNode rootNode = mapper.createObjectNode();
