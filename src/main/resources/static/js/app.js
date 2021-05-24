@@ -1,14 +1,17 @@
 'use strict';
 
+var script = document.createElement('script');              // Surely there's a better way to import jquery...
+script.src = 'https://code.jquery.com/jquery-3.4.1.min.js';
+script.type = 'text/javascript';
+document.getElementsByTagName('head')[0].appendChild(script);
+
 var usernamePage = document.querySelector('#username-page');    // primary container
 var chatPage = document.querySelector('#chat-page');            //
 
 var connecting = document.querySelector('.connecting-to-room');
 
-
 var createRoomForm = document.querySelector('#createRoomForm');
 var roomCodeForm = document.querySelector('#roomCodeForm');
-
 
 var messageForm = document.querySelector('#messageForm');
 var messagesBox = document.querySelector('#messages-box');      // has two children: event box (join/leave) & chat box; put msgs in correct boxes based on TYPE enum
@@ -17,14 +20,15 @@ var messageInputBox = document.querySelector('#message-input-box');
 var betForm = document.querySelector('#betForm');
 var betInputBox = document.querySelector('#bet-input-box');
 
-createRoomForm.addEventListener('submit', createRoomInit, true);
-roomCodeForm.addEventListener('submit', joinRoomInit, true);
+createRoomForm.addEventListener('submit', handleCreateRoom, true);
+roomCodeForm.addEventListener('submit', handleJoinRoom, true);
 messageForm.addEventListener('submit', sendMessage, true);
 betForm.addEventListener('submit', betRaise, true);
 
 
 var stompClient = null;
-//var username = null;
+var roomCode = null;            // set via an ajax call by creating or joining a room
+//var username ---->>              is defined and set in the inline script in room.html
 
 var colours = ['#e30e1f', '#0e0ee3', '#cde01d', '#cde01d', '#070806', '#e010b7', '#467a7a'];
 
@@ -43,11 +47,25 @@ var colours = ['#e30e1f', '#0e0ee3', '#cde01d', '#cde01d', '#070806', '#e010b7',
 //}
 
 
+/**
+*           STOMP
+*/
+
+function connect() {
+    usernamePage.classList.add('hidden');   // username input page goes away
+    chatPage.classList.remove('hidden');    // the main chatroom page becomes visible, while we attempt to establish connection
+
+    var socket = new SockJS('/ws');
+    stompClient = Stomp.over(socket);
+    stompClient.connect({}, onConnected, {});
+}
+
 function onConnected() {
-    stompClient.subscribe('/queue/public', onMessageReceived);  // subscribe to the channel
-    // tell the others on the channel you've subbed
-    stompClient.send("/app/chat.addUser", {}, JSON.stringify({from: username, type: 'JOIN_ROOM'}));
-    connecting.classList.add('hidden');      // remove the "Connecting..."
+    stompClient.subscribe(`/queue/${roomCode}`, onMessageReceived);             // subscribe to the room's channe;
+                                                                                // inform the room that you've subbed
+    stompClient.send(`/app/${roomCode}.chat.addUser`, {},
+                     JSON.stringify({from: username, type: 'JOIN_ROOM'}));
+    connecting.classList.add('hidden');                                         // remove the 'Connecting...'
 }
 
 function sendMessage(e) {
@@ -55,24 +73,24 @@ function sendMessage(e) {
     if(messageContent && stompClient) {
         var packet = {
             from: username,
-            text: messageInputBox.value,
+            payload: messageInputBox.value,
             type: 'TEXT'
         };
-        stompClient.send("/app/chat.sendMessage", {}, JSON.stringify(packet));
-        messageInputBox.value = "";
+        stompClient.send(`/app/${roomCode}.chat.sendMessage`, {}, JSON.stringify(packet));
+        messageInputBox.value = '';
     }
     e.preventDefault();
 }
 
-function betRaise(e) {          // TODO add logic
+function betRaise(e) {                      // TODO add logic
      if(betInputBox && stompClient) {
          var packet = {
              from: username,
-             text: betInputBox.value,
+             payload: betInputBox.value,
              type: 'BET_RAISE'
          };
 
-         stompClient.send("/app/chat.betRaise", {}, JSON.stringify(packet));
+         stompClient.send(`/app/${roomCode}.chat.betRaise`, {}, JSON.stringify(packet));
      }
      e.preventDefault();
 }
@@ -98,77 +116,129 @@ function onMessageReceived(messageReceived) {
     break;
     case 'BET_RAISE':
         messageElement.classList.add('event-message');
-        message.text = message.from + ' has increased their bet to ' + message.text + '!';
+        message.payload = message.from + ' has increased their bet to ' + message.payload + '!';
     break;
 
     case 'CREATE_ROOM':
-        alert("creating room?");
+        alert('creating room?');
     break;
 
     case 'JOIN_ROOM':
         messageElement.classList.add('event-message');
-        message.text = message.from + ' joined!';
+        message.payload = message.from + ' joined!';
     break;
     case 'LEAVE_ROOM':
         messageElement.classList.add('event-message');
-        message.text = message.from + ' left!';
+        message.payload = message.from + ' left!';
     break;
     default:
-        alert("Unexpected arg " + message.type);
+        alert('Unexpected arg ' + message.type);
     }
 
     var textElement = document.createElement('p');
-    var messageText = document.createTextNode(message.text);
+    var messageText = document.createTextNode(message.payload);
     textElement.appendChild(messageText);
     messageElement.appendChild(textElement);
     messagesBox.appendChild(messageElement);
     messagesBox.scrollTop = messagesBox.scrollHeight;
 }
 
+/**
+*           AJAX
+*/
+function handleJoinRoom(e){
+    e.preventDefault();
+    var code = document.getElementById("roomcode").value;
 
-function hashString(str) {
-  var hash = 0, i, chr;
-  if (str.length === 0) return hash;
-  for (i = 0; i < str.length; i++) {
-    chr   = str.charCodeAt(i);
-    hash  = ((hash << 5) - hash) + chr;
-    hash |= 0; // Convert to 32bit integer
-  }
-  return hash;
+    if(code){
+        setCSRFtoken();
+        var data = {}
+        data['from'] = username;
+        data['type']='JOIN_ROOM';
+        data['payload']=code;
+
+        $.ajax({
+                type : 'POST',
+                contentType : 'application/json',
+                dataType : 'json',
+                data : JSON.stringify(data),
+                url : '/api/joinroom',
+                success : function(response) {      // todo parse for failure
+                    connect();
+                },
+                error : function(e) {
+                    console.log('ERROR: ', e);
+                },
+                done : function(e) {
+                    console.log('done...');
+                }
+            });
+    }
 }
 
-function incrementValue(){
+function handleCreateRoom(e){
+    e.preventDefault();
+    var capacity = document.getElementById('createRoomForm')[0].value;      // todo validate capacity on-the-fly
+    if(capacity < 2){       // todo display the error msg in a div
+        alert("Room capacity must be at least 2!");
+        return;
+    }
+
+    setCSRFtoken();
+    var data = {}
+    data['from'] = username;
+    data['type']='CREATE_ROOM';
+    data['payload']=capacity;
+
+    $.ajax({
+        type : 'POST',
+        contentType : 'application/json',
+        dataType : 'json',
+        data : JSON.stringify(data),
+        url : '/api/createroom',
+        success : function(response) {
+            roomCode = response.payload;
+            alert('ROOM '+ roomCode);
+            connect();
+        },
+        error : function(e) {
+            console.log('ERROR: ', e);
+        },
+        done : function(e) {
+            console.log('done...');
+        }
+    });
+}
+function handleIncreaseBet(){
+    // TODO add AJAX call to ensure user's coin balance is sufficient for the raise
     var value = parseInt(betInputBox.value, 10);
     value = isNaN(value) ? 0 : value;
     value+=5;
     betInputBox.value = value;
 }
 
-//
-function createRoomInit(){
 
-    alert("name = " + username);
-    //TODO call AJAX
-//    usernamePage.classList.add('hidden');           // username input page goes away
-//    chatPage.classList.remove('hidden');
+/**
+*           UTILITY METHODS
+*/
 
+function setCSRFtoken(){
+    var token = $("meta[name='_csrf']").attr("content");
+    var header = $("meta[name='_csrf_header']").attr("content");
+
+    $(document).ajaxSend(function(e, xhr, options) {
+        xhr.setRequestHeader(header, token);
+      });
 }
 
-function joinRoomInit(e){
-    var code = document.getElementsByClassName('roomCodeForm')[0].value;
-
-    if(code) {                                  // once a valid username was entered
-        usernamePage.classList.add('hidden');   // username input page goes away
-        chatPage.classList.remove('hidden');    // the main chatroom page becomes visible, while we attempt to establish connection
-
-        var socket = new SockJS('/ws');         // TODO websockets vs sockjs
-        stompClient = Stomp.over(socket);
-        stompClient.connect({}, onConnected, {});
+function hashString(str) {
+    var hash = 0, i, chr;
+    if (str.length === 0) return hash;
+    for (i = 0; i < str.length; i++) {
+        chr   = str.charCodeAt(i);
+        hash  = ((hash << 5) - hash) + chr;
+        hash |= 0;
     }
-    e.preventDefault();
+    return hash;
 }
 
-function setUsername(name){
-    username=name;
-    alert("USER NAME IS " + username);
-}

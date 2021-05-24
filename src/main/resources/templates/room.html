@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.w3.org/1999/xhtml">
 <head>
+    <meta th:name="_csrf" th:content="${_csrf.token}"/>
+    <meta th:name="_csrf_header" th:content="${_csrf.headerName}"/>
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
     <title>Chat</title>
     <link rel="stylesheet" href="/css/room.css" />
@@ -21,35 +24,37 @@
         <h1 class="title">Create a room or join an existing one </h1>
 
         <form id="createRoomForm" name="createRoomForm">
+            <input type="number" value="2" />
             <button type="submit" class="create-room-button">Create</button>
         </form>
 
         <h2>OR</h2>
 
         <form id="roomCodeForm" name="roomCodeForm">
-            <input type="text" id="name" placeholder="6 letter room code" autocomplete="off" class="form-control" />
+            <input type="text" id="roomcode" placeholder="Enter the room code here" autocomplete="off" class="form-control" />
             <button type="submit" class="join-room-submit">Join</button>
         </form>
 
     </div>
 </div>
-
-
-
 <!--<div id="username-page">-->
 <!--    <div class="username-page-container">-->
-<!--        <h1 class="title">Type your username</h1>-->
+<!--        <h1 class="title">Create a room or join an existing one </h1>-->
 
-<!--        <form id="usernameInput" name="usernameInput">-->
-<!--            <div class="form-group">-->
-<!--                <input type="text" id="name" placeholder="Username" autocomplete="off" class="form-control" />-->
-<!--            </div>-->
-<!--            <div class="form-group">-->
-<!--                <button type="submit" class="username-submit">Submit</button>-->
-<!--            </div>-->
+<!--        <form id="createRoomForm" name="createRoomForm">-->
+<!--            <button type="submit" class="create-room-button">Create</button>-->
 <!--        </form>-->
+
+<!--        <h2>OR</h2>-->
+
+<!--        <form id="roomCodeForm" name="roomCodeForm">-->
+<!--            <input type="text" id="name" placeholder="6 letter room code" autocomplete="off" class="form-control" />-->
+<!--            <button type="submit" class="join-room-submit">Join</button>-->
+<!--        </form>-->
+
 <!--    </div>-->
 <!--</div>-->
+
 
 <div id="chat-page" class="hidden">
     <div class="chat-container">
@@ -59,7 +64,7 @@
                     <div class="input-group clearfix">
                         <input type="text" id="bet-input-box"  class="form-control"/>
                         <button type="submit" class="primary">Raise bet</button>
-                        <input type="button" onclick="incrementValue()" value="5" />
+                        <input type="button" onclick="handleIncreaseBet()" value="5" />
                     </div>
                 </div>
             </form>
@@ -68,7 +73,7 @@
 
 
         <div class="connecting-to-room">
-            Connecting to the chatroom...
+            Connecting to the room...
         </div>
         <ul id="messages-box">
         </ul>

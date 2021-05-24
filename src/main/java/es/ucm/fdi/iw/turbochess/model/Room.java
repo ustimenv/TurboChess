@@ -1,38 +1,65 @@
 package es.ucm.fdi.iw.turbochess.model;
 
-import java.util.*;
-import java.util.concurrent.ThreadLocalRandom;
+import lombok.Data;
 
-public class Room{
-    static int codeLengths=4;
-    static Set<String> roomCodes = new HashSet<>();
-    final String code;      // room code
-    private CodeGenerator codeGenerator = new CodeGenerator();
+import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
+
+@Entity
+@Data
+public class Room{                        // includes two players and an undetermined number of observers
+
+    @Id
+    private final String code;              // a room is uniquely identified by its code
+    private final int capacity;             // maximum number of people able to be in a room at any given time, specified
+                                            // by the room's creator (PLAYER_1)
+
+    @Enumerated(EnumType.STRING)
+    private GameState gameState;
+
+    @OneToMany
+    private List <Participant> participants=new ArrayList<>();
 
 
-    public Room(){
-        String code = "";
-        while(!roomCodes.contains(code)){
-            code = codeGenerator.generate();
-        }
-        this.code = code;
-
+    public Room(String code, int capacity){
+        this.code=code;
+        this.capacity = capacity;
+        gameState=GameState.NOT_STARTED;
     }
 
-    private static class CodeGenerator{
-        private static final String letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-        private final Random random;
+    public enum GameState{
+        NOT_STARTED, WHITE_TURN, BLACK_TURN, WHITE_WON, BLACK_WON, DRAW
+    }
 
-        private CodeGenerator(){
-            random = ThreadLocalRandom.current();
+    public boolean addParticipant(Participant p){
+        if(participants.size() == 0){                       // room creator is player 1
+            p.setRole(Participant.Role.PLAYER1);
+            participants.add(p);
+        } else if(participants.size() == 1){                // 2nd player to join is player 2
+            p.setRole(Participant.Role.PLAYER2);
+            participants.add(p);
+        } else if(participants.size() <= capacity){         // consequent players are automatically observers
+            p.setRole(Participant.Role.OBSERVER);
+            participants.add(p);
+        } else{                                             // players who would result in capacity being exceeded
+            return false;                                   // will not be allowed to join
         }
+        return true;
+    }
 
-        private String generate(){
-            StringBuilder sb = new StringBuilder();
-            for(int i=0; i<Room.codeLengths; i++){
-                sb.append(letters.charAt(random.nextInt(letters.length())));
-            }
-            return sb.toString();
+    // TODO might store Rooms in a HashSet later on
+    @Override
+    public int hashCode(){
+        return code.hashCode();
+    }
+    @Override
+    public boolean equals(Object other){
+        if( !(other instanceof Room) ){
+            return false;
+        } else{
+            return this.code.equals(((Room) other).getCode());
         }
     }
+
 }

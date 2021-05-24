@@ -1,6 +1,7 @@
 package es.ucm.fdi.iw.turbochess.control;
 
-import es.ucm.fdi.iw.turbochess.model.MessagePacket;
+import es.ucm.fdi.iw.turbochess.model.messaging.MessagePacket;
+import es.ucm.fdi.iw.turbochess.model.messaging.MessageType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,14 +30,16 @@ public class WebSocketEventListener{
         StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
 
         String username = (String) headerAccessor.getSessionAttributes().get("username");
-        if(username != null) {
-            logger.info("User Disconnected : " + username);
+        String room = (String) headerAccessor.getSessionAttributes().get("room");
+        if(username != null && room != null) {
+
+            logger.info("[ROOM " + room +"]: User Disconnected : " + username);
 
             MessagePacket messagePacket = new MessagePacket();
-            messagePacket.setType(MessagePacket.MessageType.LEAVE_ROOM);
+            messagePacket.setType(MessageType.LEAVE_ROOM);
             messagePacket.setFrom(username);
 
-            messagingTemplate.convertAndSend("/queue/public", messagePacket);
+            messagingTemplate.convertAndSend("/queue/{room}", messagePacket);
         }
     }
 }
