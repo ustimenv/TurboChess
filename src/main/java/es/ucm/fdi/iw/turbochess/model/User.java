@@ -43,6 +43,10 @@ import es.ucm.fdi.iw.model.Transferable;
                 query="SELECT COUNT(u) "
                         + "FROM User u "
                         + "WHERE u.username = :username"),
+		@NamedQuery(name="User.byId",
+				query="SELECT u  "
+						+ "FROM User u "
+						+ "WHERE u.id = :id"),
 		})
 @NamedNativeQueries({
 		@NamedNativeQuery(name = "User.friends", query = "SELECT * FROM user_friends " +

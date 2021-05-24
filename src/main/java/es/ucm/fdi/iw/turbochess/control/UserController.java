@@ -8,12 +8,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.transaction.Transactional;
 
+import es.ucm.fdi.iw.turbochess.model.Friendship;
+import es.ucm.fdi.iw.turbochess.repository.FriendshipRepository;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,6 +70,9 @@ public class UserController {
 	
 	@Autowired
 	private PasswordEncoder passwordEncoder;
+
+	@Autowired
+	private FriendshipRepository friendshipRepository;
 	
 	/**
 	 * Tests a raw (non-encoded) password against the stored one.
@@ -100,6 +106,20 @@ public class UserController {
 
 		// construye y envía mensaje JSON
 		User requester = (User)session.getAttribute("u");
+
+		//para saber si se ha enviado peticion de amistad o no
+		List<Friendship> requests = friendshipRepository.findBySenderAndReceiverAndState(requester, u, Friendship.State.OPEN);
+		if (!requests.isEmpty()) {
+			model.addAttribute("request", requests.get(0));
+		} else {
+			requests = friendshipRepository.findBySenderAndReceiverAndState(u, requester, Friendship.State.OPEN);
+			if (!requests.isEmpty()) {
+				model.addAttribute("request", requests.get(0));
+			} else {
+				model.addAttribute("request", null);
+			}
+		}
+
 		ObjectMapper mapper = new ObjectMapper();
 		ObjectNode rootNode = mapper.createObjectNode();
 		rootNode.put("text", requester.getUsername() + " is looking up " + u.getUsername());

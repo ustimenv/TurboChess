@@ -1,15 +1,11 @@
 package es.ucm.fdi.iw.turbochess.control;
 
+import java.security.Principal;
 import java.util.List;
-
-import antlr.StringUtils;
 import es.ucm.fdi.iw.turbochess.configurations.IwUserDetailsService;
+import es.ucm.fdi.iw.turbochess.service.FriendshipException;
+import es.ucm.fdi.iw.turbochess.service.FriendshipService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -42,6 +38,9 @@ public class RootController {
 
     @Autowired
     private HttpSession session;
+
+    @Autowired
+    private FriendshipService friendshipservice;
 
     @GetMapping("/")
     public String index(Model model,HttpSession session) {
@@ -150,9 +149,7 @@ public class RootController {
             user.setMatches_played(0);
             user.setEnabled((byte) 1);
 
-            Query query = entityManager.createNamedQuery("User.byUsername");
-            query.setParameter("username", user.getUsername());
-            List result = query.getResultList();
+            List result = entityManager.createNamedQuery("User.byUsername").setParameter("username", user.getUsername()).getResultList();
             if (result.isEmpty()) {
                 entityManager.persist(user);
                 model.addAttribute("name",user.getUsername() );
@@ -181,6 +178,18 @@ public class RootController {
          
         model.addAttribute("search", searchResults);
         return "userlist";
+    }
 
+    @PostMapping("/requestFriendship")
+    @Transactional
+    public String requestFriendship(@RequestParam Long userId , Principal principal) {
+        User sender = (User)session.getAttribute("u");
+        User receiver = entityManager.find(User.class,userId);
+       try{
+           friendshipservice.createFriendshipRequest(sender,receiver);
+       }catch(FriendshipException e){
+          return  "redirect:/";
+       }
+        return "redirect:user/" +receiver.getId();
     }
 }
