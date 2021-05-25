@@ -8,8 +8,16 @@ import es.ucm.fdi.iw.turbochess.service.FriendshipService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.transaction.Transactional;
+import java.util.List;
+
 @Service
 public class FriendshipServiceImp implements FriendshipService {
+    @PersistenceContext
+    //@Autowired
+    private EntityManager entityManager;
 
     @Autowired
     private FriendshipRepository friendshipRepository;
@@ -34,13 +42,48 @@ public class FriendshipServiceImp implements FriendshipService {
         return request;
     }
 
+    /**
+     * Comprobar que la solicitud esté todavía en estado OPEN y que el usuario recibido
+     * por parámetro sea realmente el usuario receptor de la solicitud de amistad.
+     * En caso de error, se lanza la excepción con un mensaje indicando cuál es el problema.
+     * Se establece el estado ACCEPTED en la solicitud, así como el sello temporal de la respuesta.
+     * Se añade al receptor a la lista de amigos del remitente de la solicitud y viceversa.
+     * Mediante la clase de repositorio correspondiente se guardan los tres objetos modificados
+     * (los dos usuarios y la solicitud) con el método save.
+     * @param request
+     * @param receiver
+     * @throws FriendshipException
+     */
     @Override
     public void acceptFriendshipRequest(Friendship request, User receiver)
             throws FriendshipException {
+        if(request.getReceiver() == receiver){
+            request.setState(Friendship.State.ACCEPTED);
+            User send = request.getSender();
+            receiver.getFriends().add(send);
+           send.getFriends().add(receiver);
+           entityManager.persist(send);
+            entityManager.persist(receiver);
+            friendshipRepository.save(request);
+        }
     }
 
     @Override
     public void declineFriendshipRequest(Friendship request, User receiver)
             throws FriendshipException {
+        if(request.getReceiver() == receiver){
+            request.setState(Friendship.State.DECLINED);
+            friendshipRepository.save(request);
+        }
+    }
+
+    @Override
+    public List<Friendship> findByReceiverAndState(User user, Friendship.State open) {
+        return friendshipRepository.findByReceiverAndState(user, Friendship.State.OPEN);
+    }
+
+    @Override
+    public Friendship findRequest(User sender, User receiver) {
+        return friendshipRepository.findBySenderAndReceiverAndState(sender,receiver,Friendship.State.OPEN ).get(0);
     }
 }

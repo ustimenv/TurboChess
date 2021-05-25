@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.EntityManager;
+import javax.persistence.Query;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.transaction.Transactional;
@@ -114,33 +115,27 @@ public class UserController {
 				"UNION ALL" +
 				" SELECT  * FROM Friends LEFT JOIN User on Friends.SUBJECT_ID=User.id WHERE friend_id= :userid", User.class)
 				.setParameter("userid", requester.getId()).getResultList();
-
 		f = new ArrayList<>();
 		for (User name : friends) {
 			f.add(name.getId());
 		}
-		if(f.contains(id)){
-			model.addAttribute("isFriend",true );
-		}else{
-			model.addAttribute("isFriend",false );
-		}
+
+		if(f.contains(id))	model.addAttribute("isFriend",true );
+
 		model.addAttribute("friends", friends);
 		//para saber si se ha enviado peticion de amistad o no
 		List<Friendship> requests = friendshipRepository.findBySenderAndReceiverAndState(requester, u, Friendship.State.OPEN);
 		if (!requests.isEmpty()) {
-			model.addAttribute("request", requests.get(0));
+			model.addAttribute("request", "sender");
 		} else {
 			requests = friendshipRepository.findBySenderAndReceiverAndState(u, requester, Friendship.State.OPEN);
 			if (!requests.isEmpty()) {
-				model.addAttribute("request", requests.get(0));
+				model.addAttribute("request", "receiver");
 			} else {
 				model.addAttribute("request", null);
 			}
 		}
 		//obtiene la lista de peticiones de amistad
-		List<Friendship> peticiones =friendshipRepository.findByReceiverAndState(requester, Friendship.State.OPEN);
-		model.addAttribute("peticiones", peticiones);
-
 
 		ObjectMapper mapper = new ObjectMapper();
 		ObjectNode rootNode = mapper.createObjectNode();

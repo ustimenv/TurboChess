@@ -14,7 +14,7 @@ INSERT INTO user(id,enabled,username,password,roles,elo,matches_won,matches_play
 --user: pepito pssw: pepito
 INSERT INTO user(id,enabled,username,password,roles,elo,matches_won,matches_played, coins) VALUES (
 	2, 1, 'pepito',
-	'{bcrypt}$2y$12$EiyIDAUNNqBTq3llI/fTeeRUc7n7EN4qs0Y.m9CLuyXVyKOaDvoVS ',
+	'{bcrypt}$2y$12$EiyIDAUNNqBTq3llI/fTeeRUc7n7EN4qs0Y.m9CLuyXVyKOaDvoVS',
 	'USER',
 	1300, 1,10,0
 );
@@ -56,7 +56,8 @@ INSERT INTO friends(SUBJECT_ID, FRIEND_ID) VALUES(6,1);
 
 --Request friendship de ana(4) a pepito(2)
 INSERT INTO friendship(id,state,receiver_id,sender_id) VALUES(-1,0,2,4);
-
+--Request friendship de ana(3) a pepito(2)
+INSERT INTO friendship(id,state,receiver_id,sender_id) VALUES(-3,0,2,3);
 -- Unos pocos auto-mensajes de prueba
 INSERT INTO MESSAGE VALUES(1,NULL,'2020-03-23 10:48:11.074000','probando 1',1,1);
 INSERT INTO MESSAGE VALUES(2,NULL,'2020-03-23 10:48:15.149000','probando 2',1,1);

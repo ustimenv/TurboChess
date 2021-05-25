@@ -35,7 +35,12 @@
                         <input type="hidden" name="userId" th:value="${user.id}">
                         <button th:unless= "(${request} or ${isFriend})" type="submit" value="Request friendship"> Send Request </button>
                     </form>
-                    <button th:if= "${request}" value="Request friendship"> Request sended </button>
+                    <button th:if="(${#strings.equals( request, 'sender')} and ${isFriend eq null}) " value="Request friendship"> Request sended </button>
+                    <form th:if="${#strings.equals( request, 'receiver')} " th:action="@{/answerFriendshipRequest}" method="post">
+                        <input type="hidden" name="requestId" th:value="${user.id}">
+                        <button type="submit" name="action" value="Accept"> Accept</button>
+                        <button type="submit" name="action" value="Decline">Decline</button>
+                    </form>
                 </div>
                 <button th:if="(${session.u.id} eq ${user.id}) or ${session.u.hasRole('ADMIN')}" id="msg">Edit</button>
 

@@ -4,6 +4,7 @@ import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
 import es.ucm.fdi.iw.turbochess.configurations.IwUserDetailsService;
+import es.ucm.fdi.iw.turbochess.model.Friendship;
 import es.ucm.fdi.iw.turbochess.service.FriendshipException;
 import es.ucm.fdi.iw.turbochess.service.FriendshipService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,7 +47,7 @@ public class RootController {
 
     @GetMapping("/")
     public String index(Model model, HttpSession session) {
-        if (session.getAttribute("u") != null) {
+       if (session.getAttribute("u") != null) {
             User user = (User) session.getAttribute("u");
             Query query = entityManager.createNativeQuery("SELECT * FROM Friends " +
                     "LEFT JOIN User on Friends.friend_id =User.id WHERE Friends.SUBJECT_ID= :userid " +
@@ -54,10 +55,13 @@ public class RootController {
                     " SELECT  * FROM Friends LEFT JOIN User on Friends.SUBJECT_ID=User.id WHERE friend_id= :userid", User.class)
                     .setParameter("userid", user.getId());
             List<User> friends = (List<User>) query.getResultList();
-
+           List<Friendship> friendsRequest = friendshipservice.findByReceiverAndState(user, Friendship.State.OPEN);
+           if(!friendsRequest.isEmpty()) model.addAttribute("peticiones", friendsRequest);
+          // model.addAttribute("peticiones", friendsRequest);
+            /*
             friends.stream().forEach((n) -> {
                 System.out.println(n.getUsername());
-            });
+            });*/
             model.addAttribute("friends", friends);
         }
         return "index";
@@ -196,6 +200,36 @@ public class RootController {
             }
 
          return "redirect:user/" + receiver.getId();
+    }
+
+    /**
+     * Obtener los objetos del usuario con sesión abierta y de la solicitud de amistad.
+     * Invocar al método del servicio que correspondan para aceptar o declinar la solicitud.
+     * Si la solicitud es aceptada, redirigir al usuario a la vista de perfil del usuario
+     * cuya amistad acaba de aceptar.
+     * Si es declinada o se produce algún error, redirigir a la página principal.
+     * @param requestId
+     * @param action
+     * @return
+     */
+    @PostMapping(path = "/answerFriendshipRequest")
+    @Transactional
+    public String answerFriendshipRequest(@RequestParam Long requestId, @RequestParam String action, Model model) throws FriendshipException {
+        User u=(User) session.getAttribute("u");
+        User sender= entityManager.find(User.class, requestId);
+        Friendship response = friendshipservice.findRequest(sender,u);
+
+        if(action.equals("Accept") ){
+            response.setState(Friendship.State.ACCEPTED);
+            friendshipservice.acceptFriendshipRequest(response,u);
+            model.addAttribute("accept", true);
+        }else if(action.equals("Decline") ) {
+            response.setState(Friendship.State.DECLINED);
+            friendshipservice.declineFriendshipRequest(response, u);
+            model.addAttribute("decline", true);
+        }
+        return "redirect:/";
+
     }
 
 }
