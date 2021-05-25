@@ -120,7 +120,9 @@ public class UserController {
 			f.add(name.getId());
 		}
 		if(f.contains(id)){
-			model.addAttribute("isFriend","true" );
+			model.addAttribute("isFriend",true );
+		}else{
+			model.addAttribute("isFriend",false );
 		}
 		model.addAttribute("friends", friends);
 		//para saber si se ha enviado peticion de amistad o no

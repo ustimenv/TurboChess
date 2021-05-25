@@ -189,18 +189,11 @@ public class RootController {
     public String requestFriendship(@RequestParam Long userId, Model model) {
         User sender = (User) session.getAttribute("u");
         User receiver = entityManager.find(User.class, userId);
-
-
             try {
                 friendshipservice.createFriendshipRequest(sender, receiver);
             } catch (FriendshipException e) {
                 return "redirect:/";
             }
-        /* else {
-
-            model.addAttribute("msg", "This is already your friend");
-            return "redirect:user/" + receiver.getId();
-        }*/
 
          return "redirect:user/" + receiver.getId();
     }

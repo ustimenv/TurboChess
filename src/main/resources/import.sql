@@ -55,7 +55,7 @@ INSERT INTO friends(SUBJECT_ID, FRIEND_ID) VALUES(1,5);
 INSERT INTO friends(SUBJECT_ID, FRIEND_ID) VALUES(6,1);
 
 --Request friendship de ana(4) a pepito(2)
-INSERT INTO friendship(id,state,receiver_id,sender_id) VALUES(1,0,2,4);
+INSERT INTO friendship(id,state,receiver_id,sender_id) VALUES(-1,0,2,4);
 
 -- Unos pocos auto-mensajes de prueba
 INSERT INTO MESSAGE VALUES(1,NULL,'2020-03-23 10:48:11.074000','probando 1',1,1);
