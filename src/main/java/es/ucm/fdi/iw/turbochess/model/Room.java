@@ -48,7 +48,6 @@ public class Room{                        // includes two players and an undeter
         return true;
     }
 
-    // TODO might store Rooms in a HashSet later on
     @Override
     public int hashCode(){
         return code.hashCode();

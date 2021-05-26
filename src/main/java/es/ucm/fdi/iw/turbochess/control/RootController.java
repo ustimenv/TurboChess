@@ -1,31 +1,22 @@
 package es.ucm.fdi.iw.turbochess.control;
 
-import java.security.Principal;
-import java.util.ArrayList;
-import java.util.List;
 import es.ucm.fdi.iw.turbochess.configurations.IwUserDetailsService;
 import es.ucm.fdi.iw.turbochess.model.Friendship;
+import es.ucm.fdi.iw.turbochess.model.User;
 import es.ucm.fdi.iw.turbochess.service.FriendshipException;
 import es.ucm.fdi.iw.turbochess.service.FriendshipService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestMethod;
-import es.ucm.fdi.iw.turbochess.GeneralUtils;
-import es.ucm.fdi.iw.turbochess.model.User;
+import org.springframework.web.bind.annotation.*;
 
 import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import javax.servlet.http.HttpSession;
 import javax.transaction.Transactional;
+import java.util.List;
 
 @Controller
 public class RootController {
@@ -109,8 +100,8 @@ public class RootController {
 
     @GetMapping("/ranks")
     public String ranks(Model model) {
-        List<User> rankings = GeneralUtils.JSONtoList("src/main/resources/examples/rankings.json");
-        model.addAttribute("rankings", rankings);
+//        List<User> rankings = GeneralUtils.JSONtoList("src/main/resources/examples/rankings.json");
+//        model.addAttribute("rankings", rankings);
         return "ranks";
     }
 

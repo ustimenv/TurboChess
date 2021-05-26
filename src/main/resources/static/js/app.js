@@ -32,21 +32,6 @@ var roomCode = null;            // set via an ajax call by creating or joining a
 
 var colours = ['#e30e1f', '#0e0ee3', '#cde01d', '#cde01d', '#070806', '#e010b7', '#467a7a'];
 
-//function connect(e) {
-//    username = document.querySelector('#name').value.trim();
-//
-//    if(username) {                              // once a valid username was entered
-//        usernamePage.classList.add('hidden');   // username input page goes away
-//        chatPage.classList.remove('hidden');    // the main chatroom page becomes visible, while we attempt to establish connection
-//
-//        var socket = new SockJS('/ws');         // TODO websockets vs sockjs
-//        stompClient = Stomp.over(socket);
-//        stompClient.connect({}, onConnected, {});
-//    }
-//    e.preventDefault();
-//}
-
-
 /**
 *           STOMP
 */
@@ -74,7 +59,8 @@ function sendMessage(e) {
         var packet = {
             from: username,
             payload: messageInputBox.value,
-            type: 'TEXT'
+            type: 'TEXT',
+            context: roomCode
         };
         stompClient.send(`/app/${roomCode}.chat.sendMessage`, {}, JSON.stringify(packet));
         messageInputBox.value = '';
@@ -87,7 +73,8 @@ function betRaise(e) {                      // TODO add logic
          var packet = {
              from: username,
              payload: betInputBox.value,
-             type: 'BET_RAISE'
+             type: 'BET_RAISE',
+             context: roomCode
          };
 
          stompClient.send(`/app/${roomCode}.chat.betRaise`, {}, JSON.stringify(packet));
@@ -156,6 +143,7 @@ function handleJoinRoom(e){
         data['from'] = username;
         data['type']='JOIN_ROOM';
         data['payload']=code;
+        data['context']=null;   // at this point the context hasn't been set or 'approved' by the server
 
         $.ajax({
                 type : 'POST',
@@ -163,10 +151,12 @@ function handleJoinRoom(e){
                 dataType : 'json',
                 data : JSON.stringify(data),
                 url : '/api/joinroom',
-                success : function(response) {      // todo parse for failure
+                success : function(response) {
+                    roomCode = code;                // set the room 'context'
                     connect();
                 },
                 error : function(e) {
+                    alert("Room " + code + " doesn't exist!");
                     console.log('ERROR: ', e);
                 },
                 done : function(e) {
