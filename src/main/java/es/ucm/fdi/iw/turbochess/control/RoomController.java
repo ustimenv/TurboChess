@@ -6,6 +6,8 @@ import es.ucm.fdi.iw.turbochess.model.Room;
 import es.ucm.fdi.iw.turbochess.model.User;
 import es.ucm.fdi.iw.turbochess.model.messaging.MessagePacket;
 import es.ucm.fdi.iw.turbochess.model.messaging.ResponsePacket;
+import es.ucm.fdi.iw.turbochess.service.RoomException;
+import es.ucm.fdi.iw.turbochess.service.RoomService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,10 +23,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import javax.persistence.EntityManager;
+import javax.persistence.Query;
+import java.util.List;
 
 //TODO below::::
 /**	In order to provide a common return type for the handlers, clean up the code, and most importantly handle exceptions,
@@ -39,11 +40,16 @@ import java.util.Set;
 
 @Controller
 public class RoomController{
-	Set<Room> rooms = new HashSet<>();
 	private static Logger log = LogManager.getLogger(User.class);
 
 	@Autowired
 	private SimpMessagingTemplate template;
+
+	@Autowired
+	private RoomService roomService;
+
+	@Autowired
+	private EntityManager entityManager;		// instead we could potentially convert the User into a repository
 
 	//STOMP
 	@MessageMapping("/{room}.chat.sendMessage")
@@ -91,38 +97,57 @@ public class RoomController{
 // AJAX
 	@RequestMapping(value = "/api/createroom", method=RequestMethod.POST, produces = "application/json")
 	@ResponseBody
-	public ResponsePacket createRoom(@RequestBody MessagePacket packet) {
+	public ResponsePacket createRoom(@RequestBody MessagePacket packet){		// todo handle the exception!!
 		log.info("[create room]: received packet" + packet);
-		String code = SessionKeeper.INSTANCE.generateRoomCode();	// todo this needs to be refactored
-		int capacity = Integer.parseInt(packet.getPayload());
-//		Room r = new Room(code, capacity);
-		Room r = new Room(code, 5);
-
-		r.addParticipant(new Participant());	//TODO SQL query to get user by username
-		if(rooms.contains(r)){
-			log.error("Attempting to create room " + r.getCode() + " already exists!");
-			return null;						//TODO not sure whether to return null or not-okay
+		int maxAttemptsToGenerateCode=10;
+		String code=null;
+		String from = packet.getFrom();		// todo sanitise!!!!!
+		int i=0;
+		while(roomService.roomExists(code)){
+			code = CodeGenerator.INSTANCE.generateRoomCode();
+			i++;
+			if(i > maxAttemptsToGenerateCode){
+				log.error("[create room]: failed to create room");
+				return null;	// basically a 500
+			}
 		}
-		rooms.add(r);
-		log.info("Room " + r.getCode() + " created successfully");
-		return new ResponsePacket(code);
+
+		try{
+			Room r = roomService.createRoom(code, Integer.parseInt(packet.getPayload()));
+			Participant p = getParticipantByUsername(from);
+			roomService.joinRoom(code, p);
+			log.info("Room " + r.getCode() + " created successfully");
+			return new ResponsePacket(code);
+		} catch(RoomException e){
+			e.printStackTrace();
+			log.error("[create room]: failed to create room " + e.getMessage());
+			return null;
+		}
 	}
 
 	@RequestMapping(value = "/api/joinroom", method=RequestMethod.POST, produces = "application/json")
 	@ResponseBody
-	public ResponsePacket joinRoom(@RequestBody MessagePacket packet) {
+	public ResponsePacket joinRoom(@RequestBody MessagePacket packet){
 		log.info("[join room]: received packet" + packet);
-		rooms.add(new Room("X", 3));		//____________ for testing ONLY!!___________//TODO delete!________________________________________________
+
 		String code = packet.getPayload();
 		String from = packet.getFrom();
-		for(Room room : rooms){
-			if(room.getCode().equals(code)){
-				room.addParticipant(new Participant());
-				log.info("User " + from + "joined room " + room.getCode() + " successfully");
-				return new ResponsePacket("oki");
-			}
+		Participant p = getParticipantByUsername(from);
+
+		try{
+			roomService.joinRoom(code, p);
+			log.info("User " + from + "joined room " + code + " successfully");
+			return new ResponsePacket("oki");
+		} catch(RoomException e){
+			log.error("[create room]: failed to create room " + code + " \n"+ e.getMessage());
+			return null;
 		}
-		log.error("Attempting to create room " + code + " but it already exists!");
-		return null;
+	}
+
+	private Participant getParticipantByUsername(String username){
+		Query query = entityManager.createQuery("SELECT * FROM user u WHERE u.username = :username")
+									.setParameter("username", username);
+
+		return new Participant((User) query.getSingleResult());	// todo ought to add null check
 	}
 }

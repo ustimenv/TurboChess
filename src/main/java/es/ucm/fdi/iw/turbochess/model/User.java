@@ -1,7 +1,5 @@
 package es.ucm.fdi.iw.turbochess.model;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 import javax.persistence.*;
 import javax.swing.ImageIcon;
@@ -94,9 +92,13 @@ public class User implements Transferable<User.Transfer> {
 	@Column(name="coins", nullable=false)	// coins can be gained by betting as an observer or playing matches
 	private int coins;
 
+	@OneToMany(mappedBy = "user", fetch = FetchType.LAZY)		// user can participate in any number of rooms simultaneously,
+	private List<Participant> participations = new ArrayList<>();	// provided they don't double-join any
+
 	@OneToMany
 	@JoinColumn(name = "sender_id")
 	private List<Message> sent = new ArrayList<>();
+
 	@OneToMany
 	@JoinColumn(name = "recipient_id")	
 	private List<Message> received = new ArrayList<>();
@@ -115,8 +117,7 @@ public class User implements Transferable<User.Transfer> {
 	 */
 	public boolean hasRole(Role role) {
 		String roleName = role.name();
-		return Arrays.stream(roles.split(","))
-				.anyMatch(r -> r.equals(roleName));
+		return Arrays.asList(roles.split(",")).contains(roleName);
 	}
 
     @Getter
@@ -141,4 +142,6 @@ public class User implements Transferable<User.Transfer> {
 	public boolean samePasword(){
 		return this.password.equals(this.passwordConfirm);
 	}
+
+
 }
