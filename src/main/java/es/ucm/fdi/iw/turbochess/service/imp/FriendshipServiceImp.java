@@ -34,7 +34,21 @@ public class FriendshipServiceImp implements FriendshipService {
                 .findBySenderAndReceiverAndState(receiver, sender, Friendship.State.OPEN).isEmpty()) {
             throw new FriendshipException("A pending request exists");
         }
-        Friendship request = new Friendship();
+        Friendship request;
+        //ya existe un decline en alguna peticion previa
+        if(!friendshipRepository
+                .findBySenderAndReceiverAndState(sender, receiver, Friendship.State.DECLINED).isEmpty()){
+             request = friendshipRepository
+                    .findBySenderAndReceiverAndState(sender, receiver, Friendship.State.DECLINED).get(0);
+        } else
+        if(!friendshipRepository
+                .findBySenderAndReceiverAndState(receiver, sender, Friendship.State.DECLINED).isEmpty()){
+            request = friendshipRepository
+                    .findBySenderAndReceiverAndState(receiver, sender, Friendship.State.DECLINED).get(0);
+
+        }else {
+            request = new Friendship();
+        }
         request.setSender(sender);
         request.setReceiver(receiver);
         request.setState(Friendship.State.OPEN);
@@ -57,13 +71,12 @@ public class FriendshipServiceImp implements FriendshipService {
     @Override
     public void acceptFriendshipRequest(Friendship request, User receiver)
             throws FriendshipException {
-        if(request.getReceiver() == receiver){
+        if(request.getReceiver().getId() == receiver.getId()){
             request.setState(Friendship.State.ACCEPTED);
             User send = request.getSender();
-            receiver.getFriends().add(send);
+           receiver.getFriends().add(send);
            send.getFriends().add(receiver);
-           entityManager.persist(send);
-            entityManager.persist(receiver);
+            entityManager.flush();
             friendshipRepository.save(request);
         }
     }
