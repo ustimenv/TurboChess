@@ -25,5 +25,4 @@ Scenario: html url encoded form submit - post
     Then status 200
     * string response = response    
     * def h4s = util.selectHtml(response, "h4");
-
     And match h4s contains 'User'
