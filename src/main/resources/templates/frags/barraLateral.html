@@ -6,7 +6,7 @@
 
 <body>
     <header>
-        <div th:fragment="barraLateral" class="barraLateral">
+        <div sec:authorize="isAuthenticated()" th:fragment="barraLateral" class="barraLateral">
             <a class="friendBar">Foto de Perfil</a>
                 <h2>Friends</h2>
                     <a th:each="result: ${friends}"  th:href="@{user/{id}(id=${result.id}) }" class="enlacePersona">
