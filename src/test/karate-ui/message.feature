@@ -7,8 +7,8 @@ Background:
 Scenario: login using chrome
 
   Given driver 'http://localhost:8080/login'
-  And input('#username', 'a')
-  And input('#password', 'aa')
+  And input('#username', 'pepa')
+  And input('#password', 'pepa')
   When submit().click("button[type=submit]")
   And match html('title') contains 'Admin'
   * driver.screenshot()
