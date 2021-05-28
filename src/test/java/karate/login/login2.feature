@@ -9,7 +9,6 @@ Feature: csrf and log-out endpoint
     Scenario: user page
         * path 'user/1'
         * method get
-        * print response
         * status 200
         * def userName = util.selectHtml(response, "h1>span")
         * assert userName == 'pepa'

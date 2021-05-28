@@ -6,7 +6,7 @@
 
 <body>
     <header>
-        <div th:fragment="chat" class="chat">
+        <div sec:authorize="isAuthenticated()" th:fragment="chat" class="chat">
             <a class="chatBar"> Se puede minimizar y tal  </a>
             <a> Aqui va el chat privado </a>
         </div>
