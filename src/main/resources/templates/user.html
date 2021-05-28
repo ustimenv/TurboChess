@@ -14,8 +14,35 @@
                 <!-- <img th:src="@{/user/{id}/photo(id=${user.id})}"  class="imagenPerfil">-->
                 <img id="avatar" src="http://pngimg.com/uploads/simpsons/simpsons_PNG95.png"></img>
             </div>
+            <div id="alertInfo" class="alert alert-success"  role="alert">
+                <p th:text="${msgInfo}" id="msgSuccess"></p>
+            </div>
+            <div id="alertError" class="alert alert-danger">
+                <p th:text="${msgError}" id="msgError"></p>
+            </div>
 
-            <div id="stats">
+            <form  id="form-editInfo" class="form-editInfo" method="post" th:action="@{/user/{id}(id=${user.id})}" th:object="${user}" >
+                <div class="user-box">
+                    <input type="text" th:field="*{username}" class="form-control"
+                           required minlength="2" maxlength="20"/>
+                    <label>User name</label>
+                </div>
+                <div class="user-box">
+                    <input type="password" th:field="*{password}" class="form-control"
+                           required minlength="6" maxlength="10"/>
+                    <label>Password</label>
+                </div>
+                <div class="user-box">
+                    <input type="password" th:field="*{passwordConfirm}" class="form-control"
+                           required minlength="6" maxlength="10"/>
+                    <label>Confirm password</label>
+                </div>
+
+                <button class="loginButton" id="loginButton"  type="submit" onclick="save()">
+                    Save</button>
+            </form>
+
+            <div  id="stats">
                 <div class="col">
                     <p th:text="${user.matches_won}"class="stat">108</p>
                     <p class="label">Matches won</p>
@@ -29,6 +56,7 @@
                     <p class="label" >ELO</p>
                 </div>
             </div>
+
             <div id="buttons">
                 <div th:unless="(${session.u.id} eq ${user.id}) or ${session.u.hasRole('ADMIN')}">
                     <form th:action="@{/requestFriendship}" method="post">
@@ -42,8 +70,7 @@
                         <button type="submit" name="action" value="Decline">Decline</button>
                     </form>
                 </div>
-                <button th:if="(${session.u.id} eq ${user.id}) or ${session.u.hasRole('ADMIN')}" id="msg">Edit</button>
-
+                <button th:if="(${session.u.id} eq ${user.id}) or ${session.u.hasRole('ADMIN')}" class="editbutton" id="editbutton" onclick="ocultar()">Edit</button>
             </div>
 
         <footer th:replace="frags/footer.html"> footer</footer>
