@@ -179,7 +179,7 @@ li a.upBar:hover {
     background-color: #097691;
   }
   .footer {
-    position: absolute;
+    position: fixed;
     bottom: 5px;
     text-align: center;
     margin: auto;
@@ -187,4 +187,10 @@ li a.upBar:hover {
     background-color: #eee;
     left: 0;
     right: 0;
+  }
+  .board {
+    position: absolute;
+    top: 15%;
+    left: 35%;
+    right: 210px;
   }
