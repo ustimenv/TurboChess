@@ -223,4 +223,10 @@ public class RootController {
 
     }
 
+    @GetMapping("/editProfile")
+    public String editProfile(Model model) {
+        model.addAttribute("editing", true);
+        return "room";
+    }
+
 }

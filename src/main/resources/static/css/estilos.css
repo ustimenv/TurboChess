@@ -182,8 +182,6 @@ li a.upBar:hover {
     position: fixed;
     bottom: 5px;
     text-align: center;
-    margin: auto;
-  
     background-color: #eee;
     left: 0;
     right: 0;

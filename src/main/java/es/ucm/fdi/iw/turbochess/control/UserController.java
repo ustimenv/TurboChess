@@ -10,6 +10,7 @@ import java.io.OutputStream;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
@@ -151,7 +152,11 @@ public class UserController {
 		value=HttpStatus.FORBIDDEN, 
 		reason="No eres administrador, y éste no es tu perfil")  // 403
 	public static class NoEsTuPerfilException extends RuntimeException {}
-
+	@RequestMapping("/edit-error")
+	public String editError(Model model, User user) {
+		model.addAttribute("msg", "Invalid username or password.");
+		return "user/" + user.getId();
+	}
 	@PostMapping("/{id}")
 	@Transactional
 	public String postUser(
@@ -160,6 +165,8 @@ public class UserController {
 			@ModelAttribute User edited, 
 			@RequestParam(required=false) String pass2,
 			Model model, HttpSession session) throws IOException {
+		boolean samePassw = true;
+
 		User target = entityManager.find(User.class, id);
 		model.addAttribute("user", target);
 		
@@ -169,14 +176,22 @@ public class UserController {
 			throw new NoEsTuPerfilException();
 		}
 		
-		if (edited.getPassword() != null && edited.getPassword().equals(pass2)) {
+		if (edited.getPassword() != null && edited.getPassword().equals(edited.getPasswordConfirm())) {
 			// save encoded version of password
 			target.setPassword(encodePassword(edited.getPassword()));
-		}		
-		target.setUsername(edited.getUsername());
-		//target.setFirstName(edited.getFirstName());
-		//target.setLastName(edited.getLastName());
+		}else{
+			samePassw = false;
+			model.addAttribute("msgError", "The password should be the same");
+		}
+		List<User> result = entityManager.createNamedQuery("User.byUsername").setParameter("username", edited.getUsername()).getResultList();
+		if (samePassw && (result.isEmpty() || result.get(0).getUsername().equals(target.getUsername()))) {
+			target.setUsername(edited.getUsername());
+			entityManager.persist(target);
+			model.addAttribute("msgInfo", "Changes saved!");
 
+		} else if (!result.isEmpty() && !result.get(0).getUsername().equals(target.getUsername())){
+			model.addAttribute("msgError", edited.getUsername() + " already exists");
+		}
 		// update user session so that changes are persisted in the session, too
 		session.setAttribute("u", target);
 

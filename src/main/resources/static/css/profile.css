@@ -78,7 +78,10 @@ h1 {
 	width: 280px;
 }
 
-#msg{
+#edit{
 	background-color: #E6EBEE;
 	color: #393B45;
+}
+.form-editInfo{
+	display: none;
 }
