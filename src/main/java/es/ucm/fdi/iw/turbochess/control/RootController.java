@@ -40,20 +40,27 @@ public class RootController {
     public String index(Model model, HttpSession session) {
        if (session.getAttribute("u") != null) {
             User user = (User) session.getAttribute("u");
-            Query query = entityManager.createNativeQuery("SELECT * FROM Friends " +
-                    "LEFT JOIN User on Friends.friend_id =User.id WHERE Friends.SUBJECT_ID= :userid " +
-                    "UNION ALL" +
-                    " SELECT  * FROM Friends LEFT JOIN User on Friends.SUBJECT_ID=User.id WHERE friend_id= :userid", User.class)
-                    .setParameter("userid", user.getId());
-            List<User> friends = (List<User>) query.getResultList();
-           List<Friendship> friendsRequest = friendshipservice.findByReceiverAndState(user, Friendship.State.OPEN);
-           if(!friendsRequest.isEmpty()) model.addAttribute("peticiones", friendsRequest);
-          // model.addAttribute("peticiones", friendsRequest);
+            if(user.getRoles().contains("ADMIN")){
+                List<User> users = entityManager.createNamedQuery("User.findAll").getResultList();
+                model.addAttribute("usersList", users);
+            }
+            if(user.getRoles().contains("USER")) {
+                Query query = entityManager.createNativeQuery("SELECT * FROM Friends " +
+                        "LEFT JOIN User on Friends.friend_id =User.id WHERE Friends.SUBJECT_ID= :userid " +
+                        "UNION ALL" +
+                        " SELECT  * FROM Friends LEFT JOIN User on Friends.SUBJECT_ID=User.id WHERE friend_id= :userid", User.class)
+                        .setParameter("userid", user.getId());
+
+                List<User> friends = (List<User>) query.getResultList();
+                List<Friendship> friendsRequest = friendshipservice.findByReceiverAndState(user, Friendship.State.OPEN);
+                if (!friendsRequest.isEmpty()) model.addAttribute("peticiones", friendsRequest);
+                // model.addAttribute("peticiones", friendsRequest);
             /*
             friends.stream().forEach((n) -> {
                 System.out.println(n.getUsername());
             });*/
-            model.addAttribute("friends", friends);
+                model.addAttribute("friends", friends);
+            }
         }
         return "index";
     }
@@ -93,10 +100,6 @@ public class RootController {
         return "othersProfile";
     }
 
-    @GetMapping("/admin")
-    public String admin(Model model) {
-        return "admin";
-    }
 
     @GetMapping("/ranks")
     public String ranks(Model model) {

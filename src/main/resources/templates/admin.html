@@ -5,23 +5,19 @@
     <div th:replace="frags/barraSuperior :: barraSuperior"></div>
     <div class= Inicio-menu>
         <h1> Soy Admin! </h1>
-        <dl class="Inicio-menu">
-            <dt class="Inicio-menu">
-               <a class="button" href="/game" >Play online</a> 
-            </dt>
-            <dt class="Inicio-menu">
-                <a class="button" href="/game" >Play Ranked</a> 
-            </dt>
-            <dt class="Inicio-menu">
-                <a class="button" href="/game" >Play private game</a> 
-            </dt>
-            <dt class="Inicio-menu">
-                <a class="button" href="/spect" >Spect</a> 
-            </dt>         
-        </dl>
-    </div>
-    <div th:replace="frags/barraLateral :: barraLateral"></div>
-    <div th:replace="frags/chat :: chat"></div>
+
+        <h4>Users (👤)</h4>
+
+        <table class="adminTable">
+            <tr><th>Name & Link<th>Deshabilitar (🔒) ó Habilitar (🔓)
+            <tr th:each="u: ${users}">
+                <td><a th:href="@{/user/{id}(id=${u.id})}" th:text="${u.username}">Pepe</a>
+                <td><form method="post" th:action="@{/admin/toggleuser(id=${u.id})}">
+                    <button th:text="${u.enabled eq 1 ? '🔓 → 🔒' : '🔒 → 🔓'}" type="submit">🗑</button>
+                </form>
+            </tr>
+        </table>
+
     <footer th:replace="frags/footer.html"> </footer>
 </body>
 </html>

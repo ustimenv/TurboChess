@@ -6,9 +6,7 @@
 
         <div th:replace="frags/barraSuperior :: barraSuperior"></div>
 
-
         <div id="card">
-
             <h1 ><span th:text="${user.username}">Pepe</span> </h1>
             <div class="image-crop">
                 <!-- <img th:src="@{/user/{id}/photo(id=${user.id})}"  class="imagenPerfil">-->
@@ -17,8 +15,8 @@
             <div id="alertInfo" class="alert alert-success"  role="alert">
                 <p th:text="${msgInfo}" id="msgSuccess"></p>
             </div>
-            <div id="alertError" class="alert alert-danger">
-                <p th:text="${msgError}" id="msgError"></p>
+            <div th:each="result: ${msg}" id="alertError" class="alert alert-danger">
+                <p th:text="${result}" id="msgError"></p>
             </div>
 
             <form  id="form-editInfo" class="form-editInfo" method="post" th:action="@{/user/{id}(id=${user.id})}" th:object="${user}" >
@@ -72,7 +70,7 @@
                 </div>
                 <button th:if="(${session.u.id} eq ${user.id}) or ${session.u.hasRole('ADMIN')}" class="editbutton" id="editbutton" onclick="ocultar()">Edit</button>
             </div>
-
+        </div>
         <footer th:replace="frags/footer.html"> footer</footer>
     </body>
 </html>

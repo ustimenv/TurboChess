@@ -152,11 +152,7 @@ public class UserController {
 		value=HttpStatus.FORBIDDEN, 
 		reason="No eres administrador, y éste no es tu perfil")  // 403
 	public static class NoEsTuPerfilException extends RuntimeException {}
-	@RequestMapping("/edit-error")
-	public String editError(Model model, User user) {
-		model.addAttribute("msg", "Invalid username or password.");
-		return "user/" + user.getId();
-	}
+
 	@PostMapping("/{id}")
 	@Transactional
 	public String postUser(
@@ -166,6 +162,7 @@ public class UserController {
 			@RequestParam(required=false) String pass2,
 			Model model, HttpSession session) throws IOException {
 		boolean samePassw = true;
+		List<String> msgError = new ArrayList<>();
 
 		User target = entityManager.find(User.class, id);
 		model.addAttribute("user", target);
@@ -181,7 +178,8 @@ public class UserController {
 			target.setPassword(encodePassword(edited.getPassword()));
 		}else{
 			samePassw = false;
-			model.addAttribute("msgError", "The password should be the same");
+			msgError.add("The password should be the same");
+			//model.addAttribute("msgError", "The password should be the same");
 		}
 		List<User> result = entityManager.createNamedQuery("User.byUsername").setParameter("username", edited.getUsername()).getResultList();
 		if (samePassw && (result.isEmpty() || result.get(0).getUsername().equals(target.getUsername()))) {
@@ -190,10 +188,13 @@ public class UserController {
 			model.addAttribute("msgInfo", "Changes saved!");
 
 		} else if (!result.isEmpty() && !result.get(0).getUsername().equals(target.getUsername())){
-			model.addAttribute("msgError", edited.getUsername() + " already exists");
+			//model.addAttribute("msgError", edited.getUsername() + " already exists");
+			msgError.add(edited.getUsername() + " already exists");
+
 		}
 		// update user session so that changes are persisted in the session, too
 		session.setAttribute("u", target);
+		model.addAttribute("msg",msgError);
 
 		return "user";
 	}	

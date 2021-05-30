@@ -8,7 +8,7 @@
 INSERT INTO user(id,enabled,username,password,roles,elo,matches_won,matches_played, coins) VALUES (
 	1, 1, 'pepa',
 	'{bcrypt}$2y$12$dDqDvO5OfYDOiTH1ovu1Gu.1KreRUyMffyOAHI54/8yjsymJMyE1m',
-	'USER',
+	'USER,ADMIN',
 	1350, 2,10,0
 );
 --user: pepito pssw: pepito
