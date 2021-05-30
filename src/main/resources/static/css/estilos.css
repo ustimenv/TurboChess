@@ -180,9 +180,15 @@ li a.upBar:hover {
   }
   .footer {
     position: fixed;
-    left: 0;
-    bottom: 0;
-    width: 100%;
+    bottom: 5px;
     text-align: center;
     background-color: #eee;
+    left: 0;
+    right: 0;
+  }
+  .board {
+    position: absolute;
+    top: 15%;
+    left: 35%;
+    right: 210px;
   }
