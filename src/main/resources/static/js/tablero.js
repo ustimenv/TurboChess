@@ -2,7 +2,19 @@ var game = new Chess()
 
 function onDragStart (source, piece, position, orientation) {
   // do not pick up pieces if the game is over
-  if (game.game_over()) return false
+  if (game.game_over()){
+    var msg = document.getElementById('endGame');
+    if(msg != null){
+      msg.style.display = "flex";
+      if(game.turn() === 'b' ){
+        msg.style.display = "flex";
+        document.getElementById('win').style.display = "flex";
+      }else{
+        document.getElementById('loose').style.display = "flex";
+      }
+    }
+    return false
+  }
 
   // only pick up pieces for White
   if (piece.search(/^b/) !== -1) return false

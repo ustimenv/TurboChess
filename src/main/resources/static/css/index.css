@@ -122,6 +122,38 @@ border-radius:.25rem}
 .alert-danger .alert-link{color:#491217}
 .alert-success{background-color:#1195ea}
 
+.endGame{
+    display: none;
+}
+.win{
+    display: none;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 400px;
+    padding: 40px;
+    transform: translate(-50%, -50%);
+    background: rgba(0,0,0,.5);
+    box-sizing: border-box;
+    box-shadow: 0 15px 25px rgba(0,0,0,.6);
+    border-radius: 10px;
+    color: red;
+}
+.loose{
+    display: none;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 400px;
+    padding: 40px;
+    transform: translate(-50%, -50%);
+    background: rgba(0,0,0,.5);
+    box-sizing: border-box;
+    box-shadow: 0 15px 25px rgba(0,0,0,.6);
+    border-radius: 10px;
+    color: red;
+}
+
 
 
 
