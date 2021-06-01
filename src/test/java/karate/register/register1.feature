@@ -1,5 +1,6 @@
 Feature:  register and login
-
+#test para saber si el registro de un usuario se hace correctamente
+  #se prueba iniciar sesion con este usuario recien creado
   Background:
     * url baseUrl
     * def util = Java.type('karate.KarateTests')

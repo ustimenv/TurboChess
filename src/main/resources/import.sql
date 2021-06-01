@@ -47,16 +47,15 @@ INSERT INTO user(id,enabled,username,password,roles,elo,matches_won,matches_play
 	2000, 8,15,0
 );
 
-INSERT INTO friends(SUBJECT_ID, FRIEND_ID) VALUES(1,2);
 INSERT INTO friends(SUBJECT_ID, FRIEND_ID) VALUES(2,3);
 INSERT INTO friends(SUBJECT_ID, FRIEND_ID) VALUES(1,3);
 INSERT INTO friends(SUBJECT_ID, FRIEND_ID) VALUES(1,4);
 INSERT INTO friends(SUBJECT_ID, FRIEND_ID) VALUES(1,5);
 INSERT INTO friends(SUBJECT_ID, FRIEND_ID) VALUES(6,1);
 
---Request friendship de ana(4) a pepito(2)
-INSERT INTO friendship(id,state,receiver_id,sender_id) VALUES(-1,0,2,4);
---Request friendship de ana(3) a pepito(2)
+--Request friendship de pepa(4) a ana(2)
+INSERT INTO friendship(id,state,receiver_id,sender_id) VALUES(-1,0,1,2);
+--Request friendship de juanito(3) a ana(2)
 INSERT INTO friendship(id,state,receiver_id,sender_id) VALUES(-3,0,2,3);
 -- Unos pocos auto-mensajes de prueba
 INSERT INTO MESSAGE VALUES(1,NULL,'2020-03-23 10:48:11.074000','probando 1',1,1);
