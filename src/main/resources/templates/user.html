@@ -27,17 +27,19 @@
                 </div>
                 <div class="user-box">
                     <input type="password" th:field="*{password}" class="form-control"
-                           required minlength="6" maxlength="10"/>
+                            minlength="6" maxlength="10"/>
                     <label>Password</label>
                 </div>
                 <div class="user-box">
                     <input type="password" th:field="*{passwordConfirm}" class="form-control"
-                           required minlength="6" maxlength="10"/>
+                            minlength="6" maxlength="10"/>
                     <label>Confirm password</label>
                 </div>
 
                 <button class="loginButton" id="loginButton"  type="submit" onclick="save()">
                     Save</button>
+                <button class="loginButton" onclick="mostrar()">
+                    Cancel</button>
             </form>
 
             <div  id="stats">
@@ -52,6 +54,10 @@
                 <div class="col">
                     <p  th:text="${user.elo}"  class="stat">229</p>
                     <p class="label" >ELO</p>
+                </div>
+                <div class="col">
+                    <p  th:text="${user.coins}"  class="stat">229</p>
+                    <p class="label" >coins</p>
                 </div>
             </div>
 

@@ -173,22 +173,22 @@ public class UserController {
 			throw new NoEsTuPerfilException();
 		}
 		
-		if (edited.getPassword() != null && edited.getPassword().equals(edited.getPasswordConfirm())) {
+		if (edited.getPassword() != null && !edited.getPassword().isEmpty() && edited.getPassword().equals(edited.getPasswordConfirm())) {
 			// save encoded version of password
 			target.setPassword(encodePassword(edited.getPassword()));
-		}else{
+		}else if (!edited.getPassword().isEmpty() && !edited.getPassword().equals(edited.getPasswordConfirm())){
 			samePassw = false;
 			msgError.add("The password should be the same");
-			//model.addAttribute("msgError", "The password should be the same");
 		}
 		List<User> result = entityManager.createNamedQuery("User.byUsername").setParameter("username", edited.getUsername()).getResultList();
 		if (samePassw && (result.isEmpty() || result.get(0).getUsername().equals(target.getUsername()))) {
-			target.setUsername(edited.getUsername());
-			entityManager.persist(target);
-			model.addAttribute("msgInfo", "Changes saved!");
+			if(!target.getUsername().equals(edited.getUsername()) || !edited.getPassword().isEmpty()) {
+				target.setUsername(edited.getUsername());
+				entityManager.persist(target);
+				model.addAttribute("msgInfo", "Changes saved!");
+			}
 
 		} else if (!result.isEmpty() && !result.get(0).getUsername().equals(target.getUsername())){
-			//model.addAttribute("msgError", edited.getUsername() + " already exists");
 			msgError.add(edited.getUsername() + " already exists");
 
 		}

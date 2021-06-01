@@ -16,17 +16,25 @@ function ocultar(){
     stats.style.display = "none";
     editbutton.style.display = "none";
     editform.style.display = "inline";
-    if(alertError.textContent!= null)alertError.style.display = "none";
-    if(alertSuccess.textContent!= null)alertSuccess.style.display = "none";
+    if(alertError!= null && alertError.textContent!= null)alertError.style.display = "none";
+    if(alertSuccess!= null && alertSuccess.textContent!= null)alertSuccess.style.display = "none";
 }
+function mostrar(){
+    var stats = document.getElementById('stats');
+    var editbutton = document.getElementById('editbutton');
+    var editform = document.getElementById('form-editInfo');
 
+    stats.style.display = "flex";
+    editbutton.style.display = "flex";
+    editform.style.display = "none";
+}
 function save(){
     console.log("entro a save");
     var editbutton = document.getElementById('editbutton');
     var msg = document.getElementById('msg');
-    if(msg.textContent != null){
+    if( msg != null && msg.textContent != null){
         // Simular click
-        editbutton.click();
+
         ocultar();
         console.log("entro a text");
     }
