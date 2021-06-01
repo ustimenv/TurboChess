@@ -62,7 +62,7 @@
             </div>
 
             <div id="buttons">
-                <div th:unless="(${session.u.id} eq ${user.id}) or ${session.u.hasRole('ADMIN')}">
+                <div th:unless="(${session.u.id} eq ${user.id})">
                     <form th:action="@{/requestFriendship}" method="post">
                         <input type="hidden" name="userId" th:value="${user.id}">
                         <button th:unless= "(${request} or ${isFriend})" type="submit" value="Request friendship"> Send Request </button>
@@ -74,7 +74,7 @@
                         <button type="submit" name="action" value="Decline">Decline</button>
                     </form>
                 </div>
-                <button th:if="(${session.u.id} eq ${user.id}) or ${session.u.hasRole('ADMIN')}" class="editbutton" id="editbutton" onclick="ocultar()">Edit</button>
+                <button th:if="${session.u.id} eq ${user.id}" class="editbutton" id="editbutton" onclick="ocultar()">Edit</button>
             </div>
         </div>
         <footer th:replace="frags/footer.html"> footer</footer>

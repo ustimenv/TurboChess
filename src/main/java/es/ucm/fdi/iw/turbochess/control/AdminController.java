@@ -16,10 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 import es.ucm.fdi.iw.turbochess.LocalData;
 import es.ucm.fdi.iw.turbochess.model.User;
@@ -58,23 +55,36 @@ public class AdminController {
 		 model.addAttribute("users",users);
 	 	return "admin";
 	 }
-	
-	 @PostMapping("/toggleuser")
-	 @Transactional
-	 public String delUser(Model model,	@RequestParam long id) {
-	 	User target = entityManager.find(User.class, id);
-	 	if (target.getEnabled() == 1) {
-	 		// remove profile photo
-	 		File f = localData.getFile("user", ""+id);
-	 		if (f.exists()) {
-	 			f.delete();
-	 		}
-	 		// disable user
-	 		target.setEnabled((byte)0);
-	 	} else {
-	 		// enable user
-	 		target.setEnabled((byte)1);
+
+	@RequestMapping(value = "/edit", method = RequestMethod.POST, params = "toggleuser")
+	@Transactional
+	public String toggleuser(Model model, @RequestParam long id, User user) {
+		User target = entityManager.find(User.class, id);
+
+		if (target.getEnabled() == 1) {
+			// remove profile photo
+			//File f = localData.getFile("user", ""+id);
+			//if (f.exists()) {
+			//	f.delete();
+			//}
+			// disable user
+			target.setEnabled((byte) 0);
+		} else {
+			// enable user
+			target.setEnabled((byte) 1);
 		}
-	 	return "redirect:/admin";
-	 }
+		entityManager.persist(target);
+		return "redirect:/admin";
+	}
+	@RequestMapping(value = "edit", method = RequestMethod.POST, params = "edit")
+	@Transactional
+	public String edit( Model model, @RequestParam long id, @ModelAttribute User user) {
+		User target = entityManager.find(User.class, id);
+		if (user.getId() == target.getId()){
+
+			User editado = entityManager.merge(user);
+			entityManager.persist(editado);
+		}
+		return "redirect:/admin";
+	}
 }

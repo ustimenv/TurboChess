@@ -15,7 +15,7 @@ INSERT INTO user(id,enabled,username,password,roles,elo,matches_won,matches_play
 INSERT INTO user(id,enabled,username,password,roles,elo,matches_won,matches_played, coins) VALUES (
 	2, 1, 'pepito',
 	'{bcrypt}$2y$12$EiyIDAUNNqBTq3llI/fTeeRUc7n7EN4qs0Y.m9CLuyXVyKOaDvoVS',
-	'USER',
+	'USER,ADMIN',
 	1300, 1,10,0
 );
 --user: juanito pssw: juanito

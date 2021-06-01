@@ -1,24 +1,76 @@
 <!DOCTYPE html>
-<html>
-    <head th:replace="head.html"> </head>
-    <body>
-    <div th:replace="frags/barraSuperior :: barraSuperior"></div>
-    <div class= Inicio-menu>
-        <h1> Soy Admin! </h1>
+<html xmlns:th="http://www.w3.org/1999/xhtml">
+<head th:replace="head.html">
+   <!-- <link th:href="@{/static/bootstrap/css/bootstrap.min.css}" rel="stylesheet" type="text/css" /-->
+</head>
+<body>
+<div th:replace="frags/barraSuperior :: barraSuperior"></div>
+<h1> Soy Admin! </h1>
 
-        <h4>Users (👤)</h4>
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <h4>(👤) Users Details</h4>
+            <div class="table-responsive">
+                <table id="mytable" class="table table-bordred table-striped">
 
-        <table class="adminTable">
-            <tr><th>Name & Link<th>Deshabilitar (🔒) ó Habilitar (🔓)
-            <tr th:each="u: ${users}">
-                <td><a th:href="@{/user/{id}(id=${u.id})}" th:text="${u.username}">Pepe</a>
-                <td><form method="post" th:action="@{/admin/toggleuser(id=${u.id})}">
-                    <button th:text="${u.enabled eq 1 ? '🔓 → 🔒' : '🔒 → 🔓'}" type="submit">🗑</button>
-                </form>
-            </tr>
-        </table>
+                    <thead>
 
-    <footer th:replace="frags/footer.html"> </footer>
+                    <th><input type="checkbox" id="checkall" /></th>
+                    <th>User name</th>
+                    <th>password</th>
+                    <th>Roles</th>
+                    <th>ELO</th>
+                    <th>Matches won</th>
+                    <th>Matches played</th>
+                    <th>Coins</th>
+
+                    <th>Save</th>
+                    <th>Disable</th>
+                    </thead>
+                    <tbody>
+
+                    <tr th:each="u: ${users}">
+                        <form  class="form-editInfo" method="post" th:action="@{/admin/edit(id=${u.id})}" th:object="${user}">
+                            <td><input type="checkbox" class="checkthis" /></td>
+
+                            <td><input name="username"  th:href="@{/user/{id}(id=${u.id})}" th:value="${u.username}"></input></td>
+                            <td><input type="password" name="password"  th:href="@{/user/{id}(id=${u.id})}" th:value="${u.password}"></input></td><td><input name="roles"  th:href="@{/user/{id}(id=${u.id})}" th:value="${u.roles}"></input></td>
+                            <td><input type="number" name="elo"   th:href="@{/user/{id}(id=${u.id})}" th:value="${u.elo}"></input></td>
+                            <td><input type="number" name="matches_won"   th:href="@{/user/{id}(id=${u.id})}" th:value="${u.matches_won}"></input></td>
+                            <td><input type="number" name="matches_played"   th:href="@{/user/{id}(id=${u.id})}" th:value="${u.matches_played}"></input></td>
+                            <td><input type="number" name="coins"   th:href="@{/user/{id}(id=${u.id})}" th:value="${u.coins}"></input></td>
+                            <td><p data-placement="top" data-toggle="tooltip" title="Edit"><button type="submit" class="btn btn-primary btn-xs" data-title="Edit" data-toggle="modal" data-target="#edit" value="edit" name="edit"><span class="glyphicon glyphicon-floppy-disk">💾</span></button></p></td>
+                            <td>
+                                <!--<form method="post" th:formaction="@{/admin/toggleuser(id=${u.id})}">  </form> -->
+                                <button th:text="${u.enabled eq 1 ? '🔓 → 🔒' : '🔒 → 🔓'}" type="submit" value="diable" name="toggleuser">🗑</button>
+
+                            </td>
+                        </form>
+                    </tr>
+
+
+                    </tbody>
+
+                </table>
+
+              <!--
+                <ul class="pagination pull-right">
+                    <li class="disabled"><a href="#"><span class="glyphicon glyphicon-chevron-left"></span></a></li>
+                    <li class="active"><a href="#">1</a></li>
+                    <li><a href="#">2</a></li>
+                    <li><a href="#">3</a></li>
+                    <li><a href="#">4</a></li>
+                    <li><a href="#">5</a></li>
+                    <li><a href="#"><span class="glyphicon glyphicon-chevron-right"></span></a></li>
+                </ul>
+-->
+            </div>
+
+        </div>
+    </div>
+</div>
+<footer th:replace="frags/footer.html"> </footer>
+
 </body>
 </html>
-
