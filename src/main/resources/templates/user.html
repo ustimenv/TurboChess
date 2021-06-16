@@ -1,21 +1,48 @@
 <!DOCTYPE html>
-<html>
+<html xmlns:th="http://www.w3.org/1999/xhtml">
 <head th:replace="head.html"> </head>
 
     <body>
 
         <div th:replace="frags/barraSuperior :: barraSuperior"></div>
 
-
         <div id="card">
-
-            <h1 th:text=" ${user.username}"> </h1>
+            <h1 ><span th:text="${user.username}">Pepe</span> </h1>
             <div class="image-crop">
                 <!-- <img th:src="@{/user/{id}/photo(id=${user.id})}"  class="imagenPerfil">-->
                 <img id="avatar" src="http://pngimg.com/uploads/simpsons/simpsons_PNG95.png"></img>
             </div>
+            <div id="alertInfo" class="alert alert-success"  role="alert">
+                <p th:text="${msgInfo}" id="msgSuccess"></p>
+            </div>
+            <div th:each="result: ${msg}" id="alertError" class="alert alert-danger">
+                <p th:text="${result}" id="msgError"></p>
+            </div>
 
-            <div id="stats">
+            <form  id="form-editInfo" class="form-editInfo" method="post" th:action="@{/user/{id}(id=${user.id})}" th:object="${user}" >
+                <div class="user-box">
+                    <input type="text" th:field="*{username}" class="form-control"
+                           required minlength="2" maxlength="20"/>
+                    <label>User name</label>
+                </div>
+                <div class="user-box">
+                    <input type="password" th:field="*{password}" class="form-control"
+                            minlength="6" maxlength="10"/>
+                    <label>Password</label>
+                </div>
+                <div class="user-box">
+                    <input type="password" th:field="*{passwordConfirm}" class="form-control"
+                            minlength="6" maxlength="10"/>
+                    <label>Confirm password</label>
+                </div>
+
+                <button class="loginButton" id="loginButton"  type="submit" onclick="save()">
+                    Save</button>
+                <button class="loginButton" onclick="mostrar()">
+                    Cancel</button>
+            </form>
+
+            <div  id="stats">
                 <div class="col">
                     <p th:text="${user.matches_won}"class="stat">108</p>
                     <p class="label">Matches won</p>
@@ -28,9 +55,14 @@
                     <p  th:text="${user.elo}"  class="stat">229</p>
                     <p class="label" >ELO</p>
                 </div>
+                <div class="col">
+                    <p  th:text="${user.coins}"  class="stat">229</p>
+                    <p class="label" >coins</p>
+                </div>
             </div>
+
             <div id="buttons">
-                <div th:unless="(${session.u.id} eq ${user.id}) or ${session.u.hasRole('ADMIN')}">
+                <div th:unless="(${session.u.id} eq ${user.id})">
                     <form th:action="@{/requestFriendship}" method="post">
                         <input type="hidden" name="userId" th:value="${user.id}">
                         <button th:unless= "(${request} or ${isFriend})" type="submit" value="Request friendship"> Send Request </button>
@@ -42,10 +74,9 @@
                         <button type="submit" name="action" value="Decline">Decline</button>
                     </form>
                 </div>
-                <button th:if="(${session.u.id} eq ${user.id}) or ${session.u.hasRole('ADMIN')}" id="msg">Edit</button>
-
+                <button th:if="${session.u.id} eq ${user.id}" class="editbutton" id="editbutton" onclick="ocultar()">Edit</button>
             </div>
-
+        </div>
         <footer th:replace="frags/footer.html"> footer</footer>
     </body>
 </html>

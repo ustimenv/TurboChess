@@ -10,6 +10,7 @@ import java.io.OutputStream;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
@@ -160,6 +161,9 @@ public class UserController {
 			@ModelAttribute User edited, 
 			@RequestParam(required=false) String pass2,
 			Model model, HttpSession session) throws IOException {
+		boolean samePassw = true;
+		List<String> msgError = new ArrayList<>();
+
 		User target = entityManager.find(User.class, id);
 		model.addAttribute("user", target);
 		
@@ -169,16 +173,28 @@ public class UserController {
 			throw new NoEsTuPerfilException();
 		}
 		
-		if (edited.getPassword() != null && edited.getPassword().equals(pass2)) {
+		if (edited.getPassword() != null && !edited.getPassword().isEmpty() && edited.getPassword().equals(edited.getPasswordConfirm())) {
 			// save encoded version of password
 			target.setPassword(encodePassword(edited.getPassword()));
-		}		
-		target.setUsername(edited.getUsername());
-		//target.setFirstName(edited.getFirstName());
-		//target.setLastName(edited.getLastName());
+		}else if (!edited.getPassword().isEmpty() && !edited.getPassword().equals(edited.getPasswordConfirm())){
+			samePassw = false;
+			msgError.add("The password should be the same");
+		}
+		List<User> result = entityManager.createNamedQuery("User.byUsername").setParameter("username", edited.getUsername()).getResultList();
+		if (samePassw && (result.isEmpty() || result.get(0).getUsername().equals(target.getUsername()))) {
+			if(!target.getUsername().equals(edited.getUsername()) || !edited.getPassword().isEmpty()) {
+				target.setUsername(edited.getUsername());
+				entityManager.persist(target);
+				model.addAttribute("msgInfo", "Changes saved!");
+			}
 
+		} else if (!result.isEmpty() && !result.get(0).getUsername().equals(target.getUsername())){
+			msgError.add(edited.getUsername() + " already exists");
+
+		}
 		// update user session so that changes are persisted in the session, too
 		session.setAttribute("u", target);
+		model.addAttribute("msg",msgError);
 
 		return "user";
 	}	

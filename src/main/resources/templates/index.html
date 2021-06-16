@@ -17,12 +17,14 @@
             </dt>
             <dt class="Inicio-menu">
                 <a th:if="${session.u}" class="button" href="/spect" >Spect</a>
-            </dt>         
+            </dt>
+
         </dl>
     </div>
     <div th:replace="frags/barraLateral :: barraLateral"></div>
     <div th:replace="frags/chat :: chat"></div>
     <footer th:replace="frags/footer.html"> </footer>
+
 </body>
 </html>
 

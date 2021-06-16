@@ -45,6 +45,9 @@ import es.ucm.fdi.iw.model.Transferable;
 				query="SELECT u  "
 						+ "FROM User u "
 						+ "WHERE u.id = :id"),
+		@NamedQuery(name="User.findAll",
+				query="SELECT u  "
+						+ "FROM User u "),
 		})
 @NamedNativeQueries({
 		@NamedNativeQuery(name = "User.friends", query = "SELECT * FROM user_friends " +
