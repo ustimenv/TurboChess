@@ -11,20 +11,20 @@ import java.util.List;
 
 public interface RoomRepository extends CrudRepository<Room, String>{
         @Query("SELECT r FROM Room r WHERE r.code = :code")
-        List <Room> getRoomsByCode(@Param("code") String roomCode);     // 1-element list since room codes are unique
+        Room getRoomByCode(@Param("code") String code);     // 1-element list since room codes are unique
 
-        @Query("SELECT * FROM Room  WHERE r.code = :code")
-        List <Participant> getRoomParticipantsByCode(String roomCode);
+        @Query(value = "SELECT Participant.* FROM Participant LEFT JOIN Room on Participant.code = Room.code WHERE r.code = :code", nativeQuery = true)
+        List <Participant> getParticipantByCode(String code);
 
         @Query(value = "SELECT COUNT(r) FROM Room r WHERE r.code = :code")
-        int countByCode(@Param("code") String roomCode);
+        int countByCode(@Param("code") String code);
 
         @Modifying
-        @Query("DELETE * FROM Room r WHERE r.num_participants < 1")
+        @Query(value = "DELETE * FROM Room WHERE Room.num_participants < 1", nativeQuery = true)
         void deleteAllEmptyRooms();
 
         @Modifying
-        @Query("DELETE * FROM Room r WHERE r.code = :code")
+        @Query(value = "DELETE * FROM Room WHERE Room.code = :code", nativeQuery = true)
         void deleteRoomByCode(@Param("code") String code);
 }
 

@@ -2,7 +2,9 @@ package es.ucm.fdi.iw.turbochess.service;
 
 import es.ucm.fdi.iw.turbochess.model.Participant;
 import es.ucm.fdi.iw.turbochess.model.Room;
+import org.springframework.stereotype.Service;
 
+@Service
 public interface RoomService {
 
     Room createRoom(String roomCode, int capacity)   throws RoomException;

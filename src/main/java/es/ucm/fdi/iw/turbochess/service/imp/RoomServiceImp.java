@@ -7,15 +7,11 @@ import es.ucm.fdi.iw.turbochess.service.RoomException;
 import es.ucm.fdi.iw.turbochess.service.RoomService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Transactional
 public class RoomServiceImp implements RoomService{
-
-    @PersistenceContext
-    private EntityManager entityManager;        //hmm
 
     @Autowired
     private RoomRepository roomRepository;
@@ -76,7 +72,7 @@ public class RoomServiceImp implements RoomService{
     @Override
     public Room getRoomByCode(String roomCode) throws RoomException{
         if(roomExists(roomCode)){
-            return roomRepository.getRoomsByCode(roomCode).get(0);
+            return roomRepository.getRoomByCode(roomCode);
         }
         throw new RoomException("Room " + roomCode + " doesn't exist!");
     }
