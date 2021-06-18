@@ -4,8 +4,6 @@ import es.ucm.fdi.iw.turbochess.model.room.Participant;
 import es.ucm.fdi.iw.turbochess.model.room.Room;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-
 @Service
 public interface RoomService {
 
@@ -16,8 +14,6 @@ public interface RoomService {
     void leaveRoom(String roomCode, Participant p)   throws RoomException;
 
     Room getRoomByCode(String roomCode)              throws RoomException;
-
-    List<Participant> getRoomParticipants(String roomCode)  throws RoomException;
 
     void deleteAllEmptyRooms();
 

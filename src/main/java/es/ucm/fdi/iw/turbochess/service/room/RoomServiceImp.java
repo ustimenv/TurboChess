@@ -3,13 +3,9 @@ package es.ucm.fdi.iw.turbochess.service.room;
 import es.ucm.fdi.iw.turbochess.model.room.Participant;
 import es.ucm.fdi.iw.turbochess.model.room.Room;
 import es.ucm.fdi.iw.turbochess.repository.RoomRepository;
-import es.ucm.fdi.iw.turbochess.service.room.RoomException;
-import es.ucm.fdi.iw.turbochess.service.room.RoomService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @Service
 public class RoomServiceImp implements RoomService{
@@ -32,6 +28,7 @@ public class RoomServiceImp implements RoomService{
     }
 
     @Override
+    @Transactional
     public void joinRoom(String roomCode, Participant p) throws RoomException{
         System.out.println();
         if(roomExists(roomCode)){
@@ -42,23 +39,17 @@ public class RoomServiceImp implements RoomService{
                 throw new RoomException("Capacity exceeded for room " + roomCode +"!");
             }
         } else {
-//            throw new RoomException("Participant " + p.getUser().getUsername() + " is attempting to join a non-existent" +
-//                    " room "+roomCode +"!");
+            throw new RoomException("Participant " + p.getUser().getUsername() + " is attempting to join a non-existent" +
+                    " room "+roomCode +"!");
         }
-        List <Participant> ps = getRoomParticipants(roomCode);
-        System.out.println();
-        System.out.println();
-        ps.forEach(System.out::println);
-        System.out.println();
-        System.out.println();
     }
 
     @Override
     public void leaveRoom(String roomCode, Participant p) throws RoomException{
         Room room = getRoomByCode(roomCode);
         if(!room.removeParticipant(p)){
-//            throw new RoomException("Participant " + p.getUser().getUsername() + " can't leave " +
-//                                    " room "+roomCode + " because they are not in the room!");
+            throw new RoomException("Participant " + p.getUser().getUsername() + " can't leave " +
+                                    " room "+roomCode + " because they are not in the room!");
         }
 
         if(room.getNumParticipants() < 1){
@@ -87,8 +78,4 @@ public class RoomServiceImp implements RoomService{
         throw new RoomException("Room " + roomCode + " doesn't exist!");
     }
 
-    @Override
-    public List<Participant> getRoomParticipants(String roomCode)   throws RoomException{
-        return roomRepository.getRoomParticipants(roomCode);
-    }
 }

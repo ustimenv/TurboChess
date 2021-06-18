@@ -12,7 +12,7 @@ import java.io.Serializable;
 @AllArgsConstructor
 public class ParticipantKey implements Serializable{
     @Column(name = "room_code", nullable = false)
-    private String room_code;
+    private String roomCode;
 
     @Column(name = "username", nullable = false)
     private String username;
