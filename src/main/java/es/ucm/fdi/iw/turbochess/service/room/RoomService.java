@@ -1,13 +1,15 @@
-package es.ucm.fdi.iw.turbochess.service;
+package es.ucm.fdi.iw.turbochess.service.room;
 
-import es.ucm.fdi.iw.turbochess.model.Participant;
-import es.ucm.fdi.iw.turbochess.model.Room;
+import es.ucm.fdi.iw.turbochess.model.room.Participant;
+import es.ucm.fdi.iw.turbochess.model.room.Room;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public interface RoomService {
 
-    Room createRoom(String roomCode, int capacity)   throws RoomException;
+    void createRoom(String roomCode, int capacity)   throws RoomException;
 
     void joinRoom(String roomCode, Participant p)    throws RoomException;
 
@@ -15,7 +17,11 @@ public interface RoomService {
 
     Room getRoomByCode(String roomCode)              throws RoomException;
 
+    List<Participant> getRoomParticipants(String roomCode)  throws RoomException;
+
     void deleteAllEmptyRooms();
 
     boolean roomExists(String roomCode);
+
+
 }

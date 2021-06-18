@@ -1,13 +1,12 @@
-package es.ucm.fdi.iw.turbochess.control;
+package es.ucm.fdi.iw.turbochess.control.room;
 
 
-import es.ucm.fdi.iw.turbochess.model.Participant;
-import es.ucm.fdi.iw.turbochess.model.Room;
 import es.ucm.fdi.iw.turbochess.model.User;
 import es.ucm.fdi.iw.turbochess.model.messaging.MessagePacket;
 import es.ucm.fdi.iw.turbochess.model.messaging.ResponsePacket;
-import es.ucm.fdi.iw.turbochess.service.RoomException;
-import es.ucm.fdi.iw.turbochess.service.RoomService;
+import es.ucm.fdi.iw.turbochess.model.room.Participant;
+import es.ucm.fdi.iw.turbochess.service.room.RoomException;
+import es.ucm.fdi.iw.turbochess.service.room.RoomService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,24 +22,48 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
-import java.util.List;
-
-//TODO below::::
-/**	In order to provide a common return type for the handlers, clean up the code, and most importantly handle exceptions,
- * we will change the return types of STOMP handlers from MessagePacket to void (it is unrelated but should be done),
- * utilising template.convertAndSend();
- * Response packet will be changed to ResponseEntity and another class, @ControllerAdvice, will handle the exceptions raised
- *
- * eg
- * https://www.toptal.com/java/spring-boot-rest-api-error-handling
- * https://stackoverflow.com/questions/38117717/what-is-the-best-way-to-return-different-types-of-responseentity-in-spring-mvc-o
- */
+import java.util.ArrayList;
 
 @Controller
 public class RoomController{
 	private static Logger log = LogManager.getLogger(User.class);
+
+	private int n1=0, n2=0, n3=0;		// counters for the 3 segments that form the room code
+	private char[] letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".toCharArray();
+	private ArrayList<String> segments = new ArrayList<>();
+	private int len;
+
+	@PostConstruct
+	private void initCodeSegments(){
+		for(char c1 : letters){
+			for(char c2 : letters){
+				segments.add(String.valueOf(c1) + c2);
+			}
+		}
+		len=segments.size();
+
+	}
+
+	// THIS WORKS, DON'T TOUCH!!
+	private synchronized String nextRoomCode(){
+		String code=segments.get(n1) + segments.get(n2) + segments.get(n3);
+		if(n3-1>len){
+			if(n2-1>len){
+				if(n1-1>len){
+					log.info("Room code overflow");
+					n1=0;
+				} else n1++;
+				n2=0;
+			} else n2++;
+			n3=0;
+		} else n3++;
+		return code;
+	}
+
+
 
 	@Autowired
 	private SimpMessagingTemplate template;
@@ -97,26 +120,16 @@ public class RoomController{
 // AJAX
 	@RequestMapping(value = "/api/createroom", method=RequestMethod.POST, produces = "application/json")
 	@ResponseBody
-	public ResponsePacket createRoom(@RequestBody MessagePacket packet){		// todo handle the exception!!
+	public ResponsePacket createRoom(@RequestBody MessagePacket packet){
 		log.info("[create room]: received packet" + packet);
-		int maxAttemptsToGenerateCode=10;
-		String code=null;
-		String from = packet.getFrom();		// todo sanitise!!!!!
-		int i=0;
-		while(roomService.roomExists(code)){
-			code = CodeGenerator.INSTANCE.generateRoomCode();
-			i++;
-			if(i > maxAttemptsToGenerateCode){
-				log.error("[create room]: failed to create room");
-				return null;	// basically a 500
-			}
-		}
+		String from = packet.getFrom();
+		String code=nextRoomCode();	// code generation guarantees room code is unique
 
 		try{
-			Room r = roomService.createRoom(code, Integer.parseInt(packet.getPayload()));
+			roomService.createRoom(code, Integer.parseInt(packet.getPayload()));
 			Participant p = getParticipantByUsername(from);
 			roomService.joinRoom(code, p);
-			log.info("Room " + r.getCode() + " created successfully");
+			log.info("Room " + code + " created successfully");
 			return new ResponsePacket(code);
 		} catch(RoomException e){
 			e.printStackTrace();
@@ -145,9 +158,12 @@ public class RoomController{
 	}
 
 	private Participant getParticipantByUsername(String username){
-		Query query = entityManager.createQuery("SELECT * FROM user u WHERE u.username = :username")
+		Query query = entityManager.createQuery("SELECT u FROM User u WHERE u.username = :username")
 									.setParameter("username", username);
 
-		return new Participant((User) query.getSingleResult());	// todo ought to add null check
+//		Participant p = new Participant((User) query.getSingleResult());
+//		System.out.println(p.getUser().getUsername());
+		return null;
 	}
+
 }

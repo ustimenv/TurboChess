@@ -1,4 +1,4 @@
-package es.ucm.fdi.iw.turbochess.service;
+package es.ucm.fdi.iw.turbochess.service.friendship;
 
 public class FriendshipException extends Exception {
 

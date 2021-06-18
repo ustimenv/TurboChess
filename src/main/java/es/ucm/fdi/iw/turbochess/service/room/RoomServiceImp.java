@@ -1,54 +1,64 @@
-package es.ucm.fdi.iw.turbochess.service.imp;
+package es.ucm.fdi.iw.turbochess.service.room;
 
-import es.ucm.fdi.iw.turbochess.model.Participant;
-import es.ucm.fdi.iw.turbochess.model.Room;
+import es.ucm.fdi.iw.turbochess.model.room.Participant;
+import es.ucm.fdi.iw.turbochess.model.room.Room;
 import es.ucm.fdi.iw.turbochess.repository.RoomRepository;
-import es.ucm.fdi.iw.turbochess.service.RoomException;
-import es.ucm.fdi.iw.turbochess.service.RoomService;
+import es.ucm.fdi.iw.turbochess.service.room.RoomException;
+import es.ucm.fdi.iw.turbochess.service.room.RoomService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
-@Transactional
 public class RoomServiceImp implements RoomService{
 
     @Autowired
     private RoomRepository roomRepository;
 
+
     @Override
-    public Room createRoom(String roomCode, int capacity) throws RoomException {
-        if(roomExists(roomCode)){
-            throw new RoomException("Room "+ roomCode + " already exists!");
+    @Transactional
+    public void createRoom(String code, int capacity) throws RoomException {
+        if(roomExists(code)){       // really shouldnt happen but doesn't hurt to check twice
+            throw new RoomException("Room "+ code + " already exists!");
         }
         if(capacity < 2){
-            throw new RoomException("Can't create a room with "+ capacity + " players, must be at least 2!");
+            throw new RoomException("Can't create a room with " + capacity + " players, must be at least 2!");
         }
-        Room room = new Room(roomCode, capacity);
-        roomRepository.save(room);
-        return room;
+        Room r = new Room(code, capacity);
+        roomRepository.save(r);
     }
 
     @Override
     public void joinRoom(String roomCode, Participant p) throws RoomException{
+        System.out.println();
         if(roomExists(roomCode)){
             Room room = getRoomByCode(roomCode);
             if(room.addParticipant(p)){
                 roomRepository.save(room);
+            } else{
+                throw new RoomException("Capacity exceeded for room " + roomCode +"!");
             }
-            throw new RoomException("Capacity exceeded for room " + roomCode +"!");
         } else {
-            throw new RoomException("Participant " + p.getUser().getUsername() + " is attempting to join a non-existent" +
-                    " room "+roomCode +"!");
+//            throw new RoomException("Participant " + p.getUser().getUsername() + " is attempting to join a non-existent" +
+//                    " room "+roomCode +"!");
         }
+        List <Participant> ps = getRoomParticipants(roomCode);
+        System.out.println();
+        System.out.println();
+        ps.forEach(System.out::println);
+        System.out.println();
+        System.out.println();
     }
 
     @Override
     public void leaveRoom(String roomCode, Participant p) throws RoomException{
         Room room = getRoomByCode(roomCode);
         if(!room.removeParticipant(p)){
-            throw new RoomException("Participant " + p.getUser().getUsername() + " can't leave " +
-                                    " room "+roomCode +" because they are not in the room!");
+//            throw new RoomException("Participant " + p.getUser().getUsername() + " can't leave " +
+//                                    " room "+roomCode + " because they are not in the room!");
         }
 
         if(room.getNumParticipants() < 1){
@@ -75,5 +85,10 @@ public class RoomServiceImp implements RoomService{
             return roomRepository.getRoomByCode(roomCode);
         }
         throw new RoomException("Room " + roomCode + " doesn't exist!");
+    }
+
+    @Override
+    public List<Participant> getRoomParticipants(String roomCode)   throws RoomException{
+        return roomRepository.getRoomParticipants(roomCode);
     }
 }

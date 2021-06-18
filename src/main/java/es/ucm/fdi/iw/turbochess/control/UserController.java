@@ -10,10 +10,8 @@ import java.io.OutputStream;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import javax.persistence.EntityManager;
-import javax.persistence.Query;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.transaction.Transactional;
@@ -48,7 +46,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import es.ucm.fdi.iw.turbochess.LocalData;
 // import es.ucm.fdi.iw.turbochess.LocalData;
-import es.ucm.fdi.iw.turbochess.model.Message;
+import es.ucm.fdi.iw.turbochess.model.messaging.Message;
 import es.ucm.fdi.iw.turbochess.model.User;
 
 /**

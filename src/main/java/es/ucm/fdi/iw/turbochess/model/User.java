@@ -2,14 +2,14 @@ package es.ucm.fdi.iw.turbochess.model;
 import java.util.*;
 
 import javax.persistence.*;
-import javax.swing.ImageIcon;
 
+import es.ucm.fdi.iw.turbochess.model.messaging.Message;
+import es.ucm.fdi.iw.turbochess.model.room.Participant;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import lombok.Data;
 import lombok.Getter;
-import lombok.Setter;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import es.ucm.fdi.iw.model.Transferable;

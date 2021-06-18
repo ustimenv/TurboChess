@@ -1,16 +1,13 @@
-package es.ucm.fdi.iw.turbochess.service.imp;
+package es.ucm.fdi.iw.turbochess.service.friendship;
 
-import es.ucm.fdi.iw.turbochess.service.FriendshipException;
 import es.ucm.fdi.iw.turbochess.model.Friendship;
 import es.ucm.fdi.iw.turbochess.model.User;
 import es.ucm.fdi.iw.turbochess.repository.FriendshipRepository;
-import es.ucm.fdi.iw.turbochess.service.FriendshipService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import javax.transaction.Transactional;
 import java.util.List;
 
 @Service

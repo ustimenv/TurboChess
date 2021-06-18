@@ -1,10 +1,12 @@
-package es.ucm.fdi.iw.turbochess.model;
+package es.ucm.fdi.iw.turbochess.model.room;
 
 import java.util.List;
 import java.util.HashMap;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import javax.persistence.*;
+
+import es.ucm.fdi.iw.turbochess.model.Player;
 import lombok.Data;
 @Entity
 @Data

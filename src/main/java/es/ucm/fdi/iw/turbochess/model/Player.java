@@ -2,6 +2,7 @@ package es.ucm.fdi.iw.turbochess.model;
 
 import javax.persistence.*;
 
+import es.ucm.fdi.iw.turbochess.model.room.Game;
 import lombok.Data;
 
 @Entity

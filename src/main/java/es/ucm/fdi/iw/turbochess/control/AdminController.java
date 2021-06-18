@@ -1,15 +1,10 @@
 package es.ucm.fdi.iw.turbochess.control;
-import java.io.File;
 import java.util.List;
 
 import javax.persistence.EntityManager;
-import javax.persistence.Query;
-import javax.servlet.http.HttpSession;
 import javax.transaction.Transactional;
 
-import es.ucm.fdi.iw.turbochess.model.Friendship;
-import es.ucm.fdi.iw.turbochess.repository.FriendshipRepository;
-import es.ucm.fdi.iw.turbochess.service.FriendshipService;
+import es.ucm.fdi.iw.turbochess.service.friendship.FriendshipService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,7 +1,7 @@
 package es.ucm.fdi.iw.turbochess.repository;
 
-import es.ucm.fdi.iw.turbochess.model.Participant;
-import es.ucm.fdi.iw.turbochess.model.Room;
+import es.ucm.fdi.iw.turbochess.model.room.Participant;
+import es.ucm.fdi.iw.turbochess.model.room.Room;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -11,10 +11,12 @@ import java.util.List;
 
 public interface RoomRepository extends CrudRepository<Room, String>{
         @Query("SELECT r FROM Room r WHERE r.code = :code")
-        Room getRoomByCode(@Param("code") String code);     // 1-element list since room codes are unique
+        Room getRoomByCode(@Param("code") String code);
 
-        @Query(value = "SELECT Participant.* FROM Participant LEFT JOIN Room on Participant.code = Room.code WHERE r.code = :code", nativeQuery = true)
-        List <Participant> getParticipantByCode(String code);
+        @Query(value = "SELECT * FROM Participant " +
+                "OUTER JOIN Room on Participant.code = Room.code " +
+                "WHERE Room.code = :code", nativeQuery = true)
+        List <Participant> getRoomParticipants(String code);
 
         @Query(value = "SELECT COUNT(r) FROM Room r WHERE r.code = :code")
         int countByCode(@Param("code") String code);

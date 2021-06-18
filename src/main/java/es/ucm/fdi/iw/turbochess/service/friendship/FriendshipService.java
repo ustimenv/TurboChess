@@ -1,4 +1,4 @@
-package es.ucm.fdi.iw.turbochess.service;
+package es.ucm.fdi.iw.turbochess.service.friendship;
 
 import es.ucm.fdi.iw.turbochess.model.Friendship;
 import es.ucm.fdi.iw.turbochess.model.User;

@@ -1,6 +1,5 @@
-package es.ucm.fdi.iw.turbochess.model;
+package es.ucm.fdi.iw.turbochess.model.messaging;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -10,8 +9,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 
-import com.fasterxml.jackson.databind.JsonNode;
-
+import es.ucm.fdi.iw.turbochess.model.User;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

@@ -1,4 +1,4 @@
-package es.ucm.fdi.iw.turbochess.service;
+package es.ucm.fdi.iw.turbochess.service.room;
 
 public class RoomException extends Exception{
     public RoomException(String message) {
