@@ -9,14 +9,25 @@ import javax.persistence.*;
 @Data
 public class Participant {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+
     private int id;
 
+//    @ManyToOne
+//    @JoinColumn(name = "code")
+//    private Room room;
+//
+//    @ManyToOne
+//    @JoinColumn(name = "username")
+//    private User user;
+
+
     @ManyToOne
-    @JoinColumn(name = "code")
+    @JoinColumn(name= "code")
     private Room room;
 
     @ManyToOne
-    @JoinColumn(name = "username")
+    @JoinColumn(name= "username")
     private User user;
 
     public Participant(Room room, User user){
