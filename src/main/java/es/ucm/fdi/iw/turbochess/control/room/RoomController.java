@@ -5,6 +5,7 @@ import es.ucm.fdi.iw.turbochess.model.User;
 import es.ucm.fdi.iw.turbochess.model.messaging.MessagePacket;
 import es.ucm.fdi.iw.turbochess.model.messaging.ResponsePacket;
 import es.ucm.fdi.iw.turbochess.model.room.Participant;
+import es.ucm.fdi.iw.turbochess.model.room.Room;
 import es.ucm.fdi.iw.turbochess.service.room.RoomException;
 import es.ucm.fdi.iw.turbochess.service.room.RoomService;
 import org.apache.logging.log4j.LogManager;
@@ -17,6 +18,7 @@ import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -26,6 +28,8 @@ import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 import java.util.ArrayList;
+
+import static java.text.MessageFormat.format;
 
 @Controller
 public class RoomController{
@@ -80,9 +84,9 @@ public class RoomController{
 	public MessagePacket sendMessage(@DestinationVariable String room, @Payload MessagePacket messagePacket) {
 		log.info(room);
 		if(room == null){
-			log.error("[sendMessage]: " + " room is null!");
+			log.error("[sendMessage]: room is null!");
 		} else{
-			log.info("[sendMessage]: message" +messagePacket + " sent successfully");
+			log.info(format("[sendMessage]: message{0} sent successfully", messagePacket));
 		}
 		return messagePacket;
 	}
@@ -93,9 +97,9 @@ public class RoomController{
 	public MessagePacket betRaise(@DestinationVariable String room, @Payload MessagePacket messagePacket) {
 		log.info(room);
 		if(room == null){
-			log.error("[betRaise]: " + " room is null!");
+			log.error("[betRaise]: room is null!");
 		} else{
-			log.info("betRaise]: bet msg" +messagePacket + " sent successfully");
+			log.info(format("betRaise]: bet msg{0} sent successfully", messagePacket));
 		}
 		return messagePacket;
 	}
@@ -108,9 +112,9 @@ public class RoomController{
 		log.info(room);
 		// Add username in web socket session
 		if(room == null){
-			log.error("[addUser]: " + " room is null!");
+			log.error("[addUser]: room is null!");
 		} else{
-			log.info("[addUser]: joining msg" +messagePacket + " sent successfully");
+			log.info(format("[addUser]: joining msg{0} sent successfully", messagePacket));
 		}
 		headerAccessor.getSessionAttributes().put("username", messagePacket.getFrom());
 		return messagePacket;
@@ -120,50 +124,54 @@ public class RoomController{
 // AJAX
 	@RequestMapping(value = "/api/createroom", method=RequestMethod.POST, produces = "application/json")
 	@ResponseBody
+	@Transactional
 	public ResponsePacket createRoom(@RequestBody MessagePacket packet){
-		log.info("[create room]: received packet" + packet);
+		log.info(format("[create room]: received packet{0}", packet));
 		String from = packet.getFrom();
-		String code=nextRoomCode();	// code generation guarantees room code is unique
+		String code = nextRoomCode();					// code generation guarantees room code is unique
 
 		try{
-			roomService.createRoom(code, Integer.parseInt(packet.getPayload()));
-			Participant p = getParticipantByUsername(from);
-			roomService.joinRoom(code, p);
-			log.info("Room " + code + " created successfully");
+			User userFrom = getUserByUsername(from);
+			Room createdRoom = roomService.createRoom(code, Integer.parseInt(packet.getPayload()));
+			Participant p = new Participant(createdRoom, userFrom);
+			p.setRole(roomService.assignRole(code, p));
+			entityManager.persist(p);
+			log.info(format("Room {0} created successfully by {1}", code, p.getUser().getUsername()));
 			return new ResponsePacket(code);
 		} catch(RoomException e){
-			e.printStackTrace();
-			log.error("[create room]: failed to create room " + e.getMessage());
-			return null;
+			log.error(format("[create room]: failed to create room {0}", e.getMessage()));
+			return null;		// TODO change to 505 or smth
 		}
 	}
 
 	@RequestMapping(value = "/api/joinroom", method=RequestMethod.POST, produces = "application/json")
 	@ResponseBody
 	public ResponsePacket joinRoom(@RequestBody MessagePacket packet){
-		log.info("[join room]: received packet" + packet);
-
-		String code = packet.getPayload();
+		log.info(format("[join room]: received packet{0}", packet));
 		String from = packet.getFrom();
-		Participant p = getParticipantByUsername(from);
+		String code = packet.getPayload();
 
 		try{
+			User userFrom = getUserByUsername(from);
+			Room roomToJoin = roomService.getRoomByCode(code);
+			Participant p = new Participant(roomToJoin, userFrom);
+			p.setRole(roomService.assignRole(code, p));
 			roomService.joinRoom(code, p);
-			log.info("User " + from + "joined room " + code + " successfully");
+			log.info(format("User {0} joined room {1} successfully", from, code));
 			return new ResponsePacket("oki");
 		} catch(RoomException e){
-			log.error("[create room]: failed to create room " + code + " \n"+ e.getMessage());
+			log.error(format("[join room]: User {0}failed to join room {1} \n{2}", from, code, e.getMessage()));
 			return null;
 		}
 	}
 
-	private Participant getParticipantByUsername(String username){
+	private User getUserByUsername(String username) throws RoomException{
 		Query query = entityManager.createQuery("SELECT u FROM User u WHERE u.username = :username")
 									.setParameter("username", username);
-
-//		Participant p = new Participant((User) query.getSingleResult());
-//		System.out.println(p.getUser().getUsername());
-		return null;
+		User u = (User) query.getSingleResult();
+		if(u == null){
+			throw new RoomException(format("Unable to find user {0}", username));
+		} else	return u;
 	}
 
 }

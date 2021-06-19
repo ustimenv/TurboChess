@@ -33,6 +33,9 @@
                     <a th:unless="${session.u}" class="upBar" href="/register">Sign Up</a>
                 </li>
                 <li class="upBar">
+                    <a class="upBar" href="/room">room</a>
+                </li>
+                <li class="upBar">
                     <a th:if="(${session.u} and ${session.u.hasRole('ADMIN')})" class="upBar" href="/admin/" >Admin</a>
                 </li>
 

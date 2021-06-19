@@ -1,12 +1,16 @@
 package es.ucm.fdi.iw.turbochess.model.room;
 
+import es.ucm.fdi.iw.turbochess.model.User;
+import es.ucm.fdi.iw.turbochess.service.room.RoomException;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
+
+import static java.text.MessageFormat.format;
 
 @Entity
 @NoArgsConstructor
@@ -18,17 +22,17 @@ public class Room{                           // includes two players and an unde
 
     @Column(nullable = false)
     private @Getter @Setter
-    int capacity;            // maximum number of people able to be in a room at any given time,
-                                             // specified by the room's creator (PLAYER_1)
+    int capacity;            // maximum number of people able to be in a room at any given time, specified by the room's creator (PLAYER_1)
 
     @Column(name = "num_participants", nullable = false)
     private @Getter int numParticipants=0;
+
 
     @Enumerated(EnumType.STRING)
     private @Getter GameState gameState=GameState.NOT_STARTED;
 
     @OneToMany(mappedBy = "room", fetch = FetchType.LAZY)
-    private Set <Participant> participants = new HashSet<>();
+    private List<Participant> participants = new ArrayList<>();
 
 
     public Room(String code, int capacity){
@@ -40,31 +44,27 @@ public class Room{                           // includes two players and an unde
         NOT_STARTED, WHITE_TURN, BLACK_TURN, WHITE_WON, BLACK_WON, DRAW
     }
 
-    public boolean addParticipant(Participant p){
-        if(numParticipants == 0){                       // room creator is player 1
-            p.setRole(Participant.Role.PLAYER1);
-            participants.add(p);
-            numParticipants++;
-        } else if(numParticipants == 1){                // 2nd player to join is player 2
-            p.setRole(Participant.Role.PLAYER2);
-            participants.add(p);
-            numParticipants++;
-        } else if(numParticipants <= capacity){         // consequent players are automatically observers
-            p.setRole(Participant.Role.OBSERVER);
-            participants.add(p);
-            numParticipants++;
-        } else{                                             // players who would result in capacity being exceeded
-            return false;                                   // will not be allowed to join
+    public Participant.Role assignRole(Participant p) throws RoomException {
+        if(participants.contains(p) || participants.size() > capacity){
+            throw new RoomException(format("Unable to add participant {0} to room {1}", p, this));
         }
-        return true;
+        switch(numParticipants){
+            case 0:     return Participant.Role.PLAYER1;
+            case 1:     return Participant.Role.PLAYER2;
+            default:    return Participant.Role.OBSERVER;
+        }
     }
 
-    public boolean removeParticipant(Participant p){
-        boolean wasPresent = participants.remove(p);
-        if(wasPresent)  numParticipants--;
-        return wasPresent;
+    public void addParticipant(Participant p){
+        numParticipants++;
+        participants.add(p);
     }
 
+    public void removeParticipant(Participant p) throws RoomException{
+        if(!participants.remove(p)){
+            throw new RoomException(format("Unable to remove participant {0} from room {1}; participant not present in the room", p, this));
+        } else  numParticipants--;
+    }
 
     @Override
     public int hashCode(){

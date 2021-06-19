@@ -1,11 +1,14 @@
 package es.ucm.fdi.iw.turbochess.service.room;
 
+import es.ucm.fdi.iw.turbochess.model.User;
 import es.ucm.fdi.iw.turbochess.model.room.Participant;
 import es.ucm.fdi.iw.turbochess.model.room.Room;
 import es.ucm.fdi.iw.turbochess.repository.RoomRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import static java.text.MessageFormat.format;
 
 @Service
 public class RoomServiceImp implements RoomService{
@@ -15,48 +18,46 @@ public class RoomServiceImp implements RoomService{
 
 
     @Override
-    @Transactional
-    public void createRoom(String code, int capacity) throws RoomException {
-        if(roomExists(code)){       // really shouldnt happen but doesn't hurt to check twice
-            throw new RoomException("Room "+ code + " already exists!");
+//    @Transactional
+    public Room createRoom(String code, int capacity) throws RoomException {
+        if(roomExists(code)){
+            throw new RoomException(format("Room {0} already exists!", code));
         }
         if(capacity < 2){
-            throw new RoomException("Can't create a room with " + capacity + " players, must be at least 2!");
+            throw new RoomException(format("Can''t create a room with {0} players, must be at least 2!", capacity));
         }
-        Room r = new Room(code, capacity);
-        roomRepository.save(r);
+        Room room = new Room(code, capacity);
+        roomRepository.save(room);
+        return room;
     }
 
     @Override
-    @Transactional
-    public void joinRoom(String roomCode, Participant p) throws RoomException{
-        System.out.println();
+    public Participant.Role assignRole(String roomCode, Participant p) throws RoomException{
         if(roomExists(roomCode)){
             Room room = getRoomByCode(roomCode);
-            if(room.addParticipant(p)){
-                roomRepository.save(room);
-            } else{
-                throw new RoomException("Capacity exceeded for room " + roomCode +"!");
-            }
-        } else {
-            throw new RoomException("Participant " + p.getUser().getUsername() + " is attempting to join a non-existent" +
-                    " room "+roomCode +"!");
-        }
+            return room.assignRole(p);
+        } else throw new RoomException(format("Can't assign a role in room {0} since it doesn't exist", roomCode));
+    }
+
+    @Override
+//    @Transactional
+    public void joinRoom(String roomCode, Participant p) throws RoomException{
+        if(roomExists(roomCode)){
+            Room room = getRoomByCode(roomCode);
+            room.addParticipant(p);
+            roomRepository.save(room);
+        } else throw new RoomException(format("User {0} is attempting to join a non-existent room {1}!", p.getUser().getUsername(), roomCode));
+
     }
 
     @Override
     public void leaveRoom(String roomCode, Participant p) throws RoomException{
         Room room = getRoomByCode(roomCode);
-        if(!room.removeParticipant(p)){
-            throw new RoomException("Participant " + p.getUser().getUsername() + " can't leave " +
-                                    " room "+roomCode + " because they are not in the room!");
-        }
+        room.removeParticipant(p);
 
         if(room.getNumParticipants() < 1){
-            roomRepository.deleteRoomByCode(roomCode);
-        } else{
-            roomRepository.save(room);
-        }
+            roomRepository.delete(room);
+        } else  roomRepository.save(room);
     }
 
     @Override
@@ -66,16 +67,9 @@ public class RoomServiceImp implements RoomService{
 
 
     @Override
-    public void deleteAllEmptyRooms(){              // shouldn't be necessary of leaveRoom works as intended
-        roomRepository.deleteAllEmptyRooms();
-    }
-
-    @Override
     public Room getRoomByCode(String roomCode) throws RoomException{
         if(roomExists(roomCode)){
             return roomRepository.getRoomByCode(roomCode);
-        }
-        throw new RoomException("Room " + roomCode + " doesn't exist!");
+        } else  throw new RoomException(format("Room {0} doesn''t exist!", roomCode));
     }
-
 }

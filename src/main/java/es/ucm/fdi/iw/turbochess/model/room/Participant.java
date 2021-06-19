@@ -2,27 +2,27 @@ package es.ucm.fdi.iw.turbochess.model.room;
 
 import es.ucm.fdi.iw.turbochess.model.User;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import java.util.Objects;
 
 @Entity
 @Data
-@NoArgsConstructor
 public class Participant {
-    @EmbeddedId
-    private ParticipantKey key;             // participant is uniquely identified by the (username, roomcode) tuple
+    @Id
+    private int id;
 
     @ManyToOne
-  //  @JoinColumn(name = "room_code")
-    @MapsId("room_code")
+    @JoinColumn(name = "code")
     private Room room;
 
     @ManyToOne
-    @MapsId("username")
-//    @JoinColumn(name = "username")
+    @JoinColumn(name = "username")
     private User user;
+
+    public Participant(Room room, User user){
+        this.room = room;
+        this.user = user;
+    }
 
     private int currentBet = 0;             // on the last transaction we will commit the bet manually
 
@@ -30,12 +30,12 @@ public class Participant {
     private Role role;                      // we'll store the roles as strings for clarity
 
     public enum Role{
-        PLAYER1, PLAYER2, OBSERVER;
+        PLAYER1, PLAYER2, OBSERVER, INVALID;
     }
 
     @Override
     public int hashCode(){
-        return key.hashCode();
+        return room.hashCode()*user.hashCode();
     }
 
     @Override
@@ -43,8 +43,8 @@ public class Participant {
         if( !(other instanceof Participant) ){
             return false;
         } else{
-            return this.key.getUsername().equals(
-                    ((Participant) other).key.getUsername());
+            return this.user.getUsername().equals(((Participant) other).user.getUsername()) &&
+                   this.room.getCode().equals(((Participant) other).room.getCode());
         }
     }
 }
