@@ -2,32 +2,24 @@ package es.ucm.fdi.iw.turbochess.model.room;
 
 import es.ucm.fdi.iw.turbochess.model.User;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 
 @Entity
 @Data
+@NoArgsConstructor
 public class Participant {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-
     private int id;
 
-//    @ManyToOne
-//    @JoinColumn(name = "code")
-//    private Room room;
-//
-//    @ManyToOne
-//    @JoinColumn(name = "username")
-//    private User user;
-
-
     @ManyToOne
-    @JoinColumn(name= "code")
+    @JoinColumn(name= "room_code")
     private Room room;
 
     @ManyToOne
-    @JoinColumn(name= "username")
+    @JoinColumn(name = "user_id")
     private User user;
 
     public Participant(Room room, User user){
@@ -41,7 +33,7 @@ public class Participant {
     private Role role;                      // we'll store the roles as strings for clarity
 
     public enum Role{
-        PLAYER1, PLAYER2, OBSERVER, INVALID;
+        PLAYER1, PLAYER2, OBSERVER;
     }
 
     @Override

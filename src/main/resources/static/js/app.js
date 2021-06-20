@@ -150,7 +150,7 @@ function handleJoinRoom(e){
                 contentType : 'application/json',
                 dataType : 'json',
                 data : JSON.stringify(data),
-                url : '/api/joinroom',
+                url : '/api/join_room',
                 success : function(response) {
                     roomCode = code;                // set the room 'context'
                     connect();
@@ -185,7 +185,7 @@ function handleCreateRoom(e){
         contentType : 'application/json',
         dataType : 'json',
         data : JSON.stringify(data),
-        url : '/api/createroom',
+        url : '/api/create_room',
         success : function(response) {
             roomCode = response.payload;
             alert('ROOM '+ roomCode);

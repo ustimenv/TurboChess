@@ -122,7 +122,7 @@ public class RoomController{
 
 
 // AJAX
-	@RequestMapping(value = "/api/createroom", method=RequestMethod.POST, produces = "application/json")
+	@RequestMapping(value = "/api/create_room", method=RequestMethod.POST, produces = "application/json")
 	@ResponseBody
 	@Transactional
 	public ResponsePacket createRoom(@RequestBody MessagePacket packet){
@@ -135,6 +135,7 @@ public class RoomController{
 			Room createdRoom = roomService.createRoom(code, Integer.parseInt(packet.getPayload()));
 			Participant p = new Participant(createdRoom, userFrom);
 			p.setRole(roomService.assignRole(code, p));
+			roomService.joinRoom(createdRoom.getCode(), p);
 			entityManager.persist(p);
 			log.info(format("Room {0} created successfully by {1}", code, p.getUser().getUsername()));
 			return new ResponsePacket(code);
@@ -144,8 +145,9 @@ public class RoomController{
 		}
 	}
 
-	@RequestMapping(value = "/api/joinroom", method=RequestMethod.POST, produces = "application/json")
+	@RequestMapping(value = "/api/join_room", method=RequestMethod.POST, produces = "application/json")
 	@ResponseBody
+	@Transactional
 	public ResponsePacket joinRoom(@RequestBody MessagePacket packet){
 		log.info(format("[join room]: received packet{0}", packet));
 		String from = packet.getFrom();
@@ -157,6 +159,7 @@ public class RoomController{
 			Participant p = new Participant(roomToJoin, userFrom);
 			p.setRole(roomService.assignRole(code, p));
 			roomService.joinRoom(code, p);
+			entityManager.persist(p);
 			log.info(format("User {0} joined room {1} successfully", from, code));
 			return new ResponsePacket("oki");
 		} catch(RoomException e){
@@ -164,6 +167,29 @@ public class RoomController{
 			return null;
 		}
 	}
+
+//	@RequestMapping(value = "/api/place_bet", method=RequestMethod.POST, produces = "application/json")
+//	@ResponseBody
+//	@Transactional
+//	public ResponsePacket placeBet(@RequestBody MessagePacket packet){
+//		log.info(format("[place bet]: received packet{0}", packet));
+//		String from = packet.getFrom();
+//		String code = nextRoomCode();
+//
+//		try{
+//			User userFrom = getUserByUsername(from);
+//			Participant p = new Participant(createdRoom, userFrom);
+//			p.setRole(roomService.assignRole(code, p));
+//			roomService.joinRoom(createdRoom.getCode(), p);
+//			entityManager.persist(p);
+//			log.info(format("Room {0} created successfully by {1}", code, p.getUser().getUsername()));
+//			return new ResponsePacket(code);
+//		} catch(RoomException e){
+//			log.error(format("[create room]: failed to create room {0}", e.getMessage()));
+//			return null;		// TODO change to 505 or smth
+//		}
+//	}
+
 
 	private User getUserByUsername(String username) throws RoomException{
 		Query query = entityManager.createQuery("SELECT u FROM User u WHERE u.username = :username")
@@ -173,5 +199,18 @@ public class RoomController{
 			throw new RoomException(format("Unable to find user {0}", username));
 		} else	return u;
 	}
+//	private Participant getParticipantByUsernameAndRoom(User user, Room room) throws RoomException{
+//		String username, roomCode;
+//		try{
+//			username = user.getUsername();
+//			roomCode = room.getCode();
+//		}
+//		Query query = entityManager.createQuery("SELECT p FROM Participant p WHERE p.username = :username AND p.room_code = :code")
+//				.setParameter("username", user.getUsername()).setParameter("code", room.getCode());
+//		Participant p = (Participant) query.getSingleResult();
+//		if(p == null){
+//			throw new RoomException(format("Unable to find participant {0} in room {1}", user.get));
+//		} else	return u;
+//	}
 
 }

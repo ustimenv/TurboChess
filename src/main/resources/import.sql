@@ -9,42 +9,42 @@ INSERT INTO user(id,enabled,username,password,roles,elo,matches_won,matches_play
 	1, 1, 'pepa',
 	'{bcrypt}$2y$12$dDqDvO5OfYDOiTH1ovu1Gu.1KreRUyMffyOAHI54/8yjsymJMyE1m',
 	'USER,ADMIN',
-	1350, 2,10,0
+	1350, 2,10,100
 );
 --user: pepito pssw: pepito
 INSERT INTO user(id,enabled,username,password,roles,elo,matches_won,matches_played, coins) VALUES (
 	2, 1, 'pepito',
 	'{bcrypt}$2y$12$EiyIDAUNNqBTq3llI/fTeeRUc7n7EN4qs0Y.m9CLuyXVyKOaDvoVS',
 	'USER,ADMIN',
-	1300, 1,10,0
+	1300, 1,10,100
 );
 --user: juanito pssw: juanito
 INSERT INTO user(id,enabled,username,password,roles,elo,matches_won,matches_played, coins) VALUES (
 	3, 1, 'juanito',
 	'{bcrypt}$2y$12$jYEcETb2FvTILd9lcRYf/.vZfQE87tg/I.d/BX5YIrDIN0NFM1sBW',
 	'USER',
-	1500, 3,11,0
+	1500, 3,11,100
 );
 --user: ana pssw: ana
 INSERT INTO user(id,enabled,username,password,roles,elo,matches_won,matches_played, coins) VALUES (
 	4, 1, 'ana',
 	'{bcrypt}$2y$12$DV/PvazrZKPKj/u7Z6.bauGwuwYNPZsAUkSsqFLukRRiA6k7WDY0C',
 	'USER',
-	1800, 5,11,0
+	1800, 5,11,100
 );
 --user: a pssw: a
 INSERT INTO user(id,enabled,username,password,roles,elo,matches_won,matches_played, coins) VALUES (
 	5, 1, 'a',
 	'{bcrypt}$2y$12$L6usUMQ40avP0m2ztn/iiOwGH9k0lzv.OerZkUHQdHmfTYM7Cxte2',
 	'USER',
-	2000, 8,11,0
+	2000, 8,11,100
 );
 --user: b pssw: b
 INSERT INTO user(id,enabled,username,password,roles,elo,matches_won,matches_played, coins) VALUES (
 	6, 1, 'b',
 	'{bcrypt}$2y$12$dFS0HQLjY0cJ/Ww/SjqdP.GJmQOenTbVlCfyGMyg8OlM/7uD5H0j.',
 	'USER',
-	2000, 8,15,0
+	2000, 8,15,100
 );
 
 INSERT INTO friends(SUBJECT_ID, FRIEND_ID) VALUES(2,3);
