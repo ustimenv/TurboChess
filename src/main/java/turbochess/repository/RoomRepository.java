@@ -13,6 +13,12 @@ public interface RoomRepository extends CrudRepository<Room, String>{
 	@Query(value = "SELECT COUNT(*) FROM Room WHERE code = :code", nativeQuery = true)
 	int countByCode(@Param("code") String code);
 
+	@Query(value = "SELECT num_participants FROM Room WHERE code = :code", nativeQuery = true)
+	int getNumParticipants(@Param("code") String code);
+
+	@Query(value = "SELECT capacity FROM Room WHERE code = :code", nativeQuery = true)
+	int getCapacity(@Param("code") String code);
+
 	@Modifying
 	@Query(value = "DELETE FROM Room WHERE Room.num_participants < 1", nativeQuery = true)
 	void deleteAllEmptyRooms();

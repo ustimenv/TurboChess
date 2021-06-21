@@ -145,6 +145,12 @@
 			<version>1.13.1</version>
 			<scope>test</scope>
 		</dependency>
+
+		<dependency>
+			<groupId>com.jayway.jsonpath</groupId>
+			<artifactId>json-path</artifactId>
+			<version>2.6.0</version>
+		</dependency>
 		<!--STOMP
 		-->
 
@@ -165,6 +171,10 @@
 			<artifactId>jquery</artifactId>
 			<version>3.6.0</version>
 		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>net.minidev</groupId>-->
+<!--			<artifactId>json-smart</artifactId>-->
+<!--		</dependency>-->
 
 
 	</dependencies>

@@ -15,5 +15,5 @@ public interface RoomService {
     Room getRoomByCode(String roomCode)                             throws RoomException;
     boolean roomExists(String roomCode);
 
-
+    boolean isRoomBelowCapacity(String roomCode)                    throws RoomException;
 }

@@ -38,20 +38,32 @@ var colours = ['#e30e1f', '#0e0ee3', '#cde01d', '#cde01d', '#070806', '#e010b7',
 /**
 *         CHESS
 */
-var game;
+const game = new Chess();
+var myColour = null;
 
 function onDragStart (source, piece, position, orientation) {
-    if(game.game_over()){                               // do not pick up pieces if the game is over
-        var msg = document.getElementById('endGame');
-        if(msg != null){
-            msg.style.display = "flex";
-            if(game.turn() === 'b' ){                                           // blacks turn
-                msg.style.display = "flex";
-                document.getElementById('win').style.display = "flex";
-            } else  document.getElementById('loose').style.display = "flex";    // whites turn
-        } else  return false;
-  }
-  if (piece.search(/^b/) !== -1)    return false;             // only pick up pieces for White TODO why(????)
+//    if(game.game_over()){                               // do not pick up pieces if the game is over
+//        var msg = document.getElementById('endGame');
+//        if(msg != null){
+//            msg.style.display = "flex";
+//            if(game.turn() === 'b' ){                                           // blacks turn
+//                msg.style.display = "flex";
+//                document.getElementById('win').style.display = "flex";
+//            } else  document.getElementById('loose').style.display = "flex";    // whites turn
+//        } else  return false;
+//  }
+    if(!piece.includes(myColour)){
+        return false;
+    }
+
+//    if()
+//    if(game.turn() === myColour){
+//        if(myColour === 'w'){
+//            if (piece.search(/^w/) !== -1)    return false;
+//        } else if(myColour==='b'){
+//            if (piece.search(/^b/) !== -1)    return false;
+//        }
+//   }
 }
 
 function onDrop (source, target) {
@@ -61,7 +73,7 @@ function onDrop (source, target) {
         promotion: 'q'                              // NOTE: always promote to a queen for example simplicity
     });
     if (move === null)    return 'snapback'         // illegal move
-    sendMove(move);
+    makeMove(move);
 }
 
 function onSnapEnd () {
@@ -95,10 +107,9 @@ function onConnected() {
                                                                                 // inform the room that you've subbed
     stompClient.send(`/app/${roomCode}.chat.addUser`, {},
                      JSON.stringify({from: username, type: 'JOIN_ROOM'}));
-    game = new Chess();
 
     connecting.classList.add('hidden');                     // remove the 'Connecting...'
-    boardDiv.classList.remove('hidden');                       // and show the board
+    boardDiv.classList.remove('hidden');                    // and show the board
 
 }
 
@@ -116,9 +127,10 @@ function sendMessage(e) {
     }
     e.preventDefault();
 }
-function sendMove(movementJSON){
-    stompClient.send(`/app/${roomCode}.sys.makeMove`, {},
-                     JSON.stringify({from: username, type: 'MOVE', payload: movementJSON}));
+function makeMove(movementJSON){
+    var packet = JSON.stringify({from: username, context: roomCode, type: 'MOVE', payload: JSON.stringify(movementJSON)});
+    console.log(packet);
+    stompClient.send(`/app/${roomCode}.sys.makeMove`, {}, packet);
 }
 
 function betRaise(e){
@@ -171,6 +183,14 @@ function onMessageReceived(messageReceived) {
         messageElement.classList.add('event-message');
         message.payload = message.from + ' left!';
     break;
+    case 'MOVE':
+        if(message.from !== username){
+            var payload = JSON.parse(message.payload);
+            game.move({from: payload.from, to: payload.to});
+            board.position(game.fen());
+        }
+        return;
+    break;
     default:
         alert('Unexpected arg ' + message.type);
     }
@@ -205,6 +225,7 @@ function handleJoinRoom(e){
                 data : JSON.stringify(data),
                 url : '/api/join_room',
                 success : function(response) {
+                    myColour = response.header;
                     roomCode = code;                // set the room 'context'
                     connect();
                 },
@@ -240,6 +261,7 @@ function handleCreateRoom(e){
         data : JSON.stringify(data),
         url : '/api/create_room',
         success : function(response) {
+            myColour = response.header;
             roomCode = response.payload;
             alert('ROOM '+ roomCode);
             connect();

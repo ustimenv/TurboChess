@@ -12,7 +12,7 @@ import javax.persistence.*;
 public class Participant {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private long id;
 
     @ManyToOne
     @JoinColumn(name= "room_code")
@@ -34,6 +34,21 @@ public class Participant {
 
     public enum Role{
         PLAYER1, PLAYER2, OBSERVER;
+    }
+
+    @Enumerated(EnumType.STRING)
+    private Colour colour;
+
+
+    public enum Colour{
+        WHITE, BLACK, NONE;
+    }
+    public String getColourString(){
+        switch (colour){
+            case WHITE: return "w";
+            case BLACK: return "b";
+            default:    return "-";
+        }
     }
 
     @Override

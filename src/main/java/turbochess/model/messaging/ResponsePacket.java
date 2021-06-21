@@ -6,5 +6,6 @@ import lombok.Data;
 @AllArgsConstructor
 @Data
 public class ResponsePacket{
+    private String header;
     private String payload;
 }

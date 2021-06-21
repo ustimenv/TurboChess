@@ -65,6 +65,10 @@ public class Room{                           // includes two players and an unde
         } else  numParticipants--;
     }
 
+    public boolean isBelowCapacity(){
+        return numParticipants < capacity;
+    }
+
     @Override
     public int hashCode(){
         return code.hashCode();

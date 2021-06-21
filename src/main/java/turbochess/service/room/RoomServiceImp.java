@@ -70,4 +70,10 @@ public class RoomServiceImp implements RoomService{
             return roomRepository.getRoomByCode(roomCode);
         } else  throw new RoomException(format("Room {0} doesn''t exist!", roomCode));
     }
+
+    @Override
+    public boolean isRoomBelowCapacity(String roomCode) throws RoomException{
+        Room room = getRoomByCode(roomCode);
+        return room.isBelowCapacity();
+    }
 }
