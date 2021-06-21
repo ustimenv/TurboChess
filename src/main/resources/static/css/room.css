@@ -132,10 +132,16 @@ button.accent {
     margin-top: 10px;
 }
 
-
-#chat-page {
+#root-container{
+    display: flex;
+}
+#roomAAA-page {
     position: relative;
     height: 100%;
+}
+
+.flex-item{
+    flex-grow: 1;
 }
 
 .chat-container {
@@ -150,7 +156,7 @@ button.accent {
     position: relative;
 }
 
-#chat-page ul {
+#room-page ul {
     list-style-type: none;
     background-color: #FFF;
     margin: 0;
@@ -160,39 +166,39 @@ button.accent {
     height: calc(100% - 150px);
 }
 
-#chat-page #messageForm {
+#room-page #messageForm {
     padding: 20px;
 }
 
-#chat-page ul li {
+#room-page ul li {
     line-height: 1.5rem;
     padding: 10px 20px;
     margin: 0;
     border-bottom: 1px solid #f4f4f4;
 }
 
-#chat-page ul li p {
+#room-page ul li p {
     margin: 0;
 }
 
-#chat-page .event-message {
+#room-page .event-message {
     width: 100%;
     text-align: center;
     clear: both;
 }
 
-#chat-page .event-message p {
+#room-page .event-message p {
     color: #777;
     font-size: 14px;
     word-wrap: break-word;
 }
 
-#chat-page .chat-message {
+#room-page .chat-message {
     padding-left: 68px;
     position: relative;
 }
 
-#chat-page .chat-message i {
+#room-page .chat-message i {
     position: absolute;
     width: 42px;
     height: 42px;
@@ -209,12 +215,12 @@ button.accent {
     text-transform: uppercase;
 }
 
-#chat-page .chat-message span {
+#room-page .chat-message span {
     color: #333;
     font-weight: 600;
 }
 
-#chat-page .chat-message p {
+#room-page .chat-message p {
     color: #43464b;
 }
 
@@ -272,7 +278,7 @@ button.accent {
         padding: 25px;
     }
 
-    #chat-page ul {
+    #room-page ul {
         height: calc(100% - 120px);
     }
 

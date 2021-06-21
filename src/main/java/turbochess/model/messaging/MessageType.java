@@ -16,8 +16,8 @@ public enum MessageType{
                     // specified in the payload, server checks the user's coin balance
 
 
-    MOVEMENT,        // TODO if the user's role in the room is that of a player,
-                    // parse the payload to extract the desired movement and broadcast
+    MOVE,        // TODO if the user's role in the room is that of a player,
+                      // parse the payload to extract the desired movement and broadcast
 
     SAVE            // if the users wish to resume the game at a later game, only then do we save the game state the DB
 

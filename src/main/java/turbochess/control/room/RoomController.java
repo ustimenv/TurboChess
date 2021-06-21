@@ -91,20 +91,6 @@ public class RoomController{
 		return messagePacket;
 	}
 
-
-	@MessageMapping("/{room}.chat.betRaise")
-	@SendTo("/queue/{room}")
-	public MessagePacket betRaise(@DestinationVariable String room, @Payload MessagePacket messagePacket) {
-		log.info(room);
-		if(room == null){
-			log.error("[betRaise]: room is null!");
-		} else{
-			log.info(format("betRaise]: bet msg{0} sent successfully", messagePacket));
-		}
-		return messagePacket;
-	}
-
-
 	@MessageMapping("/{room}.chat.addUser")
 	@SendTo("/queue/{room}")
 	public MessagePacket addUser(@DestinationVariable String room, @Payload MessagePacket messagePacket,
@@ -120,6 +106,15 @@ public class RoomController{
 		return messagePacket;
 	}
 
+	@MessageMapping("/{room}.sys.makeMove")
+	@SendTo("/queue/{room}")
+	public MessagePacket makeMove(@DestinationVariable String room, @Payload MessagePacket messagePacket) {
+		log.info(format("Room [{0}]: move made-->{1}", room, messagePacket));
+		if(room == null || messagePacket==null)	return null;
+
+		return messagePacket;
+	}
+
 
 // AJAX
 	@RequestMapping(value = "/api/create_room", method=RequestMethod.POST, produces = "application/json")
@@ -127,10 +122,9 @@ public class RoomController{
 	@Transactional
 	public ResponsePacket createRoom(@RequestBody MessagePacket packet){
 		log.info(format("[create room]: received packet{0}", packet));
-		String from = packet.getFrom();
-		String code = nextRoomCode();					// code generation guarantees room code is unique
-
 		try{
+			String from = packet.getFrom();
+			String code = nextRoomCode();					// code generation guarantees room code is unique
 			User userFrom = getUserByUsername(from);
 			Room createdRoom = roomService.createRoom(code, Integer.parseInt(packet.getPayload()));
 			Participant p = new Participant(createdRoom, userFrom);
@@ -150,10 +144,10 @@ public class RoomController{
 	@Transactional
 	public ResponsePacket joinRoom(@RequestBody MessagePacket packet){
 		log.info(format("[join room]: received packet{0}", packet));
-		String from = packet.getFrom();
-		String code = packet.getPayload();
-
+		String from=null, code=null;
 		try{
+			from = packet.getFrom();
+			code = packet.getPayload();
 			User userFrom = getUserByUsername(from);
 			Room roomToJoin = roomService.getRoomByCode(code);
 			Participant p = new Participant(roomToJoin, userFrom);
@@ -168,27 +162,39 @@ public class RoomController{
 		}
 	}
 
-//	@RequestMapping(value = "/api/place_bet", method=RequestMethod.POST, produces = "application/json")
-//	@ResponseBody
-//	@Transactional
-//	public ResponsePacket placeBet(@RequestBody MessagePacket packet){
-//		log.info(format("[place bet]: received packet{0}", packet));
-//		String from = packet.getFrom();
-//		String code = nextRoomCode();
-//
-//		try{
-//			User userFrom = getUserByUsername(from);
-//			Participant p = new Participant(createdRoom, userFrom);
-//			p.setRole(roomService.assignRole(code, p));
-//			roomService.joinRoom(createdRoom.getCode(), p);
-//			entityManager.persist(p);
-//			log.info(format("Room {0} created successfully by {1}", code, p.getUser().getUsername()));
-//			return new ResponsePacket(code);
-//		} catch(RoomException e){
-//			log.error(format("[create room]: failed to create room {0}", e.getMessage()));
-//			return null;		// TODO change to 505 or smth
-//		}
-//	}
+	@RequestMapping(value = "/api/place_bet", method=RequestMethod.POST, produces = "application/json")
+	@ResponseBody
+	@Transactional
+	public ResponsePacket placeBet(@RequestBody MessagePacket packet){
+		log.info(format("[place bet]: received packet{0}", packet));
+		String from =null;
+		int betAmount=-1;
+		try{
+			from = packet.getFrom();
+			betAmount = Integer.parseInt(packet.getPayload());
+			if(betAmount<=0)	throw new NumberFormatException("Invalid bet value: " + betAmount);
+			User userFrom = getUserByUsername(from);
+			Integer currentUserBalance = entityManager.createNamedQuery("User.getBalanceByUsername", Integer.class)
+					.setParameter("username", userFrom.getUsername())
+					.getSingleResult();
+
+			Room room = roomService.getRoomByCode(packet.getContext());
+			Participant p = getParticipantByUsernameAndRoom(userFrom, room);
+			// all the relevant variables initialised at this point
+			if(currentUserBalance == null || currentUserBalance < betAmount){
+				throw new RoomException(format("Insufficient ({0}) balance ({1}) for player {2}", currentUserBalance, betAmount, userFrom.getUsername()));
+			}
+			entityManager.createNamedQuery("User.removeCoins")
+			 			 .setParameter("username", userFrom.getUsername())
+						 .setParameter("amount", betAmount).executeUpdate();
+
+			log.info(format("Bet of {0} coins has been placed successfully by {1}", betAmount, p.getUser().getUsername()));
+			return new ResponsePacket("OKI");
+		} catch(RoomException | NumberFormatException e){
+			log.error(format("[place bet]: failed to place bet for participant {0} --> {1}", from, e.getMessage()));
+			return null;		// TODO change to 505 or smth
+		}
+	}
 
 
 	private User getUserByUsername(String username) throws RoomException{
@@ -199,18 +205,20 @@ public class RoomController{
 			throw new RoomException(format("Unable to find user {0}", username));
 		} else	return u;
 	}
-//	private Participant getParticipantByUsernameAndRoom(User user, Room room) throws RoomException{
-//		String username, roomCode;
-//		try{
-//			username = user.getUsername();
-//			roomCode = room.getCode();
-//		}
-//		Query query = entityManager.createQuery("SELECT p FROM Participant p WHERE p.username = :username AND p.room_code = :code")
-//				.setParameter("username", user.getUsername()).setParameter("code", room.getCode());
-//		Participant p = (Participant) query.getSingleResult();
-//		if(p == null){
-//			throw new RoomException(format("Unable to find participant {0} in room {1}", user.get));
-//		} else	return u;
-//	}
+	private Participant getParticipantByUsernameAndRoom(User user, Room room) throws RoomException{
+		String username, roomCode;
+		try{
+			username = user.getUsername();
+			roomCode = room.getCode();
+			Query query = entityManager.createQuery("SELECT p FROM Participant p WHERE p.username = :username AND p.room_code = :code")
+					.setParameter("username", user.getUsername()).setParameter("code", room.getCode());
+			Participant p = (Participant) query.getSingleResult();
+			if(p == null){
+				throw new RoomException(format("Unable to find participant {0} in room {1}", username, roomCode));
+			} else	return p;
+		} catch(Exception e){
+			throw new RoomException(e.getMessage());
+		}
+	}
 
 }

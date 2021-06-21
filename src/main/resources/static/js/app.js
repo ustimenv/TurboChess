@@ -1,12 +1,13 @@
-'use strict';
+//'use strict';
 
 var script = document.createElement('script');              // Surely there's a better way to import jquery...
 script.src = 'https://code.jquery.com/jquery-3.4.1.min.js';
 script.type = 'text/javascript';
 document.getElementsByTagName('head')[0].appendChild(script);
 
-var usernamePage = document.querySelector('#username-page');    // primary container
-var chatPage = document.querySelector('#chat-page');            //
+var usernamePage = document.querySelector('#username-page');
+var roomPage = document.querySelector('#room-page');
+var rootContainer = document.querySelector('#root-container')
 
 var connecting = document.querySelector('.connecting-to-room');
 
@@ -19,6 +20,8 @@ var messageInputBox = document.querySelector('#message-input-box');
 
 var betForm = document.querySelector('#betForm');
 var betInputBox = document.querySelector('#bet-input-box');
+
+var boardDiv = document.querySelector('.board');
 
 createRoomForm.addEventListener('submit', handleCreateRoom, true);
 roomCodeForm.addEventListener('submit', handleJoinRoom, true);
@@ -33,12 +36,54 @@ var roomCode = null;            // set via an ajax call by creating or joining a
 var colours = ['#e30e1f', '#0e0ee3', '#cde01d', '#cde01d', '#070806', '#e010b7', '#467a7a'];
 
 /**
+*         CHESS
+*/
+var game;
+
+function onDragStart (source, piece, position, orientation) {
+    if(game.game_over()){                               // do not pick up pieces if the game is over
+        var msg = document.getElementById('endGame');
+        if(msg != null){
+            msg.style.display = "flex";
+            if(game.turn() === 'b' ){                                           // blacks turn
+                msg.style.display = "flex";
+                document.getElementById('win').style.display = "flex";
+            } else  document.getElementById('loose').style.display = "flex";    // whites turn
+        } else  return false;
+  }
+  if (piece.search(/^b/) !== -1)    return false;             // only pick up pieces for White TODO why(????)
+}
+
+function onDrop (source, target) {
+    var move = game.move({
+        from: source,
+        to: target,
+        promotion: 'q'                              // NOTE: always promote to a queen for example simplicity
+    });
+    if (move === null)    return 'snapback'         // illegal move
+    sendMove(move);
+}
+
+function onSnapEnd () {
+    board.position(game.fen());    // update the board position after the piece snap for castling, en passant, pawn promotion
+}
+
+var asd = {
+    draggable:      true,
+    position:       'start',
+    onDragStart:    onDragStart,
+    onDrop:         onDrop,
+    onSnapEnd:      onSnapEnd
+}
+board = Chessboard('myBoard', asd)
+
+/**
 *           STOMP
 */
 
 function connect() {
     usernamePage.classList.add('hidden');   // username input page goes away
-    chatPage.classList.remove('hidden');    // the main chatroom page becomes visible, while we attempt to establish connection
+    roomPage.classList.remove('hidden');    // the main chatroom page becomes visible, while we attempt to establish connection
 
     var socket = new SockJS('/ws');
     stompClient = Stomp.over(socket);
@@ -50,7 +95,11 @@ function onConnected() {
                                                                                 // inform the room that you've subbed
     stompClient.send(`/app/${roomCode}.chat.addUser`, {},
                      JSON.stringify({from: username, type: 'JOIN_ROOM'}));
-    connecting.classList.add('hidden');                                         // remove the 'Connecting...'
+    game = new Chess();
+
+    connecting.classList.add('hidden');                     // remove the 'Connecting...'
+    boardDiv.classList.remove('hidden');                       // and show the board
+
 }
 
 function sendMessage(e) {
@@ -67,8 +116,12 @@ function sendMessage(e) {
     }
     e.preventDefault();
 }
+function sendMove(movementJSON){
+    stompClient.send(`/app/${roomCode}.sys.makeMove`, {},
+                     JSON.stringify({from: username, type: 'MOVE', payload: movementJSON}));
+}
 
-function betRaise(e) {                      // TODO add logic
+function betRaise(e){
      if(betInputBox && stompClient) {
          var packet = {
              from: username,
@@ -77,7 +130,7 @@ function betRaise(e) {                      // TODO add logic
              context: roomCode
          };
 
-         stompClient.send(`/app/${roomCode}.chat.betRaise`, {}, JSON.stringify(packet));
+         stompClient.send(`/app/${roomCode}.sys.betRaise`, {}, JSON.stringify(packet));
      }
      e.preventDefault();
 }

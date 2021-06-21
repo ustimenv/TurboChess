@@ -30,24 +30,30 @@ import lombok.AllArgsConstructor;
 
 @NamedQueries({
 	@NamedQuery(name="User.search_result",
-	query="SELECT u FROM User u "
-			+ "WHERE u.username like :username AND u.enabled = 1"),
+	query= "SELECT u FROM User u WHERE u.username LIKE :username AND u.enabled = 1"),
 
 		@NamedQuery(name="User.byUsername",
-                query="SELECT u FROM User u "
-                        + "WHERE u.username = :username AND u.enabled = 1"),
-        @NamedQuery(name="User.hasUsername",
-                query="SELECT COUNT(u) "
-                        + "FROM User u "
-                        + "WHERE u.username = :username"),
+                	query= "SELECT u FROM User u WHERE u.username = :username AND u.enabled = 1"),
+
+		@NamedQuery(name="User.hasUsername",
+                	query= "SELECT COUNT(u) FROM User u WHERE u.username = :username"),
+
 		@NamedQuery(name="User.byId",
-				query="SELECT u  "
-						+ "FROM User u "
-						+ "WHERE u.id = :id"),
+					query= "SELECT u FROM User u WHERE u.id = :id"),
+
 		@NamedQuery(name="User.findAll",
-				query="SELECT u  "
-						+ "FROM User u "),
-		})
+					query= "SELECT u FROM User u "),
+
+		@NamedQuery(name="User.getBalanceByUsername",
+					query="SELECT u.coins FROM User u WHERE u.username = :username"),
+
+		@NamedQuery(name="User.addCoins",
+					query="UPDATE User u SET u.coins = u.coins + :amount WHERE u.username = :username"),
+
+		@NamedQuery(name="User.removeCoins",
+					query="UPDATE User u SET u.coins = u.coins - :amount WHERE u.username = :username")
+		}
+)
 @NamedNativeQueries({
 		@NamedNativeQuery(name = "User.friends", query = "SELECT * FROM user_friends " +
 		"LEFT JOIN user on user_friends.friends_id =user.id WHERE user_id= :userid " +
