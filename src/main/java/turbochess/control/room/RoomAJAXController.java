@@ -44,7 +44,7 @@ public class RoomAJAXController extends RoomController{
             log.info(format("Room {0} created successfully by {1}", createdRoom.getCode(), p.getUser().getUsername()));
             return new ResponsePacket(p.getColourString(), createdRoom.getCode());
         } catch(RoomException e){
-            log.error(format("[create room]: failed to create room {0}", (Object) e.getStackTrace()));
+            log.error(format("[create room]: failed to create room {0}", (Object) e.getMessage()));
             return null;		                    // TODO change to smth like 505?
         }
     }
@@ -74,7 +74,7 @@ public class RoomAJAXController extends RoomController{
             return new ResponsePacket(p.getColourString(), "oki");
         } catch(RoomException e){
             log.error(format("[join room]: User failed to join room. Packet:\n {0}\n" +
-                                                                    "Error:\n{1}", packet, e.getStackTrace()));
+                                                                    "Error:\n{1}", packet, e.getMessage()));
             return null;
         }
     }
@@ -96,12 +96,15 @@ public class RoomAJAXController extends RoomController{
             for(Participant p :getRoomParticipants(contextRoom)){
                 participantJSONs.add(p.toJSON());
             }
+//            for(String s : participantJSONs){
+//                System.out.println(s);
+//            }
             roomService.prepareAndSave(contextRoom.getCode(), boardState,
                                         participantJSONs.stream().map(Object::toString).collect(Collectors.joining(",")));
             log.info(format("Room {0} saved successfully by {1}", contextRoom.getCode(), userFrom.getUsername()));
             return new ResponsePacket("", "oki");
         } catch(RoomException e){
-            log.error(format("[save room]: error--> {0}", (Object) e.getStackTrace()));
+            log.error(format("[save room]: error--> {0}", e.getMessage()));
             return null;
         }
     }

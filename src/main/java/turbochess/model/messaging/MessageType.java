@@ -12,6 +12,6 @@ public enum MessageType{
     BET_RAISE,      // user informs the server they wish to increase their bet on the current match BY the amount
                     // specified in the payload, server checks the user's coin balance
 
-    SAVE            // if the users wish to resume the game at a later game, only then do we save the game state the DB
+    SAVE_ROOM            // if the users wish to resume the game at a later game, only then do we save the game state the DB
 
 }

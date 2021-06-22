@@ -21,6 +21,7 @@ var messageInputBox = document.querySelector('#message-input-box');
 var betForm = document.querySelector('#betForm');
 var betInputBox = document.querySelector('#bet-input-box');
 
+var actionsDiv = document.querySelector('#actions');
 var boardDiv = document.querySelector('.board');
 
 createRoomForm.addEventListener('submit', handleCreateRoom, true);
@@ -28,10 +29,11 @@ roomCodeForm.addEventListener('submit', handleJoinRoom, true);
 messageForm.addEventListener('submit', sendMessage, true);
 betForm.addEventListener('submit', sendBetRaise, true);
 
-
+var isRoomOwner=false;
+var numPeopleInRoom=0;      // incremented via JOIN_ROOM, decremented via LEAVE_ROOM
 var stompClient = null;
 var roomCode = null;            // set via an ajax call by creating or joining a room
-//var username ---->>              is defined and set in the inline script in room.html
+//var username ---->>  is defined and set in the inline script in room.html
 
 var colours = ['#e30e1f', '#0e0ee3', '#cde01d', '#cde01d', '#070806', '#e010b7', '#467a7a'];
 
@@ -42,6 +44,11 @@ const game = new Chess();
 var myColour = null;
 
 function onDragStart (source, piece, position, orientation) {
+    if(numPeopleInRoom < 2)  return false; // need at least two players to play
+    if(!piece.includes(myColour)){  // can't move other colour's pieces
+        return false;
+    }
+
 //    if(game.game_over()){                               // do not pick up pieces if the game is over
 //        var msg = document.getElementById('endGame');
 //        if(msg != null){
@@ -52,9 +59,6 @@ function onDragStart (source, piece, position, orientation) {
 //            } else  document.getElementById('loose').style.display = "flex";    // whites turn
 //        } else  return false;
 //  }
-    if(!piece.includes(myColour)){
-        return false;
-    }
 
 //    if()
 //    if(game.turn() === myColour){
@@ -108,9 +112,11 @@ function onConnected() {
     stompClient.send(`/app/${roomCode}.chat.addUser`, {},
                      JSON.stringify({from: username, type: 'JOIN_ROOM'}));
 
-    connecting.classList.add('hidden');                     // remove the 'Connecting...'
-    boardDiv.classList.remove('hidden');                    // and show the board
-
+    connecting.classList.add('hidden');                                         // remove the 'Connecting...'
+    boardDiv.classList.remove('hidden');                                        // and show the board
+    if(isRoomOwner){
+        actionsDiv.insertAdjacentHTML('afterbegin', '<img src="img/save.jpg" style="width: 50px;" title="Save game" onclick="handleSaveRoom()"/>');
+    }
 }
 
 function sendMessage(e) {
@@ -143,6 +149,7 @@ function sendBetRaise(e){
          };
 
          stompClient.send(`/app/${roomCode}.sys.placeBet`, {}, JSON.stringify(packet));
+         betInputBox.value = 0;
      }
      e.preventDefault();
 }
@@ -176,10 +183,12 @@ function onMessageReceived(messageReceived) {
     break;
 
     case 'JOIN_ROOM':
+        numPeopleInRoom=parseInt(message.payload);
         messageElement.classList.add('event-message');
         message.payload = message.from + ' joined!';
     break;
     case 'LEAVE_ROOM':
+        numPeopleInRoom--;
         messageElement.classList.add('event-message');
         message.payload = message.from + ' left!';
     break;
@@ -225,6 +234,7 @@ function handleJoinRoom(e){
                 data : JSON.stringify(data),
                 url : '/api/join_room',
                 success : function(response) {
+                    isRoomOwner=false;
                     myColour = response.header;
                     roomCode = code;                // set the room 'context'
                     connect();
@@ -261,6 +271,7 @@ function handleCreateRoom(e){
         data : JSON.stringify(data),
         url : '/api/create_room',
         success : function(response) {
+            isRoomOwner=true;
             myColour = response.header;
             roomCode = response.payload;
 //            alert('ROOM '+ roomCode);
@@ -274,8 +285,39 @@ function handleCreateRoom(e){
         }
     });
 }
+
+function handleSaveRoom(){
+//    e.preventDefault();
+    if(!isRoomOwner)    return;
+
+    setCSRFtoken();
+    var packet = {}
+    packet['from'] = username;
+    packet['type']='SAVE_ROOM';
+    packet['context']=roomCode;
+    packet['payload']=game.fen();
+    console.log("TRANSMITTING:");
+    console.log(packet);
+    $.ajax({
+        type : 'POST',
+        contentType : 'application/json',
+        dataType : 'json',
+        data : JSON.stringify(packet),
+        url : '/api/save_room',
+        success : function(response) {
+            alert("Game saved!")
+        },
+        error : function(e) {
+            console.log('ERROR: ', e);
+        },
+        done : function(e) {
+            console.log('done...');
+        }
+    });
+}
+
+
 function handleIncreaseBet(){
-    // TODO add AJAX call to ensure user's coin balance is sufficient for the raise
     var value = parseInt(betInputBox.value, 10);
     value = isNaN(value) ? 0 : value;
     value+=5;

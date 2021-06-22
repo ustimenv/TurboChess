@@ -12,13 +12,8 @@ import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
 import turbochess.model.User;
 import turbochess.model.messaging.MessagePacket;
-import turbochess.model.messaging.ResponsePacket;
 import turbochess.model.room.Participant;
 import turbochess.model.room.Room;
 import turbochess.service.room.RoomException;
@@ -41,19 +36,22 @@ public class RoomSTOMPController extends RoomController{
     @MessageMapping("/{room}.chat.addUser")
     @SendTo("/queue/{room}")
     public MessagePacket addUser(@DestinationVariable String room, @Payload MessagePacket messagePacket,
-                                 SimpMessageHeaderAccessor headerAccessor) {
+                                 SimpMessageHeaderAccessor headerAccessor) throws RoomException{
         // Add username in web socket session
         if(room == null || messagePacket.getFrom().length()<1){
             log.error("[addUser]: Failed to add user");
             return null;
         }   log.info(format("[addUser]: joining msg {0} sent successfully", messagePacket));
         headerAccessor.getSessionAttributes().put("username", messagePacket.getFrom());
+        Room contextRoom = roomService.getRoomByCode(room);
+        messagePacket.setPayload(String.valueOf(contextRoom.getNumParticipants()));
         return messagePacket;
     }
 
-    @MessageMapping("/{room}.sys.makeMove")
+    @MessageMapping("/{room}.sys.sendMove")
     @SendTo("/queue/{room}")
-    public MessagePacket makeMove(@DestinationVariable String room, @Payload MessagePacket messagePacket) {
+    @Transactional
+    public MessagePacket sendMove(@DestinationVariable String room, @Payload MessagePacket messagePacket) {
         log.info(format("Room [{0}]: move made-->{1}", room, messagePacket));
 
         if(room == null || messagePacket==null)	return null;
@@ -93,7 +91,7 @@ public class RoomSTOMPController extends RoomController{
             log.info(format("User {0} made a move successfully", user.getUsername()));
             return messagePacket;
         } catch(RoomException | JsonProcessingException e){
-            log.error(format("[make move]: {0}", (Object) e.getStackTrace()));
+            log.error(format("[make move]: {0}", e.getMessage()));
             return null;
         }
     }
@@ -122,7 +120,7 @@ public class RoomSTOMPController extends RoomController{
             log.info(format("Bet of {0} coins has been placed successfully by {1}", betAmount, p.getUser().getUsername()));
             return packet;
         } catch(RoomException | NumberFormatException e){
-            log.error(format("[place bet]: failed to place bet --> {0}", (Object) e.getStackTrace()));
+            log.error(format("[place bet]: failed to place bet --> {0}", e.getMessage()));
             return null;		// TODO change to 505 or smth
         }
     }
