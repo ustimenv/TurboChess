@@ -72,6 +72,20 @@ public class RoomController{
 										 .setParameter("code", room.getCode())
 										 .getSingleResult();
 	}
+	protected void increaseParticipantBetBy(User user, Room room, int betAmount){
+			entityManager.createNamedQuery("Participant.increaseBetAmountBy")
+										 .setParameter("user_id", user.getId())
+										 .setParameter("code", room.getCode())
+										 .setParameter("betAmount", betAmount)
+										 .executeUpdate();
+	}
+	protected void removeUserCoins(User user, int amount){
+		entityManager.createNamedQuery("User.removeCoins")
+						.setParameter("username", user.getUsername())
+						.setParameter("amount", amount)
+						.executeUpdate();
+	}
+
 
 	// CODE CREATION
 	private int n1=0, n2=0, n3=0;								// counters for the 3 segments that form the room code

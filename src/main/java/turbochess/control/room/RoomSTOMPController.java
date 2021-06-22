@@ -11,8 +11,14 @@ import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 import turbochess.model.User;
 import turbochess.model.messaging.MessagePacket;
+import turbochess.model.messaging.ResponsePacket;
 import turbochess.model.room.Participant;
 import turbochess.model.room.Room;
 import turbochess.service.room.RoomException;
@@ -89,6 +95,35 @@ public class RoomSTOMPController extends RoomController{
         } catch(RoomException | JsonProcessingException e){
             log.error(format("[make move]: {0}", (Object) e.getStackTrace()));
             return null;
+        }
+    }
+
+    @MessageMapping("/{room}.sys.placeBet")
+    @SendTo("/queue/{room}")
+    @Transactional
+    public MessagePacket placeBet(@DestinationVariable String room, @Payload MessagePacket packet){
+        log.info(format("[place bet]: received packet{0}", packet));
+        try{
+            User userFrom = getUserByUsername(packet.getFrom());
+            Room contextRoom = roomService.getRoomByCode(packet.getContext());
+            Participant p = getParticipantByUsernameAndRoom(userFrom, contextRoom);
+
+            int userBalance = userFrom.getCoins();
+            int betAmount = Integer.parseInt(packet.getPayload());
+
+            if(betAmount <= 0)	throw new NumberFormatException("Invalid bet value: " + betAmount);
+
+            if(userBalance < betAmount){
+                throw new RoomException(format("Insufficient ({0}) balance ({1}) for player {2}",
+                        userBalance, betAmount, userFrom.getUsername()));
+            }
+            removeUserCoins(userFrom, betAmount);
+            increaseParticipantBetBy(userFrom, contextRoom, betAmount);
+            log.info(format("Bet of {0} coins has been placed successfully by {1}", betAmount, p.getUser().getUsername()));
+            return packet;
+        } catch(RoomException | NumberFormatException e){
+            log.error(format("[place bet]: failed to place bet --> {0}", (Object) e.getStackTrace()));
+            return null;		// TODO change to 505 or smth
         }
     }
 

@@ -26,7 +26,7 @@ var boardDiv = document.querySelector('.board');
 createRoomForm.addEventListener('submit', handleCreateRoom, true);
 roomCodeForm.addEventListener('submit', handleJoinRoom, true);
 messageForm.addEventListener('submit', sendMessage, true);
-betForm.addEventListener('submit', betRaise, true);
+betForm.addEventListener('submit', sendBetRaise, true);
 
 
 var stompClient = null;
@@ -73,7 +73,7 @@ function onDrop (source, target) {
         promotion: 'q'                              // NOTE: always promote to a queen for example simplicity
     });
     if (move === null)    return 'snapback'         // illegal move
-    makeMove(move);
+    sendMove(move);
 }
 
 function onSnapEnd () {
@@ -127,13 +127,13 @@ function sendMessage(e) {
     }
     e.preventDefault();
 }
-function makeMove(movementJSON){
+function sendMove(movementJSON){
     var packet = JSON.stringify({from: username, context: roomCode, type: 'MOVE', payload: JSON.stringify(movementJSON)});
     console.log(packet);
-    stompClient.send(`/app/${roomCode}.sys.makeMove`, {}, packet);
+    stompClient.send(`/app/${roomCode}.sys.sendMove`, {}, packet);
 }
 
-function betRaise(e){
+function sendBetRaise(e){
      if(betInputBox && stompClient) {
          var packet = {
              from: username,
@@ -142,7 +142,7 @@ function betRaise(e){
              context: roomCode
          };
 
-         stompClient.send(`/app/${roomCode}.sys.betRaise`, {}, JSON.stringify(packet));
+         stompClient.send(`/app/${roomCode}.sys.placeBet`, {}, JSON.stringify(packet));
      }
      e.preventDefault();
 }

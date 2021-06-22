@@ -26,7 +26,10 @@ import java.io.Serializable;
                 query= "SELECT colour FROM Participant WHERE user_id = :user_id AND room_code = :code"),
 
         @NamedNativeQuery(name="Participant.getRoomParticipants",
-                query= "SELECT * FROM Participant WHERE room_code = :code"),
+                query= "SELECT * WHERE Participant WHERE room_code = :code"),
+
+        @NamedNativeQuery(name="Participant.increaseBetAmountBy",
+                query= "UPDATE Participant SET current_bet = current_bet + :betAmount WHERE user_id = :user_id AND room_code = :code"),
 
 })
 public class Participant {

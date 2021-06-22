@@ -107,37 +107,5 @@ public class RoomAJAXController extends RoomController{
     }
 
 
-//	@RequestMapping(value = "/api/place_bet", method=RequestMethod.POST, produces = "application/json")
-//	@ResponseBody
-//	@Transactional
-//	public ResponsePacket placeBet(@RequestBody MessagePacket packet){
-//		log.info(format("[place bet]: received packet{0}", packet));
-//		String from =null;
-//		int betAmount=-1;
-//		try{
-//			from = packet.getFrom();
-//			betAmount = Integer.parseInt(packet.getPayload());
-//			if(betAmount<=0)	throw new NumberFormatException("Invalid bet value: " + betAmount);
-//			User userFrom = getUserByUsername(from);
-//			Integer currentUserBalance = entityManager.createNamedQuery("User.getBalanceByUsername", Integer.class)
-//					.setParameter("username", userFrom.getUsername())
-//					.getSingleResult();
-//
-//			Room room = roomService.getRoomByCode(packet.getContext());
-//			Participant p = getParticipantByUsernameAndRoom(userFrom, room);
-//			// all the relevant variables initialised at this point
-//			if(currentUserBalance == null || currentUserBalance < betAmount){
-//				throw new RoomException(format("Insufficient ({0}) balance ({1}) for player {2}", currentUserBalance, betAmount, userFrom.getUsername()));
-//			}
-//			entityManager.createNamedQuery("User.removeCoins")
-//			 			 .setParameter("username", userFrom.getUsername())
-//						 .setParameter("amount", betAmount).executeUpdate();
-//
-//			log.info(format("Bet of {0} coins has been placed successfully by {1}", betAmount, p.getUser().getUsername()));
-//			return new ResponsePacket("OKI");
-//		} catch(RoomException | NumberFormatException e){
-//			log.error(format("[place bet]: failed to place bet for participant {0} --> {1}", from, e.getMessage()));
-//			return null;		// TODO change to 505 or smth
-//		}
-//	}
+
 }
