@@ -5,10 +5,21 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.io.Serializable;
 
 @Entity
 @Data
 @NoArgsConstructor
+
+@NamedNativeQueries({
+        @NamedNativeQuery(name="Participant.getByUserIdAndRoomCode",
+                query= "SELECT * FROM Participant WHERE user_id = :user_id AND room_code = :code", resultClass = Participant.class),
+        @NamedNativeQuery(name="Participant.getRoleByUserIdAndRoomCode",
+                query= "SELECT role FROM Participant WHERE user_id = :user_id AND room_code = :code"),
+        @NamedNativeQuery(name="Participant.getColourByUserIdAndRoomCode",
+                query= "SELECT colour FROM Participant WHERE user_id = :user_id AND room_code = :code"),
+
+})
 public class Participant {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

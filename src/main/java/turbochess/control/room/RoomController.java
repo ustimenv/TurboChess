@@ -4,8 +4,6 @@ package turbochess.control.room;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.databind.util.JSONPObject;
-import com.jayway.jsonpath.JsonPath;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +32,6 @@ import javax.persistence.EntityManager;
 import javax.persistence.Query;
 import java.util.ArrayList;
 
-import static com.fasterxml.jackson.databind.DeserializationFeature.UNWRAP_ROOT_VALUE;
 import static java.text.MessageFormat.format;
 
 @Controller
@@ -72,8 +69,6 @@ public class RoomController{
 		return code;
 	}
 
-
-
 	@Autowired
 	private SimpMessagingTemplate template;
 
@@ -81,7 +76,7 @@ public class RoomController{
 	private RoomService roomService;
 
 	@Autowired
-	private EntityManager entityManager;		// instead we could potentially convert the User into a repository
+	private EntityManager entityManager;
 
 	//STOMP
 	@MessageMapping("/{room}.chat.sendMessage")
@@ -117,36 +112,21 @@ public class RoomController{
 		log.info(format("Room [{0}]: move made-->{1}", room, messagePacket));
 
 		if(room == null || messagePacket==null)	return null;
-		for(int i=0; i<10; i++)
-			System.out.println("Woop woop");
+
 		// check to see if the sender has the permission to make this move
 		String from=null, payload=null;
 		try{
 			from = messagePacket.getFrom();
 			payload = messagePacket.getPayload();
-			ObjectMapper objectMapper = new ObjectMapper();
-			ObjectNode node = objectMapper.readValue(payload, ObjectNode.class);
+			ObjectNode node = new ObjectMapper().readValue(payload, ObjectNode.class);
 			String allegedColour = String.valueOf(node.get("color")).replaceAll("\"", "");
-
-			System.out.println(allegedColour);
-			System.out.println(allegedColour.getClass());
-			System.out.println(allegedColour.hashCode());
 
 			User user = getUserByUsername(from);
 			Room contextRoom = roomService.getRoomByCode(room);
 			Participant p = getParticipantByUsernameAndRoom(user, contextRoom);
 
-			System.out.println(p.getColourString());
-			System.out.println(p.getColourString().getClass());
-			System.out.println(p.getColourString().hashCode());
-
 			if(!p.getColourString().equals(allegedColour))
 				throw new RoomException(format("Participant {0} with colour {1} can't move for {2}", from, p.getColourString(), allegedColour));
-			log.info(format("User {0} made a move successfully", from));
-			log.info(format("User {0} made a move successfully", from));
-			log.info(format("User {0} made a move successfully", from));
-			log.info(format("User {0} made a move successfully", from));
-			log.info(format("User {0} made a move successfully", from));
 			log.info(format("User {0} made a move successfully", from));
 			return messagePacket;
 		} catch(RoomException | JsonProcessingException e){
@@ -162,9 +142,10 @@ public class RoomController{
 	@Transactional
 	public ResponsePacket createRoom(@RequestBody MessagePacket packet){
 		log.info(format("[create room]: received packet{0}", packet));
+		String from=null, code=null;
 		try{
-			String from = packet.getFrom();
-			String code = nextRoomCode();					// code generation guarantees room code is unique
+			from = packet.getFrom();
+			code = nextRoomCode();					// code generation guarantees room code is unique, if implementation changes will have to check for room's existence
 			User userFrom = getUserByUsername(from);
 			Room createdRoom = roomService.createRoom(code, Integer.parseInt(packet.getPayload()));
 			Participant p = new Participant(createdRoom, userFrom);
@@ -176,7 +157,7 @@ public class RoomController{
 			return new ResponsePacket(p.getColourString(), code);
 		} catch(RoomException e){
 			log.error(format("[create room]: failed to create room {0}", e.getMessage()));
-			return null;		// TODO change to 505 or smth
+			return null;		// TODO change to smth like 505?
 		}
 	}
 
@@ -192,9 +173,9 @@ public class RoomController{
 			User userFrom = getUserByUsername(from);
 			if(!roomService.isRoomBelowCapacity(code))	throw new RoomException(format("Capacity exceeded for room {0)", code));
 
-			Room roomToJoin = roomService.getRoomByCode(code);
-			Participant p = new Participant(roomToJoin, userFrom);
+			Participant p = new Participant(roomService.getRoomByCode(code), userFrom);
 			p.setRole(roomService.assignRole(code, p));
+
 			if(p.getRole() == Participant.Role.OBSERVER){
 				p.setColour(Participant.Colour.NONE);
 			} else{
@@ -246,24 +227,30 @@ public class RoomController{
 
 
 	private User getUserByUsername(String username) throws RoomException{
-		Query query = entityManager.createQuery("SELECT u FROM User u WHERE u.username = :username")
-									.setParameter("username", username);
-		User u = (User) query.getSingleResult();
-		if(u == null){
-			throw new RoomException(format("Unable to find user {0}", username));
-		} else	return u;
+		User u = entityManager.createQuery("SELECT u FROM User u WHERE u.username = :username AND enabled = 1", User.class)
+								.setParameter("username", username)
+								.getSingleResult();
+//User u = entityManager.createQuery("User.byUsername", User.class)	//todo why? {java.lang.IllegalArgumentException: Could not locate named parameter [username], expecting one of []}
+//								.setParameter("username", username)
+//								.getSingleResult();
+		if(u != null){
+			return u;
+		} else	throw new RoomException(format("Unable to find user {0}", username));
 	}
+
 	private Participant getParticipantByUsernameAndRoom(User user, Room room) throws RoomException{
 		String username, roomCode;
 		try{
 			username = user.getUsername();
 			roomCode = room.getCode();
-			Participant p = (Participant) entityManager.createNativeQuery(
-					"SELECT * FROM Participant WHERE user_id = :user_id AND room_code = :code",  Participant.class)
-					.setParameter("user_id", user.getId()).setParameter("code", room.getCode()).getSingleResult();
-			if(p == null){
-				throw new RoomException(format("Unable to find participant {0} in room {1}", username, roomCode));
-			} else	return p;
+
+			Participant p = entityManager.createNamedQuery("Participant.getByUserIdAndRoomCode", Participant.class)
+										 .setParameter("user_id", user.getId())
+					  					 .setParameter("code", room.getCode())
+										 .getSingleResult();
+			if(p != null){
+				return p;
+			} else	throw new RoomException(format("Unable to find participant {0} in room {1}", username, roomCode));
 		} catch(Exception e){
 			throw new RoomException(e.getMessage());
 		}

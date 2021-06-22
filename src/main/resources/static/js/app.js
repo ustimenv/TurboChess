@@ -172,7 +172,7 @@ function onMessageReceived(messageReceived) {
     break;
 
     case 'CREATE_ROOM':
-        alert('creating room?');
+//        alert('creating room?');
     break;
 
     case 'JOIN_ROOM':
@@ -263,7 +263,7 @@ function handleCreateRoom(e){
         success : function(response) {
             myColour = response.header;
             roomCode = response.payload;
-            alert('ROOM '+ roomCode);
+//            alert('ROOM '+ roomCode);
             connect();
         },
         error : function(e) {
