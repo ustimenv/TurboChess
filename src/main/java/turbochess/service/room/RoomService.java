@@ -18,4 +18,5 @@ public interface RoomService {
     boolean isRoomBelowCapacity(String roomCode)                                        throws RoomException;
     void setGameState(String roomCode, Room.GameState newState)                         throws RoomException;
     void prepareAndSave(String roomCode, String boardState, String participantInfo)   throws RoomException;
+
 }

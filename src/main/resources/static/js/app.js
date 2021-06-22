@@ -154,6 +154,16 @@ function sendBetRaise(e){
      e.preventDefault();
 }
 
+function sendCheer(e){
+     var packet = {
+         from: username,
+         payload: null,
+         type: 'CHEER',
+         context: roomCode
+     };
+     stompClient.send(`/app/${roomCode}.chat.cheer`, {}, JSON.stringify(packet));
+}
+
 function onMessageReceived(messageReceived) {
     var message = JSON.parse(messageReceived.body);
 
@@ -176,6 +186,9 @@ function onMessageReceived(messageReceived) {
     case 'BET_RAISE':
         messageElement.classList.add('event-message');
         message.payload = message.from + ' has increased their bet to ' + message.payload + '!';
+    break;
+    case 'CHEER':
+        messageElement.classList.add('event-message');
     break;
 
     case 'CREATE_ROOM':
