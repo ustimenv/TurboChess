@@ -1,5 +1,9 @@
 package turbochess.model.room;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import turbochess.model.User;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -14,10 +18,15 @@ import java.io.Serializable;
 @NamedNativeQueries({
         @NamedNativeQuery(name="Participant.getByUserIdAndRoomCode",
                 query= "SELECT * FROM Participant WHERE user_id = :user_id AND room_code = :code", resultClass = Participant.class),
+
         @NamedNativeQuery(name="Participant.getRoleByUserIdAndRoomCode",
                 query= "SELECT role FROM Participant WHERE user_id = :user_id AND room_code = :code"),
+
         @NamedNativeQuery(name="Participant.getColourByUserIdAndRoomCode",
                 query= "SELECT colour FROM Participant WHERE user_id = :user_id AND room_code = :code"),
+
+        @NamedNativeQuery(name="Participant.getRoomParticipants",
+                query= "SELECT * FROM Participant WHERE room_code = :code"),
 
 })
 public class Participant {
@@ -74,6 +83,15 @@ public class Participant {
         } else{
             return this.user.getUsername().equals(((Participant) other).user.getUsername()) &&
                    this.room.getCode().equals(((Participant) other).room.getCode());
+        }
+    }
+
+    public String toJSON(){
+        try{
+            return new ObjectMapper().writeValueAsString(this);
+        } catch(JsonProcessingException e){
+            e.printStackTrace();
+            return null;
         }
     }
 }

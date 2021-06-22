@@ -1,5 +1,6 @@
 package turbochess.model.room;
 
+import lombok.Data;
 import turbochess.service.room.RoomException;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -12,11 +13,11 @@ import java.util.List;
 import static java.text.MessageFormat.format;
 
 @Entity
+@Data
 @NoArgsConstructor
 public class Room{                           // includes two players and an undetermined number of observers
 
     @Id
-    @Getter @Setter
     private String code;
 
     @Column(nullable = false)
@@ -32,6 +33,13 @@ public class Room{                           // includes two players and an unde
 
     @OneToMany(mappedBy = "room", fetch = FetchType.LAZY)
     private List<Participant> participants = new ArrayList<>();
+
+    @Column(name="stored_fen", nullable = true)
+    String storedFen;                         // board state, initialised only when the room's creator asks for it
+
+    @Column(name="stored_participants", nullable = true)
+    String storedParticipants;                         // json string containing serialised participants (ids, roles, bets)
+
 
 
     public Room(String code, int capacity){
