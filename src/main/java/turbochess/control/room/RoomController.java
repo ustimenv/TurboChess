@@ -21,9 +21,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
+import turbochess.model.Player;
 import turbochess.model.User;
 import turbochess.model.messaging.MessagePacket;
 import turbochess.model.messaging.ResponsePacket;
+import turbochess.model.room.Game;
 import turbochess.model.room.Participant;
 import turbochess.model.room.Room;
 import turbochess.service.room.RoomException;
@@ -32,7 +34,10 @@ import turbochess.service.room.RoomService;
 import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
+import javax.servlet.http.HttpSession;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.List;
 
 import static com.fasterxml.jackson.databind.DeserializationFeature.UNWRAP_ROOT_VALUE;
 import static java.text.MessageFormat.format;
@@ -110,7 +115,7 @@ public class RoomController{
 		headerAccessor.getSessionAttributes().put("username", messagePacket.getFrom());
 		return messagePacket;
 	}
-
+	@Transactional
 	@MessageMapping("/{room}.sys.makeMove")
 	@SendTo("/queue/{room}")
 	public MessagePacket makeMove(@DestinationVariable String room, @Payload MessagePacket messagePacket) {
@@ -128,14 +133,19 @@ public class RoomController{
 			ObjectNode node = objectMapper.readValue(payload, ObjectNode.class);
 			String allegedColour = String.valueOf(node.get("color")).replaceAll("\"", "");
 
+
 			System.out.println(allegedColour);
-			System.out.println(allegedColour.getClass());
-			System.out.println(allegedColour.hashCode());
+			//System.out.println(allegedColour.getClass());
+			//System.out.println(allegedColour.hashCode());
 
 			User user = getUserByUsername(from);
 			Room contextRoom = roomService.getRoomByCode(room);
 			Participant p = getParticipantByUsernameAndRoom(user, contextRoom);
-
+			Query query = entityManager.createQuery("SELECT g FROM Game g WHERE g.room_code = :room_code")
+					.setParameter("room_code", room);
+			Game g = (Game) query.getSingleResult();
+			g.addMove(payload);
+			entityManager.persist(g);
 			System.out.println(p.getColourString());
 			System.out.println(p.getColourString().getClass());
 			System.out.println(p.getColourString().hashCode());
@@ -143,11 +153,7 @@ public class RoomController{
 			if(!p.getColourString().equals(allegedColour))
 				throw new RoomException(format("Participant {0} with colour {1} can't move for {2}", from, p.getColourString(), allegedColour));
 			log.info(format("User {0} made a move successfully", from));
-			log.info(format("User {0} made a move successfully", from));
-			log.info(format("User {0} made a move successfully", from));
-			log.info(format("User {0} made a move successfully", from));
-			log.info(format("User {0} made a move successfully", from));
-			log.info(format("User {0} made a move successfully", from));
+
 			return messagePacket;
 		} catch(RoomException | JsonProcessingException e){
 			log.error(format("[make move]: User {0} -->", from, e.getStackTrace()));
@@ -160,7 +166,7 @@ public class RoomController{
 	@RequestMapping(value = "/api/create_room", method=RequestMethod.POST, produces = "application/json")
 	@ResponseBody
 	@Transactional
-	public ResponsePacket createRoom(@RequestBody MessagePacket packet){
+	public ResponsePacket createRoom(@RequestBody MessagePacket packet, HttpSession session){
 		log.info(format("[create room]: received packet{0}", packet));
 		try{
 			String from = packet.getFrom();
@@ -170,8 +176,19 @@ public class RoomController{
 			Participant p = new Participant(createdRoom, userFrom);
 			p.setRole(roomService.assignRole(code, p));
 			p.setColour(Participant.Colour.WHITE);
+			//se crea el juego con el jugador
+			Player p1 = new Player();
+			p1.setUser((User) session.getAttribute("u"));
+			p1.setWhite(true);
+			Game g = new Game();
+			g.setPlayers(p1);
+			g.setCreationDate(LocalDateTime.now());
+			g.setGameType(Game.GameType.NORMAL);
+			g.setRoom_code(code);
 			roomService.joinRoom(createdRoom.getCode(), p);
 			entityManager.persist(p);
+			entityManager.persist(p1);
+			entityManager.persist(g);
 			log.info(format("Room {0} created successfully by {1}", code, p.getUser().getUsername()));
 			return new ResponsePacket(p.getColourString(), code);
 		} catch(RoomException e){
@@ -198,7 +215,16 @@ public class RoomController{
 			if(p.getRole() == Participant.Role.OBSERVER){
 				p.setColour(Participant.Colour.NONE);
 			} else{
+				Query query = entityManager.createQuery("SELECT g FROM Game g WHERE g.room_code = :room_code")
+						.setParameter("room_code", code);
+				Game g = (Game) query.getSingleResult();
+				Player p2 = new Player();
+				p2.setUser(userFrom);
+				p2.setWhite(false);
+				g.setPlayers(p2);
 				p.setColour(Participant.Colour.BLACK);
+				entityManager.persist(p2);
+				entityManager.persist(g);
 			}
 			roomService.joinRoom(code, p);
 			entityManager.persist(p);

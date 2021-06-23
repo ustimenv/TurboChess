@@ -32,7 +32,18 @@
         <a th:href="@{/register}" >Create an account in TurboChess </a>
     </div>
         </form>
-
+    <form  method="post" th:action="@{/login}">
+        <input type="hidden" value="pepa" id="username" name="username">
+        <input type="hidden" value="pepa" id="password" name="password">
+        <button class="loginButton" id="pepalogin"  type="submit">
+        PEPA ADMIN</button>
+    </form>
+    <form  method="post" th:action="@{/login}">
+        <input type="hidden" value="ana" id="username" name="username">
+        <input type="hidden" value="ana" id="password" name="password">
+    <button class="loginButton" id="analogin"  type="submit">
+        ANA</button>
+    </form>
 
     </div>
 <footer th:replace="frags/footer.html"> footer</footer>
