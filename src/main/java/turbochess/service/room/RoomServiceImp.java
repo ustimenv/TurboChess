@@ -76,4 +76,18 @@ public class RoomServiceImp implements RoomService{
         Room room = getRoomByCode(roomCode);
         return room.isBelowCapacity();
     }
+    @Override
+    public void setGameState(String roomCode, Room.GameState newState) throws RoomException{
+        Room room = getRoomByCode(roomCode);
+        room.setGameState(newState);
+        roomRepository.save(room);
+    }
+    @Override
+    public void prepareAndSave(String roomCode, String boardState, String participantInfo)   throws RoomException{
+        Room room = getRoomByCode(roomCode);
+        room.setStoredFen(boardState);
+        room.setStoredParticipants(participantInfo);
+        roomRepository.save(room);
+    }
+
 }

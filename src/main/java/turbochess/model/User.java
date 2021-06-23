@@ -30,10 +30,10 @@ import lombok.AllArgsConstructor;
 
 @NamedQueries({
 	@NamedQuery(name="User.search_result",
-	query= "SELECT u FROM User u WHERE u.username LIKE :username AND u.enabled = 1"),
+				query= "SELECT u FROM User u WHERE u.username LIKE :username AND u.enabled = 1"),
 
 		@NamedQuery(name="User.byUsername",
-                	query= "SELECT u FROM User u WHERE u.username = :username AND u.enabled = 1"),
+					query= "SELECT u FROM User u WHERE u.username = :username AND u.enabled = 1"),
 
 		@NamedQuery(name="User.hasUsername",
                 	query= "SELECT COUNT(u) FROM User u WHERE u.username = :username"),
@@ -58,7 +58,11 @@ import lombok.AllArgsConstructor;
 		@NamedNativeQuery(name = "User.friends", query = "SELECT * FROM user_friends " +
 		"LEFT JOIN user on user_friends.friends_id =user.id WHERE user_id= :userid " +
 		"UNION ALL" +
-		" SELECT  * FROM user_friends LEFT JOIN user on user_friends.user_id=user.id WHERE friends_id= :userid",resultClass = User.class)
+		" SELECT  * FROM user_friends LEFT JOIN user on user_friends.user_id=user.id WHERE friends_id= :userid", resultClass = User.class),
+		@NamedNativeQuery(name="User.byUsernameNative",
+						  query= "SELECT * FROM User WHERE username LIKE :username AND enabled = 1", resultClass=User.class),
+
+
 })
 public class User implements Transferable<User.Transfer> {
 
