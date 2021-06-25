@@ -17,24 +17,6 @@ import java.io.Serializable;
 @Entity
 @Data
 @NoArgsConstructor
-//@NamedQueries({
-//        @NamedQuery(name="Participant.getByUserIdAndRoomCode",
-//                query= "SELECT p FROM Participant p WHERE p.user.id = :user_id AND p.room.code = :code"),
-//
-//        @NamedQuery(name="Participant.getRoleByUserIdAndRoomCode",
-//                query= "SELECT p.role FROM Participant p WHERE p.user.id = :user_id AND p.room.code = :code"),
-//
-//        @NamedQuery(name="Participant.getColourByUserIdAndRoomCode",
-//                query= "SELECT p.colour FROM Participant p WHERE p.user.id = :user_id AND p.room.code = :code"),
-//
-//        @NamedQuery(name="Participant.getRoomParticipants",
-//                query= "SELECT p FROM Participant p WHERE p.room.code = :code"),
-//
-//        @NamedQuery(name="Participant.increaseBetAmountBy",
-//                query= "UPDATE Participant p SET p.currentBet = p.currentBet + :betAmount " +
-//                        "WHERE p.user.id = :user_id AND p.room.code = :code"
-//                ),
-//})
 public class Participant {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

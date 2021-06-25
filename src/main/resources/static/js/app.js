@@ -44,31 +44,28 @@ const game = new Chess();
 var myColour = null;
 var totalBet=0;
 
+var isDraw = false;
+var gameVictory = 0;    // -1 = loss, 0=draw, 1 = victory
+
 function onDragStart (source, piece, position, orientation) {
-    if(numPeopleInRoom < 2)  return false; // need at least two players to play
-    if(!piece.includes(myColour)){  // can't move other colour's pieces
+    if(!game.game_over()){
+        if(numPeopleInRoom < 2)  return false; // need at least two players to play
+        if(!piece.includes(myColour)){  // can't move other colour's pieces
+            return false;
+        }
+    } else{
+        //timer.stop()
+        if(!isDraw){    // if not a draw, then the colour whose turn it's currently NOT wins
+            if(game.tun() === myColour){
+                gameVictory=-1;
+            } else{
+                gameVictory=1;
+            }
+        } else{
+            gameVictory=0;
+        }
         return false;
     }
-
-//    if(game.game_over()){                               // do not pick up pieces if the game is over
-//        var msg = document.getElementById('endGame');
-//        if(msg != null){
-//            msg.style.display = "flex";
-//            if(game.turn() === 'b' ){                                           // blacks turn
-//                msg.style.display = "flex";
-//                document.getElementById('win').style.display = "flex";
-//            } else  document.getElementById('loose').style.display = "flex";    // whites turn
-//        } else  return false;
-//  }
-
-//    if()
-//    if(game.turn() === myColour){
-//        if(myColour === 'w'){
-//            if (piece.search(/^w/) !== -1)    return false;
-//        } else if(myColour==='b'){
-//            if (piece.search(/^b/) !== -1)    return false;
-//        }
-//   }
 }
 
 function onDrop (source, target) {
@@ -288,6 +285,43 @@ function handleCreateRoom(e){
             myColour = response.colourAssigned;
             roomCode = response.roomCodeAssigned;
             connect();
+        },
+        error : function(e) {
+            console.log('ERROR: ', e);
+        },
+        done : function(e) {
+            console.log('done...');
+        }
+    });
+}
+
+function declareGameOver(){
+    setCSRFtoken();
+    var data = {}
+    data['from'] = username;
+    data['type'] = 'GAME_OVER';
+    data['context'] = roomCode;
+    switch(gameVictory){
+    case -1:
+        data['result']='LOSS';
+        break;
+    case 1:
+        data['result']='WIN';
+        break;
+    case 0:
+    default:
+        data['result']='DRAW';
+        break;
+    }
+
+    $.ajax({
+        type : 'POST',
+        contentType : 'application/json',
+        dataType : 'json',
+        data : JSON.stringify(data),
+        url : '/api/game_over',
+        success : function(response) {
+            alert("Game over!");
         },
         error : function(e) {
             console.log('ERROR: ', e);

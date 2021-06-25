@@ -16,4 +16,5 @@ public interface ParticipantService{
 
     List<Participant> getRoomParticipants(Room room);
 
+    List<Long> getUserIdsInRoomWithRole(String roomCode, Participant.Role role) throws ParticipantException;
 }

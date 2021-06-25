@@ -49,4 +49,9 @@ public class ParticipantServiceImp implements ParticipantService{
     public List<Participant> getRoomParticipants(Room room){
         return repository.getRoomParticipants(room.getCode());
     }
+
+    @Override
+    public List<Long> getUserIdsInRoomWithRole(String roomCode, Participant.Role role) throws ParticipantException{
+        return repository.getUserIdsInRoomWithRole(roomCode, role);
+    }
 }

@@ -100,6 +100,8 @@ public class User implements Transferable<User.Transfer> {
 	private int matches_won;
 	@Column(name="matches_played", nullable=false)
 	private int matches_played;
+	@Column(name="matches_lost", nullable=false)
+	private int matches_lost;
 
 	@Column(name="coins", nullable=false)	// coins can be gained by betting as an observer or playing matches
 	private int coins;
@@ -155,5 +157,10 @@ public class User implements Transferable<User.Transfer> {
 		return this.password.equals(this.passwordConfirm);
 	}
 
-
+	public void updateScoreOnVictory(User loser){
+		int scoreDelta = loser.getElo()-getElo();
+		int K = 32;
+		int C=200;//TODO finish this https://en.wikipedia.org/wiki/Chess_rating_system#Example
+//		setElo(getElo() + K/2 * );
+	}
 }

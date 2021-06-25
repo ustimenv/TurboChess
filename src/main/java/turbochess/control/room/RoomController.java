@@ -42,6 +42,15 @@ public class RoomController{
 		} else	throw new RoomException(format("Unable to find user {0}", username));
 	}
 
+	protected User getUserByID(long id) throws RoomException{
+		User u = entityManager.createQuery("SELECT u FROM User u WHERE u.id = :id", User.class)
+								.setParameter("id", id)
+								.getSingleResult();
+		if(u != null){
+			return u;
+		} else	throw new RoomException(format("Unable to find user with id {0}", id));
+	}
+
 
 	// CODE CREATION
 	private int n1=0, n2=0, n3=0;								// counters for the 3 segments that form the room code

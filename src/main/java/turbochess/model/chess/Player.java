@@ -3,7 +3,6 @@ package turbochess.model.chess;
 import javax.persistence.*;
 
 import turbochess.model.User;
-import turbochess.model.room.Game;
 import lombok.Data;
 
 @Entity

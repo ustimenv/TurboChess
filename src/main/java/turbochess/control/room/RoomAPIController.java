@@ -1,5 +1,6 @@
 package turbochess.control.room;
 
+import jdk.vm.ci.meta.Local;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Controller;
@@ -9,16 +10,20 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import turbochess.model.User;
-import turbochess.model.messaging.client.ClientPacket;
 import turbochess.model.messaging.client.CreateRoomPacket;
+import turbochess.model.messaging.client.GameOverPacket;
 import turbochess.model.messaging.client.JoinRoomPacket;
 import turbochess.model.messaging.server.CreateRoomResponse;
 import turbochess.model.messaging.server.JoinRoomResponse;
+import turbochess.model.messaging.server.OkayResponse;
 import turbochess.model.messaging.server.Response;
+import turbochess.model.chess.Game;
 import turbochess.model.room.Participant;
 import turbochess.model.room.Room;
 import turbochess.service.participant.ParticipantException;
 import turbochess.service.room.RoomException;
+
+import java.time.LocalDateTime;
 
 import static java.text.MessageFormat.format;
 
@@ -99,6 +104,47 @@ public class RoomAPIController extends RoomController{
         return new JoinRoomResponse(p.getColourString(), room.getFen(), String.valueOf(p.getCurrentBet()));
     }
 
+    @RequestMapping(value = "/api/game_over", method=RequestMethod.POST, produces = "application/json")
+    @ResponseBody
+    @Transactional
+    public Response endGame(@RequestBody GameOverPacket packet) throws RoomException{
+        LocalDateTime currentTime = LocalDateTime.now();
+        log.info(format("[end game]: received packet{0}", packet));
+
+        try{
+            User userFrom = getUserByUsername(packet.getFrom());
+            Room room = roomService.getRoomByCode(packet.getContext());
+            Participant.Colour senderColour = participantService.getParticipantByUsernameAndRoom(room, userFrom).getColour();
+
+            long whitesId = participantService.getUserIdsInRoomWithRole(room.getCode(), Participant.Role.PLAYER1).get(0);
+            long blacksId = participantService.getUserIdsInRoomWithRole(room.getCode(), Participant.Role.PLAYER2).get(0);
+            User whites = getUserByID(whitesId);
+            User blacks = getUserByID(blacksId);
+
+            Game.Result result;
+            if("WIN".equals(packet.getResult()) && senderColour == Participant.Colour.WHITE){
+                result = Game.Result.WHITES_WON;
+            } else if("WIN".equals(packet.getResult()) && senderColour == Participant.Colour.BLACK){
+                result = Game.Result.BLACKS_WON;
+            } else{
+                result = Game.Result.DRAW;
+            }
+
+            Game game = new Game(whites, blacks, currentTime,result,room.getMoves());
+            entityManager.persist(game);
+            entityManager.remove(room);
+
+
+            log.info(format("Save game for users {0} and {1} successfully", whites.getUsername(), blacks.getUsername()));
+            return new OkayResponse();
+
+        } catch(RoomException | ParticipantException e){
+            log.error(format("[save room]: Failed to save room {0} \n {1}", packet, e.getMessage()));
+            return null;
+        }
+    }
+
+
 //    @RequestMapping(value = "/api/save_room", method=RequestMethod.POST, produces = "application/json")
 //    @ResponseBody
 //    @Transactional
@@ -130,7 +176,5 @@ public class RoomAPIController extends RoomController{
 //            return null;
 //        }
 //    }
-
-
 
 }

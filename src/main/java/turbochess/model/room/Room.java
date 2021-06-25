@@ -29,21 +29,19 @@ public class Room{                           // includes two players and an unde
 
 
     @Enumerated(EnumType.STRING)
-    private @Getter GameState gameState=GameState.NOT_STARTED;
+    private GameState gameState=GameState.NOT_STARTED;
 
     @OneToMany(mappedBy = "room", fetch = FetchType.LAZY)
     private List<Participant> participants = new ArrayList<>();
 
     @Column(name="moves", nullable = false)
-    String moves="";
+    private String moves="";
 
     @Column(name="fen", nullable =false)
-    String fen="";
+    private String fen="";
 
     @Column(name="stored_participants", nullable = true)
-    String storedParticipants;                         // json string containing serialised participants (ids, roles, bets)
-
-
+    private String storedParticipants;                         // json string containing serialised participants (ids, roles, bets)
 
     public Room(String code, int capacity){
         this.code = code;
@@ -53,6 +51,7 @@ public class Room{                           // includes two players and an unde
     public enum GameState{
         NOT_STARTED, WHITE_TURN, BLACK_TURN, WHITE_WON, BLACK_WON, DRAW
     }
+
 
     public Participant.Role assignRole(Participant p) throws RoomException {
         if(participants.contains(p) || participants.size() > capacity){
