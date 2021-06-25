@@ -8,13 +8,18 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
+import turbochess.model.Player;
 import turbochess.model.User;
 import turbochess.model.messaging.MessagePacket;
 import turbochess.model.messaging.ResponsePacket;
+import turbochess.model.room.Game;
 import turbochess.model.room.Participant;
 import turbochess.model.room.Room;
 import turbochess.service.room.RoomException;
 
+import javax.persistence.Query;
+import javax.servlet.http.HttpSession;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -29,23 +34,35 @@ public class RoomAJAXController extends RoomController{
     @RequestMapping(value = "/api/create_room", method=RequestMethod.POST, produces = "application/json")
     @ResponseBody
     @Transactional
-    public ResponsePacket createRoom(@RequestBody MessagePacket packet){
-        log.info(format("[create room]: received packet{0}", packet));
+    public ResponsePacket createRoom(@RequestBody MessagePacket packet, HttpSession session){
 
+        log.info(format("[create room]: received packet{0}", packet));
         try{
-            User userFrom = getUserByUsername(packet.getFrom());
-            // code generation guarantees room code is unique, if implementation changes will have to check for room's existence
-            Room createdRoom = roomService.createRoom(nextRoomCode(), Integer.parseInt(packet.getPayload()));
+            String from = packet.getFrom();
+            String code = nextRoomCode();					// code generation guarantees room code is unique
+            User userFrom = getUserByUsername(from);
+            Room createdRoom = roomService.createRoom(code, Integer.parseInt(packet.getPayload()));
             Participant p = new Participant(createdRoom, userFrom);
-            p.setRole(roomService.assignRole(createdRoom.getCode(), p));
+            p.setRole(roomService.assignRole(code, p));
             p.setColour(Participant.Colour.WHITE);
+            //se crea el juego con el jugador
+            Player p1 = new Player();
+            p1.setUser((User) session.getAttribute("u"));
+            p1.setWhite(true);
+            Game g = new Game();
+            g.setPlayers(p1);
+            g.setCreationDate(LocalDateTime.now());
+            g.setGameType(Game.GameType.NORMAL);
+            g.setRoom_code(code);
             roomService.joinRoom(createdRoom.getCode(), p);
             entityManager.persist(p);
-            log.info(format("Room {0} created successfully by {1}", createdRoom.getCode(), p.getUser().getUsername()));
-            return new ResponsePacket(p.getColourString(), createdRoom.getCode());
+            entityManager.persist(p1);
+            entityManager.persist(g);
+            log.info(format("Room {0} created successfully by {1}", code, p.getUser().getUsername()));
+            return new ResponsePacket(p.getColourString(), code);
         } catch(RoomException e){
-            log.error(format("[create room]: failed to create room {0}", (Object) e.getMessage()));
-            return null;		                    // TODO change to smth like 505?
+            log.error(format("[create room]: failed to create room {0}", e.getMessage()));
+            return null;		// TODO change to 505 or smth
         }
     }
 
@@ -54,30 +71,40 @@ public class RoomAJAXController extends RoomController{
     @Transactional
     public ResponsePacket joinRoom(@RequestBody MessagePacket packet){
         log.info(format("[join room]: received packet{0}", packet));
+        String from=null, code=null;
         try{
-            User userFrom = getUserByUsername(packet.getFrom());
-            Room room = roomService.getRoomByCode(packet.getPayload());
+            from = packet.getFrom();
+            code = packet.getPayload();
+            User userFrom = getUserByUsername(from);
+            if(!roomService.isRoomBelowCapacity(code))	throw new RoomException(format("Capacity exceeded for room {0)", code));
 
-            if(!room.isBelowCapacity())	throw new RoomException(format("Capacity exceeded for room {0)", room.getCode()));
-
-            Participant p = new Participant(room, userFrom);
-            p.setRole(roomService.assignRole(room.getCode(), p));
-
+            Room roomToJoin = roomService.getRoomByCode(code);
+            Participant p = new Participant(roomToJoin, userFrom);
+            p.setRole(roomService.assignRole(code, p));
             if(p.getRole() == Participant.Role.OBSERVER){
                 p.setColour(Participant.Colour.NONE);
             } else{
+                Query query = entityManager.createQuery("SELECT g FROM Game g WHERE g.room_code = :room_code")
+                        .setParameter("room_code", code);
+                Game g = (Game) query.getSingleResult();
+                Player p2 = new Player();
+                p2.setUser(userFrom);
+                p2.setWhite(false);
+                g.setPlayers(p2);
                 p.setColour(Participant.Colour.BLACK);
+                entityManager.persist(p2);
+                entityManager.persist(g);
             }
-            roomService.joinRoom(room.getCode(), p);
+            roomService.joinRoom(code, p);
             entityManager.persist(p);
-            log.info(format("User {0} joined room {1} successfully", userFrom.getUsername(), room.getCode()));
+            log.info(format("User {0} joined room {1} successfully", from, code));
             return new ResponsePacket(p.getColourString(), "oki");
         } catch(RoomException e){
-            log.error(format("[join room]: User failed to join room. Packet:\n {0}\n" +
-                                                                    "Error:\n{1}", packet, e.getMessage()));
+            log.error(format("[join room]: User {0}failed to join room {1} \n{2}", from, code, e.getMessage()));
             return null;
         }
     }
+
     @RequestMapping(value = "/api/save_room", method=RequestMethod.POST, produces = "application/json")
     @ResponseBody
     @Transactional

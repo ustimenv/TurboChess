@@ -1,9 +1,11 @@
 //'use strict';
 
-var script = document.createElement('script');              // Surely there's a better way to import jquery...
-script.src = 'https://code.jquery.com/jquery-3.4.1.min.js';
-script.type = 'text/javascript';
-document.getElementsByTagName('head')[0].appendChild(script);
+//var script = document.createElement('script');              // Surely there's a better way to import jquery...
+//script.src = 'https://code.jquery.com/jquery-3.4.1.min.js';
+//<script src="assets/js/myPage.js"></script>
+//script.src =
+//script.type = 'text/javascript';
+//document.getElementsByTagName('head')[0].appendChild(script);
 
 var usernamePage = document.querySelector('#username-page');
 var roomPage = document.querySelector('#room-page');

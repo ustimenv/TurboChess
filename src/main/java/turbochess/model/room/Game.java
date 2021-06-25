@@ -6,10 +6,12 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import javax.persistence.*;
 
+import com.sun.jmx.remote.internal.ArrayQueue;
 import turbochess.model.Player;
 import lombok.Data;
 @Entity
 @Data
+
 public class Game{
 
     public enum GameType {
@@ -26,6 +28,8 @@ public class Game{
 
     @Enumerated(EnumType.STRING)
     private GameType gameType;
+
+     private String room_code;
     
     private GameResult gameResult;
 
@@ -40,5 +44,15 @@ public class Game{
     //seconds
     private int time ;
 // Hashmap <gameState, Player.user.nickname>>
-    private HashMap<String, String> moves = new HashMap<String,String>();    
+@Column
+@ElementCollection(targetClass=String.class)
+    private List<String> moves = new ArrayList<String>();
+
+    public void setPlayers(Player p) {
+        this.players.add(p);
+    }
+
+    public void addMove(String move){
+        this.moves.add(move);
+    }
 }
