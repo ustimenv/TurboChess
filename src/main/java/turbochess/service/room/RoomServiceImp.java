@@ -16,7 +16,6 @@ public class RoomServiceImp implements RoomService{
 
 
     @Override
-//    @Transactional
     public Room createRoom(String code, int capacity) throws RoomException {
         if(roomExists(code)){
             throw new RoomException(format("Room {0} already exists!", code));

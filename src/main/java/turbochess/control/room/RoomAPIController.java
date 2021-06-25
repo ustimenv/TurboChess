@@ -16,15 +16,14 @@ import turbochess.model.room.Room;
 import turbochess.service.room.RoomException;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import static java.text.MessageFormat.format;
 
 @Controller
-public class RoomAJAXController extends RoomController{
-    private static Logger log = LogManager.getLogger(RoomAJAXController.class);
+public class RoomAPIController extends RoomController{
+    private static Logger log = LogManager.getLogger(RoomAPIController.class);
 
     @RequestMapping(value = "/api/create_room", method=RequestMethod.POST, produces = "application/json")
     @ResponseBody
@@ -78,36 +77,37 @@ public class RoomAJAXController extends RoomController{
             return null;
         }
     }
-    @RequestMapping(value = "/api/save_room", method=RequestMethod.POST, produces = "application/json")
-    @ResponseBody
-    @Transactional
-    public ResponsePacket saveRoom(@RequestBody MessagePacket packet){
-        log.info(format("[save room]: received packet{0}", packet));
-        try{
-            String boardState = packet.getPayload();
-            Room contextRoom = roomService.getRoomByCode(packet.getContext());
-            User userFrom = getUserByUsername(packet.getFrom());
-            Participant.Role role = getParticipantRole(userFrom, contextRoom);
-            if(role != Participant.Role.PLAYER1)    // ie must be the owner of the room
-                throw new RoomException(format("User {0} doesn't have have the permission to save room {1}",
-                                                userFrom.getUsername(), contextRoom.getCode()));
-
-            List<String> participantJSONs=new ArrayList<>();
-            for(Participant p :getRoomParticipants(contextRoom)){
-                participantJSONs.add(p.toJSON());
-            }
-//            for(String s : participantJSONs){
-//                System.out.println(s);
+//    @RequestMapping(value = "/api/save_room", method=RequestMethod.POST, produces = "application/json")
+//    @ResponseBody
+//    @Transactional
+//    public ResponsePacket saveRoom(@RequestBody MessagePacket packet){
+//        log.info(format("[save room]: received packet{0}", packet));
+//        try{
+//            String boardState = packet.getPayload();
+//            Room contextRoom = roomService.getRoomByCode(packet.getContext());
+//            User userFrom = getUserByUsername(packet.getFrom());
+//            Partic
+//            Participant.Role role = getParticipantRole(userFrom, contextRoom);
+//            if(role != Participant.Role.PLAYER1)    // ie must be the owner of the room
+//                throw new RoomException(format("User {0} doesn't have have the permission to save room {1}",
+//                                                userFrom.getUsername(), contextRoom.getCode()));
+//
+//            List<String> participantJSONs=new ArrayList<>();
+//            for(Participant p :getRoomParticipants(contextRoom)){
+//                participantJSONs.add(p.toJSON());
 //            }
-            roomService.prepareAndSave(contextRoom.getCode(), boardState,
-                                        participantJSONs.stream().map(Object::toString).collect(Collectors.joining(",")));
-            log.info(format("Room {0} saved successfully by {1}", contextRoom.getCode(), userFrom.getUsername()));
-            return new ResponsePacket("", "oki");
-        } catch(RoomException e){
-            log.error(format("[save room]: error--> {0}", e.getMessage()));
-            return null;
-        }
-    }
+////            for(String s : participantJSONs){
+////                System.out.println(s);
+////            }
+//            roomService.prepareAndSave(contextRoom.getCode(), boardState,
+//                                        participantJSONs.stream().map(Object::toString).collect(Collectors.joining(",")));
+//            log.info(format("Room {0} saved successfully by {1}", contextRoom.getCode(), userFrom.getUsername()));
+//            return new ResponsePacket("", "oki");
+//        } catch(RoomException e){
+//            log.error(format("[save room]: error--> {0}", e.getMessage()));
+//            return null;
+//        }
+//    }
 
 
 

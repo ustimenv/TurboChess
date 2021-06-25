@@ -16,13 +16,14 @@ import turbochess.model.User;
 import turbochess.model.messaging.MessagePacket;
 import turbochess.model.room.Participant;
 import turbochess.model.room.Room;
+import turbochess.service.participant.ParticipantException;
 import turbochess.service.room.RoomException;
 
 import static java.text.MessageFormat.format;
 
 @Controller
-public class RoomSTOMPController extends RoomController{
-    private static Logger log = LogManager.getLogger(RoomSTOMPController.class);
+public class RoomMessagingController extends RoomController{
+    private static Logger log = LogManager.getLogger(RoomMessagingController.class);
 
     @MessageMapping("/{room}.chat.sendMessage")
     @SendTo("/queue/{room}")
@@ -59,7 +60,7 @@ public class RoomSTOMPController extends RoomController{
         try{
             User user = getUserByUsername(messagePacket.getFrom());
             Room contextRoom = roomService.getRoomByCode(room);
-            Participant p = getParticipantByUsernameAndRoom(user, contextRoom);
+            Participant p = participantService.getParticipantByUsernameAndRoom(contextRoom, user);
 
             ObjectNode payload = new ObjectMapper().readValue(messagePacket.getPayload(), ObjectNode.class);
             String allegedColour = String.valueOf(payload.get("color")).replaceAll("\"", "");
@@ -90,7 +91,7 @@ public class RoomSTOMPController extends RoomController{
             }
             log.info(format("User {0} made a move successfully", user.getUsername()));
             return messagePacket;
-        } catch(RoomException | JsonProcessingException e){
+        } catch(RoomException | JsonProcessingException | ParticipantException e){
             log.error(format("[make move]: {0}", e.getMessage()));
             return null;
         }
@@ -104,7 +105,7 @@ public class RoomSTOMPController extends RoomController{
         try{
             User userFrom = getUserByUsername(packet.getFrom());
             Room contextRoom = roomService.getRoomByCode(packet.getContext());
-            Participant p = getParticipantByUsernameAndRoom(userFrom, contextRoom);
+            Participant p = participantService.getParticipantByUsernameAndRoom(contextRoom, userFrom);
 
             int userBalance = userFrom.getCoins();
             int betAmount = Integer.parseInt(packet.getPayload());
@@ -115,11 +116,12 @@ public class RoomSTOMPController extends RoomController{
                 throw new RoomException(format("Insufficient ({0}) balance ({1}) for player {2}",
                         userBalance, betAmount, userFrom.getUsername()));
             }
-            removeUserCoins(userFrom, betAmount);
-            increaseParticipantBetBy(userFrom, contextRoom, betAmount);
+            userFrom.setCoins(userBalance-betAmount);
+//            removeUserCoins(userFrom, betAmount);
+            p.setCurrentBet(p.getCurrentBet()+betAmount);
             log.info(format("Bet of {0} coins has been placed successfully by {1}", betAmount, p.getUser().getUsername()));
             return packet;
-        } catch(RoomException | NumberFormatException e){
+        } catch(RoomException | NumberFormatException | ParticipantException e){
             log.error(format("[place bet]: failed to place bet --> {0}", e.getMessage()));
             return null;		// TODO change to 505 or smth
         }
