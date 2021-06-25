@@ -5,8 +5,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 import turbochess.model.User;
-import turbochess.model.room.Participant;
-import turbochess.model.room.Room;
 import turbochess.service.participant.ParticipantService;
 import turbochess.service.room.RoomException;
 import turbochess.service.room.RoomService;

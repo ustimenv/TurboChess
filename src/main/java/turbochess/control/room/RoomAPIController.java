@@ -9,15 +9,16 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import turbochess.model.User;
-import turbochess.model.messaging.MessagePacket;
-import turbochess.model.messaging.ResponsePacket;
+import turbochess.model.messaging.client.ClientPacket;
+import turbochess.model.messaging.client.CreateRoomPacket;
+import turbochess.model.messaging.client.JoinRoomPacket;
+import turbochess.model.messaging.server.CreateRoomResponse;
+import turbochess.model.messaging.server.JoinRoomResponse;
+import turbochess.model.messaging.server.Response;
 import turbochess.model.room.Participant;
 import turbochess.model.room.Room;
+import turbochess.service.participant.ParticipantException;
 import turbochess.service.room.RoomException;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
 
 import static java.text.MessageFormat.format;
 
@@ -28,55 +29,76 @@ public class RoomAPIController extends RoomController{
     @RequestMapping(value = "/api/create_room", method=RequestMethod.POST, produces = "application/json")
     @ResponseBody
     @Transactional
-    public ResponsePacket createRoom(@RequestBody MessagePacket packet){
+    public Response createRoom(@RequestBody CreateRoomPacket packet) throws ParticipantException{
         log.info(format("[create room]: received packet{0}", packet));
 
+        Room createdRoom = null;
+        User userFrom = null;
         try{
-            User userFrom = getUserByUsername(packet.getFrom());
+            userFrom = getUserByUsername(packet.getFrom());
             // code generation guarantees room code is unique, if implementation changes will have to check for room's existence
-            Room createdRoom = roomService.createRoom(nextRoomCode(), Integer.parseInt(packet.getPayload()));
-            Participant p = new Participant(createdRoom, userFrom);
-            p.setRole(roomService.assignRole(createdRoom.getCode(), p));
+            createdRoom = roomService.createRoom(nextRoomCode(), Integer.parseInt(packet.getCapacity()));
+            Participant p = participantService.createParticipant(createdRoom, userFrom);
+            p.setRole(createdRoom.assignRole(p));
             p.setColour(Participant.Colour.WHITE);
-            roomService.joinRoom(createdRoom.getCode(), p);
+            createdRoom.addParticipant(p);
             entityManager.persist(p);
+            entityManager.persist(createdRoom);
             log.info(format("Room {0} created successfully by {1}", createdRoom.getCode(), p.getUser().getUsername()));
-            return new ResponsePacket(p.getColourString(), createdRoom.getCode());
+            return new CreateRoomResponse(createdRoom.getCode(), p.getColourString());
         } catch(RoomException e){
             log.error(format("[create room]: failed to create room {0}", (Object) e.getMessage()));
             return null;		                    // TODO change to smth like 505?
+        } catch(ParticipantException e){
+            return retrieveRoomStateForUser(createdRoom, userFrom);
         }
     }
 
     @RequestMapping(value = "/api/join_room", method=RequestMethod.POST, produces = "application/json")
     @ResponseBody
     @Transactional
-    public ResponsePacket joinRoom(@RequestBody MessagePacket packet){
+    public Response joinRoom(@RequestBody JoinRoomPacket packet) throws ParticipantException{
         log.info(format("[join room]: received packet{0}", packet));
+        User userFrom = null;
+        Room room = null;
         try{
-            User userFrom = getUserByUsername(packet.getFrom());
-            Room room = roomService.getRoomByCode(packet.getPayload());
+            userFrom = getUserByUsername(packet.getFrom());
+            room = roomService.getRoomByCode(packet.getRoomToJoin());
+            if(participantService.isUserInRoom(room, userFrom)){
+                return retrieveRoomStateForUser(room, userFrom);
+            }
 
             if(!room.isBelowCapacity())	throw new RoomException(format("Capacity exceeded for room {0)", room.getCode()));
 
-            Participant p = new Participant(room, userFrom);
-            p.setRole(roomService.assignRole(room.getCode(), p));
+            Participant p = participantService.createParticipant(room, userFrom);
+            p.setRole(room.assignRole(p));
 
             if(p.getRole() == Participant.Role.OBSERVER){
                 p.setColour(Participant.Colour.NONE);
             } else{
                 p.setColour(Participant.Colour.BLACK);
             }
-            roomService.joinRoom(room.getCode(), p);
+            room.addParticipant(p);
             entityManager.persist(p);
+            entityManager.persist(room);
             log.info(format("User {0} joined room {1} successfully", userFrom.getUsername(), room.getCode()));
-            return new ResponsePacket(p.getColourString(), "oki");
+            return new JoinRoomResponse(p.getColourString(), "", "0");
         } catch(RoomException e){
             log.error(format("[join room]: User failed to join room. Packet:\n {0}\n" +
                                                                     "Error:\n{1}", packet, e.getMessage()));
             return null;
+        } catch(ParticipantException e){
+            return retrieveRoomStateForUser(room, userFrom);
         }
     }
+
+    private Response retrieveRoomStateForUser(Room room, User user) throws ParticipantException{
+        // the only way we end here is if user is already present in the room, so disregard the exception
+        log.info(format("[get room]: Retrieving room state for {0} for user {1}", room.getCode(), user.getUsername()));
+        Participant p = participantService.getParticipantByUsernameAndRoom(room, user);
+        return new JoinRoomResponse(p.getColourString(), room.getFen(), String.valueOf(p.getCurrentBet()));
+    }
+
 //    @RequestMapping(value = "/api/save_room", method=RequestMethod.POST, produces = "application/json")
 //    @ResponseBody
 //    @Transactional

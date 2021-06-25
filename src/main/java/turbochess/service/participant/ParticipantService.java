@@ -10,7 +10,10 @@ import java.util.List;
 @Service
 public interface ParticipantService{
 
+    boolean isUserInRoom(Room room, User user);
+    Participant createParticipant(Room room, User user)               throws ParticipantException;
     Participant getParticipantByUsernameAndRoom(Room room, User user) throws ParticipantException;
+
     List<Participant> getRoomParticipants(Room room);
 
 }

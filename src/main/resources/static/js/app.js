@@ -42,6 +42,7 @@ var colours = ['#e30e1f', '#0e0ee3', '#cde01d', '#cde01d', '#070806', '#e010b7',
 */
 const game = new Chess();
 var myColour = null;
+var totalBet=0;
 
 function onDragStart (source, piece, position, orientation) {
     if(numPeopleInRoom < 2)  return false; // need at least two players to play
@@ -110,7 +111,7 @@ function onConnected() {
     stompClient.subscribe(`/queue/${roomCode}`, onMessageReceived);             // subscribe to the room's channe;
                                                                                 // inform the room that you've subbed
     stompClient.send(`/app/${roomCode}.chat.addUser`, {},
-                     JSON.stringify({from: username, type: 'JOIN_ROOM'}));
+                     JSON.stringify({from: username, type: 'JOIN_ROOM', roomToJoin: roomCode}));
 
     connecting.classList.add('hidden');                                         // remove the 'Connecting...'
     boardDiv.classList.remove('hidden');                                        // and show the board
@@ -124,7 +125,7 @@ function sendMessage(e) {
     if(messageContent && stompClient) {
         var packet = {
             from: username,
-            payload: messageInputBox.value,
+            text: messageInputBox.value,
             type: 'TEXT',
             context: roomCode
         };
@@ -133,9 +134,13 @@ function sendMessage(e) {
     }
     e.preventDefault();
 }
+
 function sendMove(movementJSON){
-    var packet = JSON.stringify({from: username, context: roomCode, type: 'MOVE', payload: JSON.stringify(movementJSON)});
-    console.log(packet);
+    var packet = JSON.stringify({from: username, context: roomCode, type: 'MOVE', fen: game.fen(),
+                                origin: movementJSON["from"], destination: movementJSON["to"],
+                                colour: movementJSON["color"]
+                                });
+    console.log("SENDING MOVE " + packet);
     stompClient.send(`/app/${roomCode}.sys.sendMove`, {}, packet);
 }
 
@@ -143,12 +148,13 @@ function sendBetRaise(e){
      if(betInputBox && stompClient) {
          var packet = {
              from: username,
-             payload: betInputBox.value,
+             betAmount: betInputBox.value,
              type: 'BET_RAISE',
              context: roomCode
          };
-
          stompClient.send(`/app/${roomCode}.sys.placeBet`, {}, JSON.stringify(packet));
+         totalBet += parseInt(betInputBox.value);
+         alert("Total bet=" +totalBet);
          betInputBox.value = 0;
      }
      e.preventDefault();
@@ -159,6 +165,8 @@ function onMessageReceived(messageReceived) {
 
     var messageElement = document.createElement('li');
     // by the end of the switch, we will have initialised either an event msg or a chat msg
+    var messageToShow="";
+
     switch(message.type){
     // CHAT
     case 'TEXT':
@@ -175,7 +183,7 @@ function onMessageReceived(messageReceived) {
     break;
     case 'BET_RAISE':
         messageElement.classList.add('event-message');
-        message.payload = message.from + ' has increased their bet to ' + message.payload + '!';
+        messageToShow = message.from + ' has increased their bet to ' + message.betAmount + '!';
     break;
 
     case 'CREATE_ROOM':
@@ -183,19 +191,19 @@ function onMessageReceived(messageReceived) {
     break;
 
     case 'JOIN_ROOM':
-        numPeopleInRoom=parseInt(message.payload);
+        numPeopleInRoom=parseInt(message.numParticipants);
         messageElement.classList.add('event-message');
-        message.payload = message.from + ' joined!';
+        messageToShow = message.from + ' joined!';
     break;
     case 'LEAVE_ROOM':
         numPeopleInRoom--;
         messageElement.classList.add('event-message');
-        message.payload = message.from + ' left!';
+        messageToShow = message.from + ' left!';
     break;
     case 'MOVE':
+        console.log(message);
         if(message.from !== username){
-            var payload = JSON.parse(message.payload);
-            game.move({from: payload.from, to: payload.to});
+            game.move({from: message.origin, to: message.destination});
             board.position(game.fen());
         }
         return;
@@ -205,7 +213,7 @@ function onMessageReceived(messageReceived) {
     }
 
     var textElement = document.createElement('p');
-    var messageText = document.createTextNode(message.payload);
+    var messageText = document.createTextNode(messageToShow);
     textElement.appendChild(messageText);
     messageElement.appendChild(textElement);
     messagesBox.appendChild(messageElement);
@@ -224,8 +232,8 @@ function handleJoinRoom(e){
         var data = {}
         data['from'] = username;
         data['type']='JOIN_ROOM';
-        data['payload']=code;
-        data['context']=null;   // at this point the context hasn't been set or 'approved' by the server
+        data['roomToJoin']=code;
+        data['context']='';   // at this point the context hasn't been set or 'approved' by the server
 
         $.ajax({
                 type : 'POST',
@@ -234,10 +242,14 @@ function handleJoinRoom(e){
                 data : JSON.stringify(data),
                 url : '/api/join_room',
                 success : function(response) {
-                    isRoomOwner=false;
-                    myColour = response.header;
-                    roomCode = code;                // set the room 'context'
+                    myColour = response.colourAssigned;
+                    fen = response.fen;
+                    totalBet = response.accumulatedBet;
+                    game.load(fen);
+                    board.position(game.fen());
+                    roomCode = code;                        // set the room 'context'
                     connect();
+
                 },
                 error : function(e) {
                     alert("Room " + code + " doesn't exist!");
@@ -262,7 +274,8 @@ function handleCreateRoom(e){
     var data = {}
     data['from'] = username;
     data['type']='CREATE_ROOM';
-    data['payload']=capacity;
+    data['capacity']=capacity;
+    data['context']='';
 
     $.ajax({
         type : 'POST',
@@ -272,9 +285,8 @@ function handleCreateRoom(e){
         url : '/api/create_room',
         success : function(response) {
             isRoomOwner=true;
-            myColour = response.header;
-            roomCode = response.payload;
-//            alert('ROOM '+ roomCode);
+            myColour = response.colourAssigned;
+            roomCode = response.roomCodeAssigned;
             connect();
         },
         error : function(e) {
@@ -285,37 +297,6 @@ function handleCreateRoom(e){
         }
     });
 }
-
-function handleSaveRoom(){
-//    e.preventDefault();
-    if(!isRoomOwner)    return;
-
-    setCSRFtoken();
-    var packet = {}
-    packet['from'] = username;
-    packet['type']='SAVE_ROOM';
-    packet['context']=roomCode;
-    packet['payload']=game.fen();
-    console.log("TRANSMITTING:");
-    console.log(packet);
-    $.ajax({
-        type : 'POST',
-        contentType : 'application/json',
-        dataType : 'json',
-        data : JSON.stringify(packet),
-        url : '/api/save_room',
-        success : function(response) {
-            alert("Game saved!")
-        },
-        error : function(e) {
-            console.log('ERROR: ', e);
-        },
-        done : function(e) {
-            console.log('done...');
-        }
-    });
-}
-
 
 function handleIncreaseBet(){
     var value = parseInt(betInputBox.value, 10);

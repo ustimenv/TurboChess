@@ -6,7 +6,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import javax.persistence.*;
 
-import turbochess.model.Player;
+import turbochess.model.chess.Player;
 import lombok.Data;
 @Entity
 @Data

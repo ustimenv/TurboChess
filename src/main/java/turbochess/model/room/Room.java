@@ -34,8 +34,11 @@ public class Room{                           // includes two players and an unde
     @OneToMany(mappedBy = "room", fetch = FetchType.LAZY)
     private List<Participant> participants = new ArrayList<>();
 
-    @Column(name="stored_fen", nullable = true)
-    String storedFen;                         // board state, initialised only when the room's creator asks for it
+    @Column(name="moves", nullable = false)
+    String moves="";
+
+    @Column(name="fen", nullable =false)
+    String fen="";
 
     @Column(name="stored_participants", nullable = true)
     String storedParticipants;                         // json string containing serialised participants (ids, roles, bets)

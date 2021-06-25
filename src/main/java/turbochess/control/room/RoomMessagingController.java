@@ -13,7 +13,8 @@ import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import turbochess.model.User;
-import turbochess.model.messaging.MessagePacket;
+import turbochess.model.chess.Move;
+import turbochess.model.messaging.client.*;
 import turbochess.model.room.Participant;
 import turbochess.model.room.Room;
 import turbochess.service.participant.ParticipantException;
@@ -27,46 +28,51 @@ public class RoomMessagingController extends RoomController{
 
     @MessageMapping("/{room}.chat.sendMessage")
     @SendTo("/queue/{room}")
-    public MessagePacket sendMessage(@DestinationVariable String room, @Payload MessagePacket messagePacket) {
+    public ClientPacket sendMessage(@DestinationVariable String room, @Payload TextPacket clientPacket) {
         if(room == null){
             log.error("[sendMessage]: room is null!");
-        } else  log.info(format("[sendMessage]: message {0} sent successfully", messagePacket));
-        return messagePacket;
+        } else  log.info(format("[sendMessage]: message {0} sent successfully", clientPacket));
+        return clientPacket;
     }
 
     @MessageMapping("/{room}.chat.addUser")
     @SendTo("/queue/{room}")
-    public MessagePacket addUser(@DestinationVariable String room, @Payload MessagePacket messagePacket,
-                                 SimpMessageHeaderAccessor headerAccessor) throws RoomException{
+    public ClientPacket addUser(@DestinationVariable String room, @Payload JoinRoomPacket clientPacket,
+                                SimpMessageHeaderAccessor headerAccessor) throws RoomException{
         // Add username in web socket session
-        if(room == null || messagePacket.getFrom().length()<1){
+        if(room == null || clientPacket.getFrom().length()<1){
             log.error("[addUser]: Failed to add user");
             return null;
-        }   log.info(format("[addUser]: joining msg {0} sent successfully", messagePacket));
-        headerAccessor.getSessionAttributes().put("username", messagePacket.getFrom());
+        }   log.info(format("[addUser]: joining msg {0} sent successfully", clientPacket));
+        headerAccessor.getSessionAttributes().put("username", clientPacket.getFrom());
         Room contextRoom = roomService.getRoomByCode(room);
-        messagePacket.setPayload(String.valueOf(contextRoom.getNumParticipants()));
-        return messagePacket;
+        clientPacket.setNumParticipants(String.valueOf(contextRoom.getNumParticipants()));
+        return clientPacket;
     }
 
     @MessageMapping("/{room}.sys.sendMove")
     @SendTo("/queue/{room}")
     @Transactional
-    public MessagePacket sendMove(@DestinationVariable String room, @Payload MessagePacket messagePacket) {
-        log.info(format("Room [{0}]: move made-->{1}", room, messagePacket));
+    public ClientPacket sendMove(@DestinationVariable String room, @Payload MovePacket clientPacket) {
+        log.info(format("Room [{0}]: move made-->{1}", room, clientPacket));
 
-        if(room == null || messagePacket==null)	return null;
+        if(room == null || clientPacket ==null)	return null;
         // check to see if the sender has the permission to make this move
+        for(int i=0; i<10; i++) System.out.println(clientPacket);
         try{
-            User user = getUserByUsername(messagePacket.getFrom());
+            User user = getUserByUsername(clientPacket.getFrom());
             Room contextRoom = roomService.getRoomByCode(room);
             Participant p = participantService.getParticipantByUsernameAndRoom(contextRoom, user);
 
-            ObjectNode payload = new ObjectMapper().readValue(messagePacket.getPayload(), ObjectNode.class);
-            String allegedColour = String.valueOf(payload.get("color")).replaceAll("\"", "");
+            String allegedColour = clientPacket.getColour();
+            String fen = clientPacket.getFen();
+            String from = clientPacket.getOrigin();
+            String to = clientPacket.getDestination();
+            Move move = new Move(allegedColour, from, to);
 
             if(!p.getColourString().equals(allegedColour))
-                throw new RoomException(format("Participant {0} with colour {1} can't move for {2}", user, p.getColourString(), allegedColour));
+                throw new RoomException(format("Participant {0} with colour {1} can't move for "+allegedColour,
+                                                user.getUsername(), p.getColourString()));
 
             boolean notStarted = contextRoom.getGameState() == Room.GameState.NOT_STARTED;
             boolean whitesTurn = contextRoom.getGameState() == Room.GameState.WHITE_TURN;
@@ -77,21 +83,24 @@ public class RoomMessagingController extends RoomController{
             boolean blacksMoving = blacksTurn && p.getColour() == Participant.Colour.BLACK;
 
             if(firstMove){  // ie the first move has just been made
-                roomService.setGameState(contextRoom.getCode(), Room.GameState.BLACK_TURN);
+                contextRoom.setGameState(Room.GameState.BLACK_TURN);
             } else if(whitesMoving){
-                roomService.setGameState(contextRoom.getCode(), Room.GameState.BLACK_TURN);
+                contextRoom.setGameState(Room.GameState.BLACK_TURN);
             } else if(blacksMoving){
-                roomService.setGameState(contextRoom.getCode(), Room.GameState.WHITE_TURN);
+                contextRoom.setGameState(Room.GameState.WHITE_TURN);
             } else{
                 Room.GameState expected;
                 if(whitesTurn)       expected = Room.GameState.BLACK_TURN;
                 else if(blacksTurn)  expected = Room.GameState.WHITE_TURN;
                 else                 expected = null;       // a super invalid game state
-                throw new RoomException(format("Invalid move state: expected {0}, received  {1}",expected, allegedColour));
+                throw new RoomException(format("Invalid move state: expected {0}, received  {1}", expected, allegedColour));
             }
+            contextRoom.setFen(fen);
+            contextRoom.setMoves(contextRoom.getMoves()+"|"+move);
+            entityManager.persist(contextRoom);
             log.info(format("User {0} made a move successfully", user.getUsername()));
-            return messagePacket;
-        } catch(RoomException | JsonProcessingException | ParticipantException e){
+            return clientPacket;
+        } catch(RoomException | ParticipantException e){
             log.error(format("[make move]: {0}", e.getMessage()));
             return null;
         }
@@ -100,7 +109,7 @@ public class RoomMessagingController extends RoomController{
     @MessageMapping("/{room}.sys.placeBet")
     @SendTo("/queue/{room}")
     @Transactional
-    public MessagePacket placeBet(@DestinationVariable String room, @Payload MessagePacket packet){
+    public ClientPacket placeBet(@DestinationVariable String room, @Payload BetPacket packet){
         log.info(format("[place bet]: received packet{0}", packet));
         try{
             User userFrom = getUserByUsername(packet.getFrom());
@@ -108,7 +117,7 @@ public class RoomMessagingController extends RoomController{
             Participant p = participantService.getParticipantByUsernameAndRoom(contextRoom, userFrom);
 
             int userBalance = userFrom.getCoins();
-            int betAmount = Integer.parseInt(packet.getPayload());
+            int betAmount = Integer.parseInt(packet.getBetAmount());
 
             if(betAmount <= 0)	throw new NumberFormatException("Invalid bet value: " + betAmount);
 
@@ -117,7 +126,6 @@ public class RoomMessagingController extends RoomController{
                         userBalance, betAmount, userFrom.getUsername()));
             }
             userFrom.setCoins(userBalance-betAmount);
-//            removeUserCoins(userFrom, betAmount);
             p.setCurrentBet(p.getCurrentBet()+betAmount);
             log.info(format("Bet of {0} coins has been placed successfully by {1}", betAmount, p.getUser().getUsername()));
             return packet;

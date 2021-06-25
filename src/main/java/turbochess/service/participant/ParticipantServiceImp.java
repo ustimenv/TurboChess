@@ -21,6 +21,20 @@ public class ParticipantServiceImp implements ParticipantService{
 
 
     @Override
+    public boolean isUserInRoom(Room room, User user){
+        return 0 < repository.countParticipants(room.getCode(), user.getId());
+    }
+
+    @Override
+    public Participant createParticipant(Room room, User user) throws ParticipantException{
+        if(isUserInRoom(room, user)){
+            throw new ParticipantException(format("User {0} is already in room {1}", user.getUsername(), room.getCode()));
+        } else{
+            return new Participant(room, user);
+        }
+    }
+
+    @Override
     public Participant getParticipantByUsernameAndRoom(Room room, User user) throws ParticipantException{
         String username = user.getUsername();
         String roomCode = room.getCode();
@@ -34,6 +48,5 @@ public class ParticipantServiceImp implements ParticipantService{
     @Override
     public List<Participant> getRoomParticipants(Room room){
         return repository.getRoomParticipants(room.getCode());
-
     }
 }
