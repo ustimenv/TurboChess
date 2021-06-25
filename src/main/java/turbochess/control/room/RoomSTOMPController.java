@@ -33,13 +33,13 @@ public class RoomSTOMPController extends RoomController{
         String[] cheers={"I'm excited to be here!"};    // failsafe
         if(state == Room.GameState.NOT_STARTED){
             cheers = new String[]{format("{0} can't wait for the game to start!", username),
-                                  format("{0} says time is money, let's start the game already!", username)};
+                    format("{0} says time is money, let's start the game already!", username)};
         } else if(state == Room.GameState.WHITE_TURN){
             cheers = new String[]{format("{0} is awaiting the imminent whites victory!", username),
-                                  format("Whites really deserve this victory, says {0}!", username)};
+                    format("Whites really deserve this victory, says {0}!", username)};
         } else if(state == Room.GameState.BLACK_TURN){
             cheers = new String[]{format("Blacks victory isn't far, at least according to {0}", username),
-                                  format("If whites win, I'll eat my own shoe!, claims {0}", username)};
+                    format("If whites win, I'll eat my own shoe!, claims {0}", username)};
         }
         return cheers[ThreadLocalRandom.current().nextInt(0, cheers.length)];
     }
@@ -70,7 +70,7 @@ public class RoomSTOMPController extends RoomController{
     @MessageMapping("/{room}.chat.cheer")
     @SendTo("/queue/{room}")
     public MessagePacket cheer(@DestinationVariable String room, @Payload MessagePacket messagePacket,
-                                 SimpMessageHeaderAccessor headerAccessor) throws RoomException{
+                               SimpMessageHeaderAccessor headerAccessor) throws RoomException{
         log.info(format("[cheer]: {0} sent successfully", messagePacket));
         messagePacket.setPayload(getCheer(messagePacket.getFrom(), room));
         return messagePacket;
