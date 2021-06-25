@@ -192,3 +192,15 @@ li a.upBar:hover {
     left: 35%;
     right: 210px;
   }
+
+.roomcontainer {
+  padding: 2rem 0rem;
+}
+
+h4 {
+  margin: 2rem 0rem 1rem;
+}
+
+.table-image, td,th {
+  vertical-align: middle;
+}

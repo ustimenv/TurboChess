@@ -26,10 +26,10 @@ var betInputBox = document.querySelector('#bet-input-box');
 var actionsDiv = document.querySelector('#actions');
 var boardDiv = document.querySelector('.board');
 
-createRoomForm.addEventListener('submit', handleCreateRoom, true);
-roomCodeForm.addEventListener('submit', handleJoinRoom, true);
-messageForm.addEventListener('submit', sendMessage, true);
-betForm.addEventListener('submit', sendBetRaise, true);
+if(createRoomForm !==null)createRoomForm.addEventListener('submit', handleCreateRoom, true);
+if(roomCodeForm !==null)roomCodeForm.addEventListener('submit', handleJoinRoom, true);
+if(messageForm !==null)messageForm.addEventListener('submit', sendMessage, true);
+if(betForm !==null)betForm.addEventListener('submit', sendBetRaise, true);
 
 var isRoomOwner=false;
 var numPeopleInRoom=0;      // incremented via JOIN_ROOM, decremented via LEAVE_ROOM
