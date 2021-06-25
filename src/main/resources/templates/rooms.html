@@ -64,14 +64,16 @@
                     </td>
 
                 </tr>
-                <tr>
-                    <th scope="row">QWERTYUI</th>
-                    <td>jugador X</td>
-                    <td>jugador Y</td>
-                    <td>4</td>
+                <tr th:each="r: ${rooms}">
+                    <th scope="row" th:value="${r.getCode()}" th:text="${r.getCode()}"></th>
+                    <td th:text="${r.getPlayer1().getUsername()}"></td>
+                    <!--th:text="${r.getPlayer2().getUsername()} ?: 'default value'"-->
+                    <!--<td th:unless="${r.getPlayer2() eq null}"> wait</td>-->
+                    <td> <span ></span>waiting</td>
+                    <td><span th:text="${r.getCapacity()}" /> / <span th:text="${r.getNumParticipants()}" /></td>
                     <td>
                         <form id="roomCodeForm" name="roomCodeForm">
-                            <input type="hidden" id="roomcode" placeholder="Enter the room code here" autocomplete="off" class="form-control" />
+                            <input type="hidden" id="roomcode"  autocomplete="off" class="form-control" />
                             <button type="submit" class="btn btn-primary"><i class="far fa-eye"></i>Join</button>
                         </form>
                         <button type="button" class="btn btn-danger"><i class="fa fa-trash"></i>Drop(ADMIN)</button>
