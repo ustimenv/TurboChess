@@ -3,6 +3,7 @@ package turbochess.service.bet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import turbochess.model.chess.Bet;
+import turbochess.model.chess.Game;
 import turbochess.model.room.Participant;
 import turbochess.model.room.Room;
 import turbochess.repository.BetRepository;
@@ -33,5 +34,10 @@ public class BetServiceImp implements BetService{
     @Override
     public void deleteParticipantBets(Participant p) throws BetException{
         repository.deleteBetsByParticipant(p.getId());
+    }
+
+    @Override
+    public List<Bet> getRoomBetsByResult(String roomCode, Game.Result result){
+        return repository.getRoomBetsByResult(roomCode, result);
     }
 }

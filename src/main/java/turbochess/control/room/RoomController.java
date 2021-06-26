@@ -55,6 +55,13 @@ public class RoomController{
 		} else	throw new RoomException(format("Unable to find user with id {0}", id));
 	}
 
+	protected void setUserCoins(long userId, int newCoins) throws RoomException{
+		entityManager.createQuery("UPDATE User u SET u.coins = :newCoins WHERE u.id = :userID")
+								.setParameter("newCoins", newCoins)
+								.setParameter("userID", userId)
+								.executeUpdate();
+	}
+
 
 	// CODE CREATION
 	private int n1=0, n2=0, n3=0;								// counters for the 3 segments that form the room code

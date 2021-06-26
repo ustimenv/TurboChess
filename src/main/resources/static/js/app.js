@@ -1,61 +1,72 @@
 //'use strict';
 
-var script = document.createElement('script');              // Surely there's a better way to import jquery...
+var script = document.createElement('script');            //TODO import jquery locally
 script.src = 'https://code.jquery.com/jquery-3.4.1.min.js';
 script.type = 'text/javascript';
 document.getElementsByTagName('head')[0].appendChild(script);
 
+
+// Room creation & joining
 var usernamePage = document.querySelector('#username-page');
 var roomPage = document.querySelector('#room-page');
 var rootContainer = document.querySelector('#root-container')
-
 var connecting = document.querySelector('.connecting-to-room');
-
 var createRoomForm = document.querySelector('#createRoomForm');
 var roomCodeForm = document.querySelector('#roomCodeForm');
+createRoomForm.addEventListener('submit', handleCreateRoom, true);
+roomCodeForm.addEventListener('submit', handleJoinRoom, true);
+var roomCode = null;            // set via an ajax call by creating or joining a room
+//var username           ---->> is defined and set in the inline script in room.html
 
+var stompClient = null;
+
+// In-room messaging
 var messageForm = document.querySelector('#messageForm');
 var messagesBox = document.querySelector('#messages-box');      // has two children: event box (join/leave) & chat box; put msgs in correct boxes based on TYPE enum
 var messageInputBox = document.querySelector('#message-input-box');
-
-var betForm = document.querySelector('#betForm');
-var betInputBox = document.querySelector('#bet-input-box');
-
-var actionsDiv = document.querySelector('#actions');
-var boardDiv = document.querySelector('.board');
-
-createRoomForm.addEventListener('submit', handleCreateRoom, true);
-roomCodeForm.addEventListener('submit', handleJoinRoom, true);
 messageForm.addEventListener('submit', sendMessage, true);
-betForm.addEventListener('submit', sendBetRaise, true);
-
-var isRoomOwner=false;
-var numPeopleInRoom=0;      // incremented via JOIN_ROOM, decremented via LEAVE_ROOM
-var stompClient = null;
-var roomCode = null;            // set via an ajax call by creating or joining a room
-//var username ---->>  is defined and set in the inline script in room.html
-
 var colours = ['#e30e1f', '#0e0ee3', '#cde01d', '#cde01d', '#070806', '#e010b7', '#467a7a'];
 
+// Betting
+var betForm = document.querySelector('#betForm');
+var betInputBox = document.querySelector('#bet-input-box');
+var bettedOnWhitesRadio = document.querySelector('#whites-win');
+var bettedOnDrawRadio = document.querySelector('#draw');
+var bettedOnBlacksRadio = document.querySelector('#blacks-win');
+betForm.addEventListener('submit', sendBetRaise, true);
+var betPlacedOn = null;
+var totalBet = 0;
+
+// Chess
+var actionsDiv = document.querySelector('#actions');
+var boardDiv = document.querySelector('.board');
+var isRoomOwner = false;
+var numPeopleInRoom = 0;
+const game = new Chess();
+var myColour = null;
+var isDraw = false;
+var gameOverSent = false;
 /**
 *         CHESS
 */
-const game = new Chess();
-var myColour = null;
-var totalBet=0;
-
-var isDraw = false;
-var gameVictory = 0;    // -1 = loss, 0=draw, 1 = victory
+var XXX = 0;
 
 function onDragStart (source, piece, position, orientation) {
+    XXX+=1;
+    if(XXX>1){
+        alert("S");
+    declareGameOver(1);
+    }
+
     if(!game.game_over()){
         if(numPeopleInRoom < 2)  return false; // need at least two players to play
         if(!piece.includes(myColour)){  // can't move other colour's pieces
             return false;
         }
     } else{
+        var gameVictory = 0;    // -1 = loss, 0=draw, 1 = victory
         //timer.stop()
-        if(!isDraw){    // if not a draw, then the colour whose turn it's currently NOT wins
+        if(!game.in_draw()){    // if not a draw, then the colour whose turn it's currently NOT wins
             if(game.tun() === myColour){
                 gameVictory=-1;
             } else{
@@ -63,6 +74,10 @@ function onDragStart (source, piece, position, orientation) {
             }
         } else{
             gameVictory=0;
+        }
+        if(!gameOverSent){
+            gameOverSent = true;
+            declareGameOver(gameVictory);
         }
         return false;
     }
@@ -143,15 +158,27 @@ function sendMove(movementJSON){
 
 function sendBetRaise(e){
      if(betInputBox && stompClient) {
+         var colourBettedOn = null;
+         if(bettedOnWhitesRadio.checked){
+            colourBettedOn = 'whites';
+         } else if(bettedOnDrawRadio.checked){
+            colourBettedOn = 'draw';
+         } else if(bettedOnBlacksRadio.checked){
+            colourBettedOn = 'blacks';
+         } else{
+            console.log("To bet, gotta pick a side to bet on");
+            return;
+         }
          var packet = {
-             from: username,
-             betAmount: betInputBox.value,
-             type: 'BET_RAISE',
-             context: roomCode
+            from: username,
+            betAmount: betInputBox.value,
+            bettingOn: colourBettedOn,
+            type: 'BET_RAISE',
+            context: roomCode
          };
+
          stompClient.send(`/app/${roomCode}.sys.placeBet`, {}, JSON.stringify(packet));
          totalBet += parseInt(betInputBox.value);
-         alert("Total bet=" +totalBet);
          betInputBox.value = 0;
      }
      e.preventDefault();
@@ -295,13 +322,13 @@ function handleCreateRoom(e){
     });
 }
 
-function declareGameOver(){
+function declareGameOver(gameResult){
     setCSRFtoken();
     var data = {}
     data['from'] = username;
     data['type'] = 'GAME_OVER';
     data['context'] = roomCode;
-    switch(gameVictory){
+    switch(gameResult){
     case -1:
         data['result']='LOSS';
         break;

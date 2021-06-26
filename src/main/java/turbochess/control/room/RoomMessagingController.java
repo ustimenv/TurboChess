@@ -14,6 +14,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import turbochess.model.User;
 import turbochess.model.chess.Bet;
+import turbochess.model.chess.Game;
 import turbochess.model.chess.Move;
 import turbochess.model.messaging.client.*;
 import turbochess.model.room.Participant;
@@ -125,10 +126,22 @@ public class RoomMessagingController extends RoomController{
 
             if(userBalance < betAmount){
                 throw new RoomException(format("Insufficient ({0}) balance ({1}) for player {2}",
-                        userBalance, betAmount, userFrom.getUsername()));
+                                                            userBalance, betAmount, userFrom.getUsername()));
             }
-            userFrom.setCoins(userBalance-betAmount);
-            Bet b = new Bet(p, betAmount, contextRoom.getCurrentTurn());
+            Game.Result resultBettedOn;
+            if("whites".equals(packet.getBettingOn())){
+                resultBettedOn = Game.Result.WHITES_WON;
+            } else if("blacks".equals(packet.getBettingOn())){
+                resultBettedOn = Game.Result.BLACKS_WON;
+            } else if("draw".equals(packet.getBettingOn())){
+                resultBettedOn = Game.Result.DRAW;
+            } else{
+                log.info(format("Invalid betting target {0}", packet.getBettingOn()));
+                return null;
+            }
+
+            userFrom.setCoins(userBalance - betAmount);
+            Bet b = new Bet(p, betAmount, contextRoom.getCurrentTurn(), resultBettedOn);
             entityManager.persist(b);
             log.info(format("Bet of {0} coins has been placed successfully by {1}", betAmount, p.getUser().getUsername()));
             return packet;

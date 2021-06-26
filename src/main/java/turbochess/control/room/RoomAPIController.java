@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import turbochess.model.User;
 import turbochess.model.chess.Bet;
 import turbochess.model.messaging.client.CreateRoomPacket;
+import turbochess.model.messaging.client.EmptyPacket;
 import turbochess.model.messaging.client.GameOverPacket;
 import turbochess.model.messaging.client.JoinRoomPacket;
 import turbochess.model.messaging.server.CreateRoomResponse;
@@ -26,6 +27,7 @@ import turbochess.service.participant.ParticipantException;
 import turbochess.service.room.RoomException;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import static java.text.MessageFormat.format;
 
@@ -116,9 +118,8 @@ public class RoomAPIController extends RoomController{
     @ResponseBody
     @Transactional
     public Response endGame(@RequestBody GameOverPacket packet) throws RoomException{
-        LocalDateTime currentTime = LocalDateTime.now();
         log.info(format("[end game]: received packet{0}", packet));
-
+        LocalDateTime currentTime = LocalDateTime.now();
         try{
             User userFrom = getUserByUsername(packet.getFrom());
             Room room = roomService.getRoomByCode(packet.getContext());
@@ -138,11 +139,21 @@ public class RoomAPIController extends RoomController{
                 result = Game.Result.DRAW;
             }
 
-            Game game = new Game(whites, blacks, currentTime,result,room.getMoves());
+            Game game = new Game(whites, blacks, currentTime, result, room.getMoves());
+
+
+            List<Bet> winningBets = betService.getRoomBetsByResult(room.getCode(), result);
+            for(Bet B : winningBets){
+                User u = B.getBetter().getUser();
+                setUserCoins(u.getId(), u.getCoins()+Bet.returnOnBet(B.getValue(), B.getTurnPlaced(), room.getCurrentTurn()/2));
+            }
+
             entityManager.persist(game);
+            List <Participant> participants = participantService.getRoomParticipants(room);
+            for(Participant p : participants){
+                entityManager.remove(p);
+            }
             entityManager.remove(room);
-
-
             log.info(format("Save game for users {0} and {1} successfully", whites.getUsername(), blacks.getUsername()));
             return new OkayResponse();
 
@@ -151,38 +162,4 @@ public class RoomAPIController extends RoomController{
             return null;
         }
     }
-
-
-//    @RequestMapping(value = "/api/save_room", method=RequestMethod.POST, produces = "application/json")
-//    @ResponseBody
-//    @Transactional
-//    public ResponsePacket saveRoom(@RequestBody MessagePacket packet){
-//        log.info(format("[save room]: received packet{0}", packet));
-//        try{
-//            String boardState = packet.getPayload();
-//            Room contextRoom = roomService.getRoomByCode(packet.getContext());
-//            User userFrom = getUserByUsername(packet.getFrom());
-//            Partic
-//            Participant.Role role = getParticipantRole(userFrom, contextRoom);
-//            if(role != Participant.Role.PLAYER1)    // ie must be the owner of the room
-//                throw new RoomException(format("User {0} doesn't have have the permission to save room {1}",
-//                                                userFrom.getUsername(), contextRoom.getCode()));
-//
-//            List<String> participantJSONs=new ArrayList<>();
-//            for(Participant p :getRoomParticipants(contextRoom)){
-//                participantJSONs.add(p.toJSON());
-//            }
-////            for(String s : participantJSONs){
-////                System.out.println(s);
-////            }
-//            roomService.prepareAndSave(contextRoom.getCode(), boardState,
-//                                        participantJSONs.stream().map(Object::toString).collect(Collectors.joining(",")));
-//            log.info(format("Room {0} saved successfully by {1}", contextRoom.getCode(), userFrom.getUsername()));
-//            return new ResponsePacket("", "oki");
-//        } catch(RoomException e){
-//            log.error(format("[save room]: error--> {0}", e.getMessage()));
-//            return null;
-//        }
-//    }
-
 }

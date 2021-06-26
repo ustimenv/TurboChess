@@ -29,31 +29,24 @@ import java.util.List;
 @NoArgsConstructor
 
 @NamedQueries({
-	@NamedQuery(name="User.search_result",
-				query= "SELECT u FROM User u WHERE u.username LIKE :username AND u.enabled = 1"),
+		@NamedQuery(name = "User.search_result",
+				query = "SELECT u FROM User u WHERE u.username LIKE :username AND u.enabled = 1"),
 
-		@NamedQuery(name="User.byUsername",
-					query= "SELECT u FROM User u WHERE u.username = :username AND u.enabled = 1"),
+		@NamedQuery(name = "User.byUsername",
+				query = "SELECT u FROM User u WHERE u.username = :username AND u.enabled = 1"),
 
-		@NamedQuery(name="User.hasUsername",
-                	query= "SELECT COUNT(u) FROM User u WHERE u.username = :username"),
+		@NamedQuery(name = "User.hasUsername",
+				query = "SELECT COUNT(u) FROM User u WHERE u.username = :username"),
 
-		@NamedQuery(name="User.byId",
-					query= "SELECT u FROM User u WHERE u.id = :id"),
+		@NamedQuery(name = "User.byId",
+				query = "SELECT u FROM User u WHERE u.id = :id"),
 
-		@NamedQuery(name="User.findAll",
-					query= "SELECT u FROM User u "),
+		@NamedQuery(name = "User.findAll",
+				query = "SELECT u FROM User u "),
 
-		@NamedQuery(name="User.getBalanceByUsername",
-					query="SELECT u.coins FROM User u WHERE u.username = :username"),
-
-		@NamedQuery(name="User.addCoins",
-					query="UPDATE User u SET u.coins = u.coins + :amount WHERE u.username = :username"),
-
-		@NamedQuery(name="User.removeCoins",
-					query="UPDATE User u SET u.coins = u.coins - :amount WHERE u.username = :username")
-		}
-)
+		@NamedQuery(name = "User.getBalanceByUsername",
+				query = "SELECT u.coins FROM User u WHERE u.username = :username")
+})
 @NamedNativeQueries({
 		@NamedNativeQuery(name = "User.friends", query = "SELECT * FROM user_friends " +
 		"LEFT JOIN user on user_friends.friends_id =user.id WHERE user_id= :userid " +
@@ -65,19 +58,13 @@ import java.util.List;
 
 })
 public class User implements Transferable<User.Transfer> {
-
-
-
 	private static Logger log = LogManager.getLogger(User.class);	
 
 	public enum Role {
 		USER,			// used for logged-in, non-priviledged users
 		ADMIN,			// used for maximum priviledged users
-		
 		MODERATOR,		// remove or add roles as needed
 	}
-	
-	// do not change these fields
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -161,10 +148,17 @@ public class User implements Transferable<User.Transfer> {
 		return this.password.equals(this.passwordConfirm);
 	}
 
-	public void updateScoreOnVictory(User loser){
-		int scoreDelta = loser.getElo()-getElo();
-		int K = 32;
-		int C=200;//TODO finish this https://en.wikipedia.org/wiki/Chess_rating_system#Example
-//		setElo(getElo() + K/2 * );
+	public void updateScoreOnVictory(User loser){ // somewhat based on https://en.wikipedia.org/wiki/Chess_rating_system
+		int eloDelta = loser.getElo() - this.getElo();
+		int scoreIncrease = 0;
+		int baseScoreGain = 100;
+		int maxScoreGain=150;
+		if(eloDelta > 0){	// won against a stronger opponent
+			scoreIncrease = (eloDelta / this.getElo()) * baseScoreGain;
+		} else{				// won against a weaker opponent
+			scoreIncrease = (-eloDelta / loser.getElo()) * baseScoreGain;
+		}
+		scoreIncrease = Math.min(scoreIncrease, maxScoreGain);
+		setElo(getElo() + scoreIncrease);
 	}
 }

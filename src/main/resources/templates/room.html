@@ -46,6 +46,13 @@
                 <form id="betForm" name="betForm">
                     <div class="form-group">
                         <div class="input-group clearfix">
+                            <input type="radio" name="predicition" id="whites-win"   value="whites win"/>
+                            <label for="whites-win">whites win</label><br>
+                            <input type="radio" name="predicition" id="draw"         value="draw"/>
+                            <label for="draw">draw</label><br>
+                            <input type="radio" name="predicition" id="blacks-win"   value="blacks win"/>
+                            <label for="blacks-win">blacks win</label><br>
+
                             <input type="text" id="bet-input-box"  class="form-control"/>
                             <button type="submit" class="primary">Raise bet</button>
                             <input type="button" onclick="handleIncreaseBet()" value="5" />
