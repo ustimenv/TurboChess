@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import turbochess.model.User;
+import turbochess.model.chess.Bet;
 import turbochess.model.messaging.client.CreateRoomPacket;
 import turbochess.model.messaging.client.GameOverPacket;
 import turbochess.model.messaging.client.JoinRoomPacket;
@@ -20,6 +21,7 @@ import turbochess.model.messaging.server.Response;
 import turbochess.model.chess.Game;
 import turbochess.model.room.Participant;
 import turbochess.model.room.Room;
+import turbochess.service.bet.BetException;
 import turbochess.service.participant.ParticipantException;
 import turbochess.service.room.RoomException;
 
@@ -101,7 +103,13 @@ public class RoomAPIController extends RoomController{
         // the only way we end here is if user is already present in the room, so disregard the exception
         log.info(format("[get room]: Retrieving room state for {0} for user {1}", room.getCode(), user.getUsername()));
         Participant p = participantService.getParticipantByUsernameAndRoom(room, user);
-        return new JoinRoomResponse(p.getColourString(), room.getFen(), String.valueOf(p.getCurrentBet()));
+        int participantAccumulatedBet =0;
+        try{
+            participantAccumulatedBet = betService.getParticipantTotalBet(p);
+        } catch(BetException e){
+            log.info(e);
+        }
+        return new JoinRoomResponse(p.getColourString(), room.getFen(), String.valueOf(participantAccumulatedBet));
     }
 
     @RequestMapping(value = "/api/game_over", method=RequestMethod.POST, produces = "application/json")

@@ -1,18 +1,14 @@
 package turbochess.model.room;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import turbochess.model.User;
+import turbochess.model.chess.Bet;
 
 import javax.persistence.*;
-import java.io.IOException;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Data
@@ -35,8 +31,8 @@ public class Participant {
         this.user = user;
     }
 
-    @Column(name = "current_bet")
-    private int currentBet = 0;             // on the last transaction we will commit the bet manually
+    @OneToMany(mappedBy = "better", fetch = FetchType.LAZY)
+    private List<Bet> bets = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)
     private Role role;                      // we'll store the roles as strings for clarity
@@ -52,6 +48,7 @@ public class Participant {
     public enum Colour implements Serializable{
         WHITE, BLACK, NONE;
     }
+
     public String getColourString(){
         switch (colour){
             case WHITE: return "w";
@@ -75,38 +72,39 @@ public class Participant {
         }
     }
 
-    public String toJSON(){
-        ObjectMapper mapper = new ObjectMapper();
-        SimpleModule module =new SimpleModule("ParticipantSerialiser");
-        module.addSerializer(Participant.class, new ParticipantSerialiser());
-        mapper.registerModule(module);
+//    public String toJSON(){
+//        ObjectMapper mapper = new ObjectMapper();
+//        SimpleModule module =new SimpleModule("ParticipantSerialiser");
+//        module.addSerializer(Participant.class, new ParticipantSerialiser());
+//        mapper.registerModule(module);
+//
+//
+//        try{
+//            return mapper.writeValueAsString(this);
+//        } catch(JsonProcessingException e){
+//            e.printStackTrace();
+//            return null;
+//        }
+//    }
 
-
-        try{
-            return mapper.writeValueAsString(this);
-        } catch(JsonProcessingException e){
-            e.printStackTrace();
-            return null;
-        }
-    }
-    private static class ParticipantSerialiser extends StdSerializer<Participant>{
-        protected ParticipantSerialiser(){
-            this(null);
-        }
-        protected ParticipantSerialiser(Class<Participant> t){
-            super(t);
-        }
-
-        @Override
-        public void serialize(Participant participant, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException{
-            jsonGenerator.writeStartObject();
-            jsonGenerator.writeNumberField("id", participant.getId());
-            jsonGenerator.writeStringField("username", participant.user.getUsername());
-            jsonGenerator.writeStringField("room", participant.room.getCode());
-            jsonGenerator.writeNumberField("bet", participant.getCurrentBet());
-            jsonGenerator.writeStringField("role", participant.getRole().toString());   //todo
-            jsonGenerator.writeStringField("colour", participant.getColour().toString());   //todo
-            jsonGenerator.writeEndObject();
-        }
-    }
+//    private static class ParticipantSerialiser extends StdSerializer<Participant>{
+//        protected ParticipantSerialiser(){
+//            this(null);
+//        }
+//        protected ParticipantSerialiser(Class<Participant> t){
+//            super(t);
+//        }
+//
+//        @Override
+//        public void serialize(Participant participant, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException{
+//            jsonGenerator.writeStartObject();
+//            jsonGenerator.writeNumberField("id", participant.getId());
+//            jsonGenerator.writeStringField("username", participant.user.getUsername());
+//            jsonGenerator.writeStringField("room", participant.room.getCode());
+//            jsonGenerator.writeNumberField("bet", participant.getCurrentBet());
+//            jsonGenerator.writeStringField("role", participant.getRole().toString());   //todo
+//            jsonGenerator.writeStringField("colour", participant.getColour().toString());   //todo
+//            jsonGenerator.writeEndObject();
+//        }
+//    }
 }

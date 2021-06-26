@@ -13,6 +13,7 @@ import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import turbochess.model.User;
+import turbochess.model.chess.Bet;
 import turbochess.model.chess.Move;
 import turbochess.model.messaging.client.*;
 import turbochess.model.room.Participant;
@@ -95,6 +96,7 @@ public class RoomMessagingController extends RoomController{
                 else                 expected = null;       // a super invalid game state
                 throw new RoomException(format("Invalid move state: expected {0}, received  {1}", expected, allegedColour));
             }
+            contextRoom.setCurrentTurn(contextRoom.getCurrentTurn()+1);
             contextRoom.setFen(fen);
             contextRoom.setMoves(contextRoom.getMoves()+"|"+move);
             entityManager.persist(contextRoom);
@@ -126,7 +128,8 @@ public class RoomMessagingController extends RoomController{
                         userBalance, betAmount, userFrom.getUsername()));
             }
             userFrom.setCoins(userBalance-betAmount);
-            p.setCurrentBet(p.getCurrentBet()+betAmount);
+            Bet b = new Bet(p, betAmount, contextRoom.getCurrentTurn());
+            entityManager.persist(b);
             log.info(format("Bet of {0} coins has been placed successfully by {1}", betAmount, p.getUser().getUsername()));
             return packet;
         } catch(RoomException | NumberFormatException | ParticipantException e){

@@ -21,15 +21,14 @@ public class Room{                           // includes two players and an unde
     private String code;
 
     @Column(nullable = false)
-    private @Getter @Setter
-    int capacity;            // maximum number of people able to be in a room at any given time, specified by the room's creator (PLAYER_1)
+    private int capacity;            // maximum number of people able to be in a room at any given time, specified by the room's creator (PLAYER_1)
 
     @Column(name = "num_participants", nullable = false)
-    private @Getter int numParticipants=0;
+    private int numParticipants=0;
 
 
     @Enumerated(EnumType.STRING)
-    private GameState gameState=GameState.NOT_STARTED;
+    private GameState gameState = GameState.NOT_STARTED;
 
     @OneToMany(mappedBy = "room", fetch = FetchType.LAZY)
     private List<Participant> participants = new ArrayList<>();
@@ -40,8 +39,11 @@ public class Room{                           // includes two players and an unde
     @Column(name="fen", nullable =false)
     private String fen="";
 
-    @Column(name="stored_participants", nullable = true)
-    private String storedParticipants;                         // json string containing serialised participants (ids, roles, bets)
+//    @Column(name="stored_participants", nullable = true)
+//    private String storedParticipants;                         // json string containing serialised participants (ids, roles, bets)
+
+    @Column(name="current_turn", nullable = false)
+    private int currentTurn=0;                         // json string containing serialised participants (ids, roles, bets)
 
     public Room(String code, int capacity){
         this.code = code;
@@ -49,9 +51,8 @@ public class Room{                           // includes two players and an unde
     }
 
     public enum GameState{
-        NOT_STARTED, WHITE_TURN, BLACK_TURN, WHITE_WON, BLACK_WON, DRAW
+        NOT_STARTED, WHITE_TURN, BLACK_TURN
     }
-
 
     public Participant.Role assignRole(Participant p) throws RoomException {
         if(participants.contains(p) || participants.size() > capacity){

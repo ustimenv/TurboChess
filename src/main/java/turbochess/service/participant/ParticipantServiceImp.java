@@ -6,8 +6,6 @@ import turbochess.model.User;
 import turbochess.model.room.Participant;
 import turbochess.model.room.Room;
 import turbochess.repository.ParticipantRepository;
-import turbochess.repository.RoomRepository;
-import turbochess.service.room.RoomException;
 
 import java.util.List;
 

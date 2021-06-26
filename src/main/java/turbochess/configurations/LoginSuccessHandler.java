@@ -53,10 +53,10 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler {
 		session.setAttribute("u", u);
 
 		// find count of unread messages
-		long unread = entityManager.createNamedQuery("Message.countUnread", Long.class)
-			.setParameter("userId", u.getId())
-			.getSingleResult();	
-		session.setAttribute("unread", unread);
+//		long unread = entityManager.createNamedQuery("Message.countUnread", Long.class)
+//			.setParameter("userId", u.getId())
+//			.getSingleResult();
+//		session.setAttribute("unread", unread);
 		
 		// add a 'ws' session variable
 		String ws = request.getRequestURL().toString()

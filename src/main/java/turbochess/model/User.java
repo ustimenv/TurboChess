@@ -1,17 +1,17 @@
 package turbochess.model;
-import java.util.*;
 
-import javax.persistence.*;
-
-import turbochess.model.messaging.Message;
-import turbochess.model.room.Participant;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import turbochess.model.room.Participant;
+
+import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 
 /**
@@ -109,13 +109,13 @@ public class User implements Transferable<User.Transfer> {
 	@OneToMany(mappedBy = "user", fetch = FetchType.LAZY)		// user can participate in any number of rooms simultaneously,
 	private List<Participant> participations = new ArrayList<>();	// provided they don't double-join any
 
-	@OneToMany
-	@JoinColumn(name = "sender_id")
-	private List<Message> sent = new ArrayList<>();
-
-	@OneToMany
-	@JoinColumn(name = "recipient_id")	
-	private List<Message> received = new ArrayList<>();
+//	@OneToMany
+//	@JoinColumn(name = "sender_id")
+//	private List<Message> sent = new ArrayList<>();
+//
+//	@OneToMany
+//	@JoinColumn(name = "recipient_id")
+//	private List<Message> received = new ArrayList<>();
 
 	@ManyToMany
 	@JoinTable(name="friends",
@@ -143,11 +143,15 @@ public class User implements Transferable<User.Transfer> {
 		private int totalSent;
     }
 
+//	@Override
+//    public Transfer toTransfer() {
+//		return new Transfer(id,	username, received.size(), sent.size());
+//	}
 	@Override
     public Transfer toTransfer() {
-		return new Transfer(id,	username, received.size(), sent.size());
+		return new Transfer(id,	username, 0, 0);
 	}
-	
+
 	@Override
 	public String toString() {
 		return toTransfer().toString();
