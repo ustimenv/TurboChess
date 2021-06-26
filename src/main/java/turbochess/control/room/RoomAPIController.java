@@ -141,7 +141,6 @@ public class RoomAPIController extends RoomController{
 
             Game game = new Game(whites, blacks, currentTime, result, room.getMoves());
 
-
             List<Bet> winningBets = betService.getRoomBetsByResult(room.getCode(), result);
             for(Bet B : winningBets){
                 User u = B.getBetter().getUser();
@@ -154,7 +153,7 @@ public class RoomAPIController extends RoomController{
                 entityManager.remove(p);
             }
             entityManager.remove(room);
-            log.info(format("Save game for users {0} and {1} successfully", whites.getUsername(), blacks.getUsername()));
+            log.info(format("Game saved for users {0} and {1} successfully", whites.getUsername(), blacks.getUsername()));
             return new OkayResponse();
 
         } catch(RoomException | ParticipantException e){

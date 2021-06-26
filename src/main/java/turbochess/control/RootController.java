@@ -3,6 +3,7 @@ package turbochess.control;
 import turbochess.configurations.IwUserDetailsService;
 import turbochess.model.Friendship;
 import turbochess.model.User;
+import turbochess.model.chess.Game;
 import turbochess.service.friendship.FriendshipException;
 import turbochess.service.friendship.FriendshipService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +11,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import turbochess.service.game.GameService;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -35,6 +37,8 @@ public class RootController {
     @Autowired
     private FriendshipService friendshipservice;
 
+    @Autowired
+    private GameService gameService;
 
     @GetMapping("/")
     public String index(Model model, HttpSession session) {
@@ -87,6 +91,18 @@ public class RootController {
     public String spect(Model model) {
         model.addAttribute("title", "Turbochess Spect");
         return "spect";
+    }
+
+    @GetMapping("/history")
+    public String history(Model model) {
+        if (session.getAttribute("u") != null){
+            User user = (User) session.getAttribute("u");
+            List <Game> games = gameService.getUserGames(user.getId());
+            for(int i=0; i<games.size(); i++){
+                model.addAttribute("Game "+(i+1), games.get(i).getListOfMove());
+            }
+        }
+        return "history";
     }
 
     @GetMapping("/profile")

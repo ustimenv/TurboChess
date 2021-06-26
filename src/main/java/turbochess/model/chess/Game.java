@@ -4,6 +4,9 @@ import lombok.Data;
 import turbochess.model.User;
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.List;
+import java.util.regex.Pattern;
 
 @Entity
 @Data
@@ -40,4 +43,9 @@ public class Game{
 
     @Column
     private String moves;
+
+    public List <String> getListOfMove(){
+        String separator = "|";
+        return Arrays.asList(moves.split(Pattern.quote(separator)));
+    }
 }

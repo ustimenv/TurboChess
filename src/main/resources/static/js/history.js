@@ -238,9 +238,6 @@ function onMessageReceived(messageReceived) {
     messagesBox.scrollTop = messagesBox.scrollHeight;
 }
 
-/**
-*           AJAX
-*/
 function handleJoinRoom(e){
     e.preventDefault();
     var code = document.getElementById("roomcode").value;
@@ -280,91 +277,6 @@ function handleJoinRoom(e){
     }
 }
 
-function handleCreateRoom(e){
-    e.preventDefault();
-    var capacity = document.getElementById('createRoomForm')[0].value;      // todo validate capacity on-the-fly
-    if(capacity < 2){       // todo display the error msg in a div
-        alert("Room capacity must be at least 2!");
-        return;
-    }
-
-    setCSRFtoken();
-    var data = {}
-    data['from'] = username;
-    data['type']='CREATE_ROOM';
-    data['capacity']=capacity;
-    data['context']='';
-
-    $.ajax({
-        type : 'POST',
-        contentType : 'application/json',
-        dataType : 'json',
-        data : JSON.stringify(data),
-        url : '/api/create_room',
-        success : function(response) {
-            isRoomOwner=true;
-            myColour = response.colourAssigned;
-            roomCode = response.roomCodeAssigned;
-            connect();
-        },
-        error : function(e) {
-            console.log('ERROR: ', e);
-        },
-        done : function(e) {
-            console.log('done...');
-        }
-    });
-}
-
-function declareGameOver(gameResult){
-    setCSRFtoken();
-    var data = {}
-    data['from'] = username;
-    data['type'] = 'GAME_OVER';
-    data['context'] = roomCode;
-    switch(gameResult){
-    case -1:
-        data['result']='LOSS';
-        break;
-    case 1:
-        data['result']='WIN';
-        break;
-    case 0:
-    default:
-        data['result']='DRAW';
-        break;
-    }
-
-    $.ajax({
-        type : 'POST',
-        contentType : 'application/json',
-        dataType : 'json',
-        data : JSON.stringify(data),
-        url : '/api/game_over',
-        success : function(response) {
-            alert("Game over!");
-        },
-        error : function(e) {
-            console.log('ERROR: ', e);
-        },
-        done : function(e) {
-            console.log('done...');
-        }
-    });
-}
-
-function handleIncreaseBet(){
-    var value = parseInt(betInputBox.value, 10);
-    value = isNaN(value) ? 0 : value;
-    value+=5;
-    betInputBox.value = value;
-}
-
-
-/**
-*           UTILITY METHODS
-*/
-
 function setCSRFtoken(){
     var token = $("meta[name='_csrf']").attr("content");
     var header = $("meta[name='_csrf_header']").attr("content");
@@ -373,15 +285,3 @@ function setCSRFtoken(){
         xhr.setRequestHeader(header, token);
       });
 }
-
-function hashString(str) {
-    var hash = 0, i, chr;
-    if (str.length === 0) return hash;
-    for (i = 0; i < str.length; i++) {
-        chr   = str.charCodeAt(i);
-        hash  = ((hash << 5) - hash) + chr;
-        hash |= 0;
-    }
-    return hash;
-}
-
