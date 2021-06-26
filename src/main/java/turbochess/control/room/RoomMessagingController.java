@@ -73,10 +73,10 @@ public class RoomMessagingController extends RoomController{
     }
     @MessageMapping("/{room}.chat.cheer")
     @SendTo("/queue/{room}")
-    public MessagePacket cheer(@DestinationVariable String room, @Payload MessagePacket messagePacket,
+    public ClientPacket cheer(@DestinationVariable String room, @Payload TextPacket messagePacket,
                                SimpMessageHeaderAccessor headerAccessor) throws RoomException{
         log.info(format("[cheer]: {0} sent successfully", messagePacket));
-        messagePacket.setPayload(getCheer(messagePacket.getFrom(), room));
+        messagePacket.setText(getCheer(messagePacket.getFrom(), room));
         return messagePacket;
     }
 

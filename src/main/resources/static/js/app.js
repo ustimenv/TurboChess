@@ -215,6 +215,7 @@ function onMessageReceived(messageReceived) {
     break;
     case 'CHEER':
         messageElement.classList.add('event-message');
+        messageToShow = message.text;
     break;
 
     case 'CREATE_ROOM':
