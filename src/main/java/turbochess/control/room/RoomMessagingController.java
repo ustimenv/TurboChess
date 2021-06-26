@@ -22,11 +22,31 @@ import turbochess.model.room.Room;
 import turbochess.service.participant.ParticipantException;
 import turbochess.service.room.RoomException;
 
+import java.text.MessageFormat;
+import java.util.concurrent.ThreadLocalRandom;
+
 import static java.text.MessageFormat.format;
 
 @Controller
 public class RoomMessagingController extends RoomController{
     private static Logger log = LogManager.getLogger(RoomMessagingController.class);
+
+    protected String getCheer(String username, String code) throws RoomException{
+        Room contextRoom = roomService.getRoomByCode(code);
+        Room.GameState state = contextRoom.getGameState();
+        String[] cheers={"I'm excited to be here!"};    // failsafe
+        if(state == Room.GameState.NOT_STARTED){
+            cheers = new String[]{format("{0} can't wait for the game to start!", username),
+                    format("{0} says time is money, let's start the game already!", username)};
+        } else if(state == Room.GameState.WHITE_TURN){
+            cheers = new String[]{format("{0} is awaiting the imminent whites victory!", username),
+                    format("Whites really deserve this victory, says {0}!", username)};
+        } else if(state == Room.GameState.BLACK_TURN){
+            cheers = new String[]{format("Blacks victory isn't far, at least according to {0}", username),
+                    format("If whites win, I'll eat my own shoe!, claims {0}", username)};
+        }
+        return cheers[ThreadLocalRandom.current().nextInt(0, cheers.length)];
+    }
 
     @MessageMapping("/{room}.chat.sendMessage")
     @SendTo("/queue/{room}")
@@ -50,6 +70,14 @@ public class RoomMessagingController extends RoomController{
         Room contextRoom = roomService.getRoomByCode(room);
         clientPacket.setNumParticipants(String.valueOf(contextRoom.getNumParticipants()));
         return clientPacket;
+    }
+    @MessageMapping("/{room}.chat.cheer")
+    @SendTo("/queue/{room}")
+    public MessagePacket cheer(@DestinationVariable String room, @Payload MessagePacket messagePacket,
+                               SimpMessageHeaderAccessor headerAccessor) throws RoomException{
+        log.info(format("[cheer]: {0} sent successfully", messagePacket));
+        messagePacket.setPayload(getCheer(messagePacket.getFrom(), room));
+        return messagePacket;
     }
 
     @MessageMapping("/{room}.sys.sendMove")

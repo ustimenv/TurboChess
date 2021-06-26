@@ -22,9 +22,7 @@ public class Player {
     @Column(nullable = false)
     boolean isWhite;
 
-    @Column(nullable = false)
     int result;
 
-    @Column(nullable = false)
     int secondsLeft;
 }
