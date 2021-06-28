@@ -2,15 +2,11 @@ package turbochess.service.game;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import turbochess.model.User;
 import turbochess.model.chess.Game;
-import turbochess.model.room.Room;
 import turbochess.repository.GameRepository;
 
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import static java.text.MessageFormat.format;
 
 @Service
 public class GameServiceImp implements GameService{
@@ -18,16 +14,39 @@ public class GameServiceImp implements GameService{
     @Autowired
     private GameRepository repository;
 
+//    @Override
+//    public List<Game> getGamesByUser(User user){
+//        List <Game> asWhites = repository.getUserGamesWhites(user.getId());
+//        List <Game> asBlacks = repository.getUserGamesBlacks(user.getId());
+//        return Stream.concat(asWhites.stream(), asBlacks.stream())
+//                .collect(Collectors.toList());
+//    }
+
+//    @Override
+//    public List<Game> getGamesByUsers(User whites, User blacks){
+//        return repository.getGamesByUsers(whites.getId(), blacks.getId());
+//    }
+
+//    @Override
+//    public Game getGameByUser(User user){
+//        return repository.getGameByUser(user.getId());
+//    }
+//
+//
+//    @Override
+//    public Game getGameInfoByUser(User user){
+//        return repository.getGameByUser(user.getId());
+//    }
+
     @Override
-    public List<Game> getUserGames(long userId){
-        List <Game> asWhites = repository.getUserGamesWhites(userId);
-        List <Game> asBlacks = repository.getUserGamesBlacks(userId);
-        return Stream.concat(asWhites.stream(), asBlacks.stream())
-                .collect(Collectors.toList());
+    public List<Game> getGamesInfoByUser(User user){
+        return repository.getGamesInfoByUser(user.getId());
     }
 
     @Override
-    public List<Game> getGamesByUsersIds(long whitesId, long blacksId){
-        return repository.getGamesByUsers(whitesId, blacksId);
+    public List<String> getGameMovesByGameInfo(Game gameInfo){
+        String moves = repository.getGameByGameInfo(gameInfo.getWhites().getId(), gameInfo.getBlacks().getId(),
+                                                        String.valueOf(gameInfo.getEndTime()));
+        return Game.movesToList(moves);
     }
 }

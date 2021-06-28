@@ -6,6 +6,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 import turbochess.model.User;
 import turbochess.service.bet.BetService;
+import turbochess.service.game.GameService;
 import turbochess.service.participant.ParticipantService;
 import turbochess.service.room.RoomException;
 import turbochess.service.room.RoomService;
@@ -31,6 +32,9 @@ public class RoomController{
 
 	@Autowired
 	protected BetService betService;
+
+	@Autowired
+	protected GameService gameService;
 
 	@Autowired
 	protected EntityManager entityManager;

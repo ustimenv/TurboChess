@@ -44,6 +44,7 @@ var isRoomOwner = false;
 var numPeopleInRoom = 0;
 const game = new Chess();
 var myColour = null;
+var surrendered = false;
 var isDraw = false;
 var gameOverSent = false;
 /**
@@ -51,7 +52,7 @@ var gameOverSent = false;
 */
 
 function onDragStart (source, piece, position, orientation) {
-
+    if(surrendered) return false;
     if(!game.game_over()){
         if(numPeopleInRoom < 2)  return false; // need at least two players to play
         if(!piece.includes(myColour)){  // can't move other colour's pieces
@@ -66,7 +67,7 @@ function onDragStart (source, piece, position, orientation) {
             } else{
                 gameVictory=1;
             }
-        } else{
+        }else{
             gameVictory=0;
         }
         if(!gameOverSent){
@@ -320,6 +321,38 @@ function handleCreateRoom(e){
             myColour = response.colourAssigned;
             roomCode = response.roomCodeAssigned;
             connect();
+        },
+        error : function(e) {
+            console.log('ERROR: ', e);
+        },
+        done : function(e) {
+            console.log('done...');
+        }
+    });
+}
+function leave(){
+    if(myColour === 'w' || myColour === 'b'){
+        surrender();
+    }
+}
+
+function surrender(){
+    setCSRFtoken();
+    var data = {}
+    data['from'] = username;
+    data['type'] = 'GAME_OVER';
+    data['context'] = roomCode;
+    data['result']='LOSS';
+
+    $.ajax({
+        type : 'POST',
+        contentType : 'application/json',
+        dataType : 'json',
+        data : JSON.stringify(data),
+        url : '/api/game_over',
+        success : function(response) {
+            surrendered=true;
+            alert("You have successfully surrendered!");
         },
         error : function(e) {
             console.log('ERROR: ', e);

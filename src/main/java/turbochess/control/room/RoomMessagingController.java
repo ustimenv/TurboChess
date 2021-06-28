@@ -127,7 +127,7 @@ public class RoomMessagingController extends RoomController{
             }
             contextRoom.setCurrentTurn(contextRoom.getCurrentTurn()+1);
             contextRoom.setFen(fen);
-            contextRoom.setMoves(contextRoom.getMoves()+"|"+move);
+            contextRoom.setMoves(contextRoom.getMoves() + Move.DELIMITER + move);
             entityManager.persist(contextRoom);
             log.info(format("User {0} made a move successfully", user.getUsername()));
             return clientPacket;
