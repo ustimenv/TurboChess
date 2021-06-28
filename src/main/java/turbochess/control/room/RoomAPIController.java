@@ -160,54 +160,54 @@ public class RoomAPIController extends RoomController{
         }
     }
 
-    @RequestMapping(value = "/api/list_games", method=RequestMethod.GET, produces = "application/json")
-    @ResponseBody
-    @Transactional
-    public Response listGames(@RequestBody EmptyPacket packet) throws RoomException{
-        log.info(format("[list games]: received packet{0}", packet));
-        LocalDateTime currentTime = LocalDateTime.now();
-        try{
-            User userFrom = getUserByUsername(packet.getFrom());
-            List <Game> gamesInfos = gameService.getGamesInfoByUser(userFrom);
-            List <ListOfGamesResponse.ListItem> gamesList = new ArrayList<>();
-            for(Game gameInfo : gamesInfos){
-                gamesList.add(new ListOfGamesResponse.ListItem(gameInfo.endTimeToString(), gameInfo.getWhites().getUsername(),
-                        gameInfo.getBlacks().getUsername(), Game.Result.valueToString(gameInfo.getResult())));
-            }
-            Response response = new ListOfGamesResponse((ListOfGamesResponse.ListItem[]) gamesList.toArray());
-            log.info(format("List of games retrieved for user {0} successfully", userFrom.getUsername()));
-            return response;
+//    @RequestMapping(value = "/api/list_games", method=RequestMethod.GET, produces = "application/json")
+//    @ResponseBody
+//    @Transactional
+//    public Response listGames(@RequestBody EmptyPacket packet) throws RoomException{
+//        log.info(format("[list games]: received packet{0}", packet));
+//        LocalDateTime currentTime = LocalDateTime.now();
+//        try{
+//            User userFrom = getUserByUsername(packet.getFrom());
+//            List <Game> gamesInfos = gameService.getGamesInfoByUser(userFrom);
+//            List <ListOfGamesResponse.ListItem> gamesList = new ArrayList<>();
+//            for(Game gameInfo : gamesInfos){
+//                gamesList.add(new ListOfGamesResponse.ListItem(gameInfo.endTimeToString(), gameInfo.getWhites().getUsername(),
+//                        gameInfo.getBlacks().getUsername(), Game.Result.valueToString(gameInfo.getResult())));
+//            }
+//            Response response = new ListOfGamesResponse((ListOfGamesResponse.ListItem[]) gamesList.toArray());
+//            log.info(format("List of games retrieved for user {0} successfully", userFrom.getUsername()));
+//            return response;
+//
+//        } catch(RoomException e){
+//            log.error(format("[save room]: Failed to save room {0} \n {1}", packet, e.getMessage()));
+//            return null;
+//        }
+//    }
 
-        } catch(RoomException e){
-            log.error(format("[save room]: Failed to save room {0} \n {1}", packet, e.getMessage()));
-            return null;
-        }
-    }
-
-    @RequestMapping(value = "/api/get_game", method=RequestMethod.GET, produces = "application/json")
-    @ResponseBody
-    @Transactional
-    public Response getGame(@RequestBody GetGamePacket packet) throws GameException{
-        log.info(format("[get game]: received packet{0}", packet));
-        try{
-            User userFrom = getUserByUsername(packet.getFrom());
-            User whites = getUserByUsername(packet.getWhites());
-            User blacks = getUserByUsername(packet.getBlacks());
-
-            if(!(userFrom.equals(whites) || userFrom.equals(blacks)))
-                throw new GameException(format("User {0} doesn't have access to game between {1} and {2}",
-                                                userFrom.getUsername(), whites.getUsername(), blacks.getUsername()));
-
-            Game gameInfo = new Game(whites, blacks, packet.getTime());
-            List <String> moves = gameService.getGameMovesByGameInfo(gameInfo); // eg moves = {"b2-b4", "a7-a5",...}
-            Response response = new ListOfMovesResponse((String[]) moves.toArray());
-
-            log.info(format("List of moves retrieved for a game between {0} {1} retrieved successfully",
-                                whites.getUsername(), blacks.getUsername()));
-            return response;
-        } catch(RoomException e){
-            log.error(format("[save room]: Failed to save room {0} \n {1}", packet, e.getMessage()));
-            return null;
-        }
-    }
+//    @RequestMapping(value = "/api/get_game", method=RequestMethod.GET, produces = "application/json")
+//    @ResponseBody
+//    @Transactional
+//    public Response getGame(@RequestBody GetGamePacket packet) throws GameException{
+//        log.info(format("[get game]: received packet{0}", packet));
+//        try{
+//            User userFrom = getUserByUsername(packet.getFrom());
+//            User whites = getUserByUsername(packet.getWhites());
+//            User blacks = getUserByUsername(packet.getBlacks());
+//
+//            if(!(userFrom.equals(whites) || userFrom.equals(blacks)))
+//                throw new GameException(format("User {0} doesn't have access to game between {1} and {2}",
+//                                                userFrom.getUsername(), whites.getUsername(), blacks.getUsername()));
+//
+//            Game gameInfo = new Game(whites, blacks, packet.getTime());
+//            List <String> moves = gameService.getGameMovesByGameInfo(gameInfo); // eg moves = {"b2-b4", "a7-a5",...}
+//            Response response = new ListOfMovesResponse((String[]) moves.toArray());
+//
+//            log.info(format("List of moves retrieved for a game between {0} {1} retrieved successfully",
+//                                whites.getUsername(), blacks.getUsername()));
+//            return response;
+//        } catch(RoomException e){
+//            log.error(format("[save room]: Failed to save room {0} \n {1}", packet, e.getMessage()));
+//            return null;
+//        }
+//    }
 }

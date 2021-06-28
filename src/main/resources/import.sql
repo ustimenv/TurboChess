@@ -77,3 +77,7 @@ INSERT INTO friendship(id,state,receiver_id,sender_id) VALUES(-3,0,2,3);
 --INSERT INTO MESSAGE VALUES(5,NULL,'2020-03-23 10:48:22.926000','probando 5',1,1);
 
 
+
+INSERT INTO game(id, end_time, moves, result, blacks, whites)
+VALUES(1, '2021-06-28 09:11:58.496258', '|a2-a4|a7-a5|b2-b3|b7-b6|d2-d3|d7-d6|e2-e4|e7-e5|f2-f3|f7-f6|h2-h3|h7-h6',	'BLACKS_WON',
+	    2, 1);

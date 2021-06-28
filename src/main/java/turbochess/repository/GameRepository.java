@@ -33,12 +33,12 @@ public interface GameRepository extends CrudRepository<Game, Long>{
 //    List<Game> getGamesByUsers(@Param("whites") long whitesID, @Param("blacks") long blacksID);
 
 
-    @Query(value = "SELECT whites blacks result end_time FROM Game WHERE whites = :userID OR blacks = :userID", nativeQuery = true)
-    List<Game> getGamesInfoByUser(@Param("userID") long userID);
-
-    @Query(value = "SELECT moves FROM Game WHERE whites = :whitesID AND blacks = :blacksID AND end_time = :endTime", nativeQuery = true)
-    String getGameByGameInfo(@Param("whitesID") long whitesId, @Param("blacksID") long blacksId,
-                                 @Param("endTime") String endTime);           // technically we expect a single result
+    @Query(value = "SELECT * FROM Game WHERE whites = :userID OR blacks = :userID", nativeQuery = true)
+    List<Game> getGamesByUser(@Param("userID") long userID);
+//
+//    @Query(value = "SELECT moves FROM Game WHERE whites = :whitesID AND blacks = :blacksID AND end_time = :endTime", nativeQuery = true)
+//    String getGameByGameInfo(@Param("whitesID") long whitesId, @Param("blacksID") long blacksId,
+//                                 @Param("endTime") String endTime);           // technically we expect a single result
 
 
 }

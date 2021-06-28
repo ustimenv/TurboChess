@@ -39,14 +39,14 @@ public class GameServiceImp implements GameService{
 //    }
 
     @Override
-    public List<Game> getGamesInfoByUser(User user){
-        return repository.getGamesInfoByUser(user.getId());
+    public List<Game> getGamesByUser(User user){
+        return repository.getGamesByUser(user.getId());
     }
 
-    @Override
-    public List<String> getGameMovesByGameInfo(Game gameInfo){
-        String moves = repository.getGameByGameInfo(gameInfo.getWhites().getId(), gameInfo.getBlacks().getId(),
-                                                        String.valueOf(gameInfo.getEndTime()));
-        return Game.movesToList(moves);
-    }
+//    @Override
+//    public List<String> getGameMovesByGameInfo(Game gameInfo){
+//        String moves = repository.getGameByGameInfo(gameInfo.getWhites().getId(), gameInfo.getBlacks().getId(),
+//                                                        String.valueOf(gameInfo.getEndTime()));
+//        return Game.movesToList(moves);
+//    }
 }

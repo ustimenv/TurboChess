@@ -1,19 +1,17 @@
 package turbochess.control;
 
-import antlr.ASTNULLType;
-import turbochess.configurations.IwUserDetailsService;
-import turbochess.model.Friendship;
-import turbochess.model.User;
-import turbochess.model.chess.Game;
-import turbochess.model.room.Room;
-import turbochess.repository.RoomRepository;
-import turbochess.service.friendship.FriendshipException;
-import turbochess.service.friendship.FriendshipService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import turbochess.configurations.IwUserDetailsService;
+import turbochess.model.Friendship;
+import turbochess.model.User;
+import turbochess.model.chess.Game;
+import turbochess.repository.RoomRepository;
+import turbochess.service.friendship.FriendshipException;
+import turbochess.service.friendship.FriendshipService;
 import turbochess.service.game.GameService;
 
 import javax.persistence.EntityManager;
@@ -22,6 +20,7 @@ import javax.persistence.Query;
 import javax.servlet.http.HttpSession;
 import javax.transaction.Transactional;
 import java.util.List;
+import java.util.Map;
 
 @Controller
 public class RootController {
@@ -92,28 +91,29 @@ public class RootController {
         return "game";
     }
 
-    @GetMapping("/history")
-    public String history(Model model) {
-//TODO obtener las partidas ya terminadas ahora solo muestra todas las partidas incluso las que ni han comenzado
-        List<Room> historial = (List<Room>) roomRepository.findAll();
+//    @GetMapping("/history")
+//    public String history(Model model) {
+//        model.addAttribute("username", ((User) session.getAttribute("u")).getUsername());
+//        return "history";
+//    }
+//    @GetMapping("/history")
+//    public String history(Model model) {
+//        model.addAttribute("username", ((User) session.getAttribute("u")).getUsername());
+//        return "history";
+//    }
 
-        model.addAttribute("historial", historial);
-        return "history";
 
-    }
-/*
     @GetMapping("/history")
     public String history(Model model) {
         if (session.getAttribute("u") != null){
             User user = (User) session.getAttribute("u");
-            List <Game> games = gameService.getUserGames(user.getId());
-            for(int i=0; i<games.size(); i++){
-                model.addAttribute("Game "+(i+1), games.get(i).getListOfMove());
-            }
+            List <Game> games = gameService.getGamesByUser(user);
+            model.addAttribute("games", games);
+
         }
         return "history";
     }
-*/
+
     @GetMapping("/profile")
     public String profile(Model model, HttpSession session) {
         User user = (User) session.getAttribute("u");
@@ -125,13 +125,13 @@ public class RootController {
         return "othersProfile";
     }
 
-
-    @GetMapping("/ranks")
-    public String ranks(Model model) {
-//        List<User> rankings = GeneralUtils.JSONtoList("src/main/resources/examples/rankings.json");
-//        model.addAttribute("rankings", rankings);
-        return "ranks";
-    }
+//
+//    @GetMapping("/ranks")
+//    public String ranks(Model model) {
+////        List<User> rankings = GeneralUtils.JSONtoList("src/main/resources/examples/rankings.json");
+////        model.addAttribute("rankings", rankings);
+//        return "ranks";
+//    }
 
     @GetMapping(path = "/users/{username}")
     public String erothersProfileror(Model model, @PathVariable(value = "username", required = true) String username) {

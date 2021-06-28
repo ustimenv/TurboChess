@@ -1,6 +1,8 @@
 package turbochess.model.chess;
 
 import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import turbochess.model.User;
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -10,7 +12,7 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 @Entity
-@Data
+@NoArgsConstructor
 public class Game{
     public enum Result {
         WHITES_WON, BLACKS_WON, DRAW;
@@ -37,41 +39,53 @@ public class Game{
         this.moves = moves;
     }
 
-    public Game(User whites, User blacks, LocalDateTime endTime, Result result){    // Game info 1
-        this(whites, blacks, endTime, result, null);
-    }
-
-    public Game(User whites, User blacks, String endTime){                          // Game info 2
-        this(whites, blacks, LocalDateTime.parse(endTime, Game.dateTimeFormatter), null, null);
-    }
+//    public Game(User whites, User blacks, LocalDateTime endTime, Result result){    // Game info 1
+//        this(whites, blacks, endTime, result, null);
+//    }
+//
+//    public Game(User whites, User blacks, String endTime){                          // Game info 2
+//        this(whites, blacks, LocalDateTime.parse(endTime, Game.dateTimeFormatter), null, null);
+//    }
 
     @Enumerated(EnumType.STRING)
-    private Result result;
+    private @Getter Result result;
 
     @Column(nullable = false)
-    private LocalDateTime endTime;
+    private @Getter LocalDateTime endTime;
 
     private static DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
-    public String endTimeToString(){
+    public String getEndTime(){
         return endTime.format(dateTimeFormatter);
     }
 
     @ManyToOne
     @JoinColumn(name = "whites")
-    private User whites;
+    private @Getter User whites;
 
     @ManyToOne
     @JoinColumn(name = "blacks")
-    private User blacks;
+    private @Getter User blacks;
 
     @Column(nullable = true)
     private String moves;
 
+//    public List<String> getMoves(){
+//        if(moves != null && moves.length() > 3){
+//            return Arrays.asList(moves.split(Pattern.quote(Move.DELIMITER)));
+//        } else return List.of();
+//    }
+    public String getMoves(){
+        return moves;
+    }
 
-
-    public static List <String> movesToList(String moves){
-        if(moves == null || moves.length() < 4)   return List.of();
-        return Arrays.asList(moves.split(Pattern.quote(Move.DELIMITER)));
+    public String getVictor(){
+        if(result == Result.BLACKS_WON){
+            return blacks.getUsername()+" won";
+        } else if(result == Result.WHITES_WON){
+            return whites.getUsername()+" won";
+        } else{
+            return "Draw";
+        }
     }
 }

@@ -297,8 +297,8 @@ function handleJoinRoom(e){
 
 function handleCreateRoom(e){
     e.preventDefault();
-    var capacity = document.getElementById('createRoomForm')[0].value;      // todo validate capacity on-the-fly
-    if(capacity < 2){       // todo display the error msg in a div
+    var capacity = document.getElementById('createRoomForm')[0].value;
+    if(capacity < 2){
         alert("Room capacity must be at least 2!");
         return;
     }
@@ -334,6 +334,7 @@ function leave(){
     if(myColour === 'w' || myColour === 'b'){
         surrender();
     }
+    location.href = "/";
 }
 
 function surrender(){
@@ -353,6 +354,7 @@ function surrender(){
         success : function(response) {
             surrendered=true;
             alert("You have successfully surrendered!");
+            leave();
         },
         error : function(e) {
             console.log('ERROR: ', e);

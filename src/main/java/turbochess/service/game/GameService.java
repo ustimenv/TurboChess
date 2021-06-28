@@ -17,7 +17,7 @@ public interface GameService{
 //    Game getGameInfoByUser(User user);
 
 
-    List<Game> getGamesInfoByUser(User user);
-    List<String> getGameMovesByGameInfo(Game gameInfo);
+    List<Game> getGamesByUser(User user);
+//    List<String> getGameMovesByGameInfo(Game gameInfo);
 
 }
