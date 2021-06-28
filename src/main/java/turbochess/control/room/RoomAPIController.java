@@ -4,12 +4,11 @@ package turbochess.control.room;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
 import turbochess.control.JsonConverter;
 import turbochess.model.User;
 import turbochess.model.chess.Bet;
@@ -18,21 +17,28 @@ import turbochess.model.messaging.server.*;
 import turbochess.model.chess.Game;
 import turbochess.model.room.Participant;
 import turbochess.model.room.Room;
+import turbochess.repository.RoomRepository;
 import turbochess.service.bet.BetException;
 import turbochess.service.participant.ParticipantException;
 import turbochess.service.room.RoomException;
 
+import javax.persistence.EntityManager;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import static java.text.MessageFormat.format;
 
 @Controller
 public class RoomAPIController extends RoomController{
     private static Logger log = LogManager.getLogger(RoomAPIController.class);
+    @Autowired
+    protected RoomRepository roomRepository;
+    @Autowired
+    protected EntityManager entityManager;
 
     @RequestMapping(value = "/api/create_room", method=RequestMethod.POST, produces = "application/json")
     @ResponseBody
@@ -54,7 +60,7 @@ public class RoomAPIController extends RoomController{
             entityManager.persist(createdRoom);
             log.info(format("Room {0} created successfully by {1}", createdRoom.getCode(), p.getUser().getUsername()));
 
-            return Map.of("roomCodeAssigned", createdRoom.getCode(),
+            return (Map<String, String>) Stream.of("roomCodeAssigned", createdRoom.getCode(),
                           "colourAssigned", p.getColourString()
                          );
 
@@ -94,7 +100,7 @@ public class RoomAPIController extends RoomController{
             entityManager.persist(p);
             entityManager.persist(room);
             log.info(format("User {0} joined room {1} successfully", userFrom.getUsername(), room.getCode()));
-            return Map.of("colourAssigned", p.getColourString(),
+            return (Map<String, String>) Stream.of("colourAssigned", p.getColourString(),
                           "fen",            "",
                           "accumulatedBet", String.valueOf(0)
                          );
@@ -118,7 +124,7 @@ public class RoomAPIController extends RoomController{
         } catch(BetException e){
             log.info(e);
         }
-        return Map.of("colourAssigned", p.getColourString(),
+        return (Map<String, String>) Stream.of("colourAssigned", p.getColourString(),
                       "fen",            room.getFen(),
                       "accumulatedBet", String.valueOf(participantAccumulatedBet)
                      );
@@ -166,7 +172,7 @@ public class RoomAPIController extends RoomController{
             }
             entityManager.remove(room);
             log.info(format("Game saved for users {0} and {1} successfully", whites.getUsername(), blacks.getUsername()));
-            return Map.of("okay", "okay");
+            return (Map<String, String>) Stream.of("okay", "okay");
         } catch(RoomException | ParticipantException e){
             log.error(format("[save room]: Failed to save room {0} \n {1}", packet, e.getMessage()));
             return null;
@@ -198,5 +204,14 @@ public class RoomAPIController extends RoomController{
         } catch(JsonProcessingException e){
             return null;
         }
+    }
+
+    @GetMapping("/rooms")
+    public String getRooms(Model model) {
+        List<Room> rooms = (List<Room>) roomRepository.findAll();
+
+        model.addAttribute("rooms", rooms);
+
+        return "rooms";
     }
 }

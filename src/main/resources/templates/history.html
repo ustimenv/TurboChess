@@ -53,7 +53,7 @@
                         <td th:text="${game.blacks.getUsername()}"></td>
                         <td th:text="${game.getVictor()}"></td>
 <!--                        <td th:text="Replay" th:onclick="'foo(\'' + ${game.getMoves()} + '\');'"></td>-->
-                        <td th:text="Replay" style="cursor: pointer" th:attr="onclick='showBoard(\'' + ${game.getMoves()}+'\')'"></td>
+                        <td  style="cursor: pointer" th:attr="onclick='showBoard(\'' + ${game.getMoves()}+'\')'"><i style="font-size:24px" class="fa" aria-placeholder="play">&#xf04b;</i></td>
                     </tr>
                 </tbody>
             </table>
