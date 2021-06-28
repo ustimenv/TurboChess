@@ -1,13 +1,13 @@
 package turbochess.model.room;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
-import turbochess.model.User;
-import turbochess.service.room.RoomException;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
+import turbochess.service.room.RoomException;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,36 +19,46 @@ import static java.text.MessageFormat.format;
 public class Room{                           // includes two players and an undetermined number of observers
 
     @Id
+    @JsonProperty("code")
     private String code;
 
     @Column(nullable = false)
+    @JsonProperty("capacity")
     private int capacity;            // maximum number of people able to be in a room at any given time, specified by the room's creator (PLAYER_1)
 
     @Column(name = "num_participants", nullable = false)
+    @JsonProperty("numParticipants")
     private int numParticipants=0;
 
 
     @Enumerated(EnumType.STRING)
+    @JsonIgnore
     private GameState gameState = GameState.NOT_STARTED;
 
     @OneToMany(mappedBy = "room", fetch = FetchType.LAZY)
+    @JsonIgnore
     private List<Participant> participants = new ArrayList<>();
 
     @Column(name="moves", nullable = false)
+    @JsonIgnore
     private String moves="";
 
     @Column(name="fen", nullable =false)
+    @JsonIgnore
     private String fen="";
 
-//    @Column(name="stored_participants", nullable = true)
-//    private String storedParticipants;                         // json string containing serialised participants (ids, roles, bets)
+    @Column(name="date_created", columnDefinition = "TIMESTAMP")
+    @JsonProperty("dateCreated")
+    private LocalDateTime dateCreated;
 
     @Column(name="current_turn", nullable = false)
+    @JsonProperty("currentTurn")
     private int currentTurn=0;                         // json string containing serialised participants (ids, roles, bets)
 
     public Room(String code, int capacity){
         this.code = code;
         this.capacity = capacity;
+        this.dateCreated = LocalDateTime.now();
     }
 
     public enum GameState{
@@ -95,14 +105,14 @@ public class Room{                           // includes two players and an unde
         }
     }
 
-    public User getPlayer1(){
-        Participant p =participants.stream().filter(u->u.getRole().equals(Participant.Role.PLAYER1)).findFirst()
-                .orElse(null);
-        return p.getUser();
-    }
-    public User getPlayer2(){
-        Participant p =participants.stream().filter(u->u.getRole().equals(Participant.Role.PLAYER2)).findFirst()
-                .orElse(null);
-        return p.getUser();
-    }
+//    public User getPlayer1(){
+//        Participant p =participants.stream().filter(u->u.getRole().equals(Participant.Role.PLAYER1)).findFirst()
+//                .orElse(null);
+//        return p.getUser();
+//    }
+//    public User getPlayer2(){
+//        Participant p =participants.stream().filter(u->u.getRole().equals(Participant.Role.PLAYER2)).findFirst()
+//                .orElse(null);
+//        return p.getUser();
+//    }
 }

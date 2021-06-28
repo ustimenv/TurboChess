@@ -5,6 +5,8 @@ import turbochess.repository.RoomRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 import static java.text.MessageFormat.format;
 
 @Service
@@ -35,6 +37,16 @@ public class RoomServiceImp implements RoomService{
         if(roomExists(roomCode)){
             return repository.getRoomByCode(roomCode);
         } else  throw new RoomException(format("Room {0} doesn''t exist!", roomCode));
+    }
+
+    @Override
+    public List<Room> getAvailableRooms(int maxRooms){
+        return repository.getRoomsBelowCapacity(maxRooms);
+    }
+
+    @Override
+    public List<Room> getAllRooms(){
+        return repository.getAllRooms();
     }
 
 }

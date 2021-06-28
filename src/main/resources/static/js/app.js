@@ -13,8 +13,11 @@ var rootContainer = document.querySelector('#root-container')
 var connecting = document.querySelector('.connecting-to-room');
 var createRoomForm = document.querySelector('#createRoomForm');
 var roomCodeForm = document.querySelector('#roomCodeForm');
-if(createRoomForm!=null)createRoomForm.addEventListener('submit', handleCreateRoom, true);
-if(roomCodeForm!=null)roomCodeForm.addEventListener('submit', handleJoinRoom, true);
+var availableRoomsTable = document.querySelector('#rooms-table');
+var availableRoomsTableBody = document.querySelector('#rooms-table-body');
+
+if(createRoomForm!=null)    createRoomForm.addEventListener('submit', handleCreateRoom, true);
+if(roomCodeForm!=null)      roomCodeForm.addEventListener('submit', handleJoinRoom, true);
 var roomCode = null;            // set via an ajax call by creating or joining a room
 //var username           ---->> is defined and set in the inline script in room.html
 
@@ -47,6 +50,12 @@ var myColour = null;
 var surrendered = false;
 var isDraw = false;
 var gameOverSent = false;
+
+
+document.addEventListener('DOMContentLoaded', function() {
+    requestAvailableRooms();
+}, false);
+
 /**
 *         CHESS
 */
@@ -295,6 +304,46 @@ function handleJoinRoom(e){
     }
 }
 
+function clearAvailableRoomsTable(){
+    $("#rooms-table-body").empty();
+}
+
+function selectRoomFromTable(){
+}
+function requestAvailableRooms(){
+    setCSRFtoken();
+    var data = {}
+    data['from'] = username;
+    console.log("Sending the request");
+    console.log(data);
+    $.ajax({
+            type : 'GET',
+            contentType : 'application/json',
+
+            url : '/api/list_rooms',
+            success : function(response) {
+                clearAvailableRoomsTable();
+                var rooms = JSON.parse(response.rooms);
+
+                for(var i=0; i<rooms.length; i++){
+                    $('#rooms-table > tbody:first').append(`<tr><td>${dateToString(rooms[i].dateCreated)}</td><td>${rooms[i].code}</td><td>${rooms[i].numParticipants}</td><td>${rooms[i].capacity}</td></tr>`);
+                    availableRoomsTableBody.rows[i].onclick = function() {
+                          prepareToJoinRoom(this);
+                        };
+                }
+            },
+            error : function(e) {
+                console.log('ERROR: ', e);
+            },
+            done : function(e) {
+                console.log('done...');
+            }
+        });
+}
+function prepareToJoinRoom(tableRow){
+    document.getElementById("roomcode").value = tableRow.childNodes[1].innerHTML;
+}
+
 function handleCreateRoom(e){
     e.preventDefault();
     var capacity = document.getElementById('createRoomForm')[0].value;
@@ -413,6 +462,9 @@ function handleIncreaseBet(){
 /**
 *           UTILITY METHODS
 */
+function dateToString(D){
+    return D.hour + ":" + D.minute + ", " + D.dayOfMonth + "/" + D.monthValue +"/"+ D.year;
+}
 
 function setCSRFtoken(){
     var token = $("meta[name='_csrf']").attr("content");

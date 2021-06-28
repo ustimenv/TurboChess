@@ -31,9 +31,22 @@
             <input type="text" id="roomcode" placeholder="Enter the room code here" autocomplete="off" class="form-control" />
             <button type="submit" class="join-room-submit">Join</button>
         </form>
+    <table id="rooms-table" style="width:100%">
+        <thead>
+            <tr>
+                <th>Creation date</th>
+                <th>Room code</th>
+                <th>Participants</th>
+                <th>Capacity</th>
+                <th>Join</th>
+            </tr>
+        </thead>
+        <tbody id="rooms-table-body"></tbody>
+    </table>
 
     </div>
 </div>
+
 <div id="root-container">
     <div class="board hidden">
         <div id="myBoard" style="width: 300px"></div>

@@ -1,4 +1,8 @@
 package turbochess.model.messaging.server;
 
-public abstract class Response{
+import lombok.AllArgsConstructor;
+
+@AllArgsConstructor
+public class Response{
+    private String data;
 }
