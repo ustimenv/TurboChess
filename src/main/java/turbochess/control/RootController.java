@@ -1,9 +1,12 @@
 package turbochess.control;
 
+import antlr.ASTNULLType;
 import turbochess.configurations.IwUserDetailsService;
 import turbochess.model.Friendship;
 import turbochess.model.User;
 import turbochess.model.chess.Game;
+import turbochess.model.room.Room;
+import turbochess.repository.RoomRepository;
 import turbochess.service.friendship.FriendshipException;
 import turbochess.service.friendship.FriendshipService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,6 +42,8 @@ public class RootController {
 
     @Autowired
     private GameService gameService;
+    @Autowired
+    protected RoomRepository roomRepository;
 
     @GetMapping("/")
     public String index(Model model, HttpSession session) {
@@ -87,12 +92,16 @@ public class RootController {
         return "game";
     }
 
-    @GetMapping("/spect")
-    public String spect(Model model) {
-        model.addAttribute("title", "Turbochess Spect");
-        return "spect";
-    }
+    @GetMapping("/history")
+    public String history(Model model) {
+//TODO obtener las partidas ya terminadas ahora solo muestra todas las partidas incluso las que ni han comenzado
+        List<Room> historial = (List<Room>) roomRepository.findAll();
 
+        model.addAttribute("historial", historial);
+        return "history";
+
+    }
+/*
     @GetMapping("/history")
     public String history(Model model) {
         if (session.getAttribute("u") != null){
@@ -104,7 +113,7 @@ public class RootController {
         }
         return "history";
     }
-
+*/
     @GetMapping("/profile")
     public String profile(Model model, HttpSession session) {
         User user = (User) session.getAttribute("u");

@@ -187,8 +187,14 @@ li a.upBar:hover {
     right: 0;
   }
   .board {
-    position: absolute;
+    display: inline-block;
+
     top: 15%;
     left: 35%;
     right: 210px;
+    border: solid;
+  width: 50%;
+  }
+  .buttonsViewGame{
+    padding-left: 15%;
   }

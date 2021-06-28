@@ -13,8 +13,8 @@ var rootContainer = document.querySelector('#root-container')
 var connecting = document.querySelector('.connecting-to-room');
 var createRoomForm = document.querySelector('#createRoomForm');
 var roomCodeForm = document.querySelector('#roomCodeForm');
-createRoomForm.addEventListener('submit', handleCreateRoom, true);
-roomCodeForm.addEventListener('submit', handleJoinRoom, true);
+if(createRoomForm!=null)createRoomForm.addEventListener('submit', handleCreateRoom, true);
+if(roomCodeForm!=null)roomCodeForm.addEventListener('submit', handleJoinRoom, true);
 var roomCode = null;            // set via an ajax call by creating or joining a room
 //var username           ---->> is defined and set in the inline script in room.html
 
