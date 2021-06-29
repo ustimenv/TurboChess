@@ -44,9 +44,5 @@ public class RoomServiceImp implements RoomService{
         return repository.getRoomsBelowCapacity(maxRooms);
     }
 
-    @Override
-    public List<Room> getAllRooms(){
-        return repository.getAllRooms();
-    }
 
 }

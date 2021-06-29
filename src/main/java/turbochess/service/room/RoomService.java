@@ -11,7 +11,5 @@ public interface RoomService {
     Room createRoom(String roomCode, int capacity)  throws RoomException;
     Room getRoomByCode(String roomCode)             throws RoomException;
     List<Room> getAvailableRooms(int maxRooms);
-
-    List <Room> getAllRooms();
     boolean roomExists(String roomCode);
 }

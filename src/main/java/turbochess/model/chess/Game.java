@@ -39,14 +39,6 @@ public class Game{
         this.moves = moves;
     }
 
-//    public Game(User whites, User blacks, LocalDateTime endTime, Result result){    // Game info 1
-//        this(whites, blacks, endTime, result, null);
-//    }
-//
-//    public Game(User whites, User blacks, String endTime){                          // Game info 2
-//        this(whites, blacks, LocalDateTime.parse(endTime, Game.dateTimeFormatter), null, null);
-//    }
-
     @Enumerated(EnumType.STRING)
     private @Getter Result result;
 
@@ -70,11 +62,6 @@ public class Game{
     @Column(nullable = true)
     private String moves;
 
-//    public List<String> getMoves(){
-//        if(moves != null && moves.length() > 3){
-//            return Arrays.asList(moves.split(Pattern.quote(Move.DELIMITER)));
-//        } else return List.of();
-//    }
     public String getMoves(){
         return moves;
     }

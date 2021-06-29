@@ -1,8 +1,5 @@
 package turbochess.control.room;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
@@ -16,13 +13,12 @@ import turbochess.model.User;
 import turbochess.model.chess.Bet;
 import turbochess.model.chess.Game;
 import turbochess.model.chess.Move;
-import turbochess.model.messaging.client.*;
+import turbochess.model.messaging.*;
 import turbochess.model.room.Participant;
 import turbochess.model.room.Room;
 import turbochess.service.participant.ParticipantException;
 import turbochess.service.room.RoomException;
 
-import java.text.MessageFormat;
 import java.util.concurrent.ThreadLocalRandom;
 
 import static java.text.MessageFormat.format;
@@ -88,7 +84,6 @@ public class RoomMessagingController extends RoomController{
 
         if(room == null || clientPacket ==null)	return null;
         // check to see if the sender has the permission to make this move
-        for(int i=0; i<10; i++) System.out.println(clientPacket);
         try{
             User user = getUserByUsername(clientPacket.getFrom());
             Room contextRoom = roomService.getRoomByCode(room);

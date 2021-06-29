@@ -1,4 +1,4 @@
-package turbochess.model.messaging.client;
+package turbochess.model.messaging;
 
 public enum PacketType{
     TEXT,           // text message sent from a user into the room

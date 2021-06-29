@@ -17,7 +17,6 @@ public class ParticipantServiceImp implements ParticipantService{
     @Autowired
     private ParticipantRepository repository;
 
-
     @Override
     public boolean isUserInRoom(Room room, User user){
         return 0 < repository.countParticipants(room.getCode(), user.getId());

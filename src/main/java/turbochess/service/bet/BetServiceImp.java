@@ -32,11 +32,6 @@ public class BetServiceImp implements BetService{
     }
 
     @Override
-    public void deleteParticipantBets(Participant p) throws BetException{
-        repository.deleteBetsByParticipant(p.getId());
-    }
-
-    @Override
     public List<Bet> getRoomBetsByResult(String roomCode, Game.Result result){
         return repository.getRoomBetsByResult(roomCode, result);
     }

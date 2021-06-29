@@ -1,6 +1,7 @@
 package turbochess.control.room;
 
 //import jdk.vm.ci.meta.Local;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -12,9 +13,10 @@ import org.springframework.web.bind.annotation.*;
 import turbochess.control.JsonConverter;
 import turbochess.model.User;
 import turbochess.model.chess.Bet;
-import turbochess.model.messaging.client.*;
-import turbochess.model.messaging.server.*;
 import turbochess.model.chess.Game;
+import turbochess.model.messaging.CreateRoomPacket;
+import turbochess.model.messaging.GameOverPacket;
+import turbochess.model.messaging.JoinRoomPacket;
 import turbochess.model.room.Participant;
 import turbochess.model.room.Room;
 import turbochess.repository.RoomRepository;
@@ -24,11 +26,9 @@ import turbochess.service.room.RoomException;
 
 import javax.persistence.EntityManager;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Stream;
 
 import static java.text.MessageFormat.format;
 
@@ -128,7 +128,7 @@ public class RoomAPIController extends RoomController{
         }
         Map<String, String> response = new HashMap<>();
         response.put("colourAssigned", p.getColourString());
-        response.put("fen",            "");
+        response.put("fen",            room.getFen());
         response.put("accumulatedBet", String.valueOf(participantAccumulatedBet));
         return response;
     }
@@ -173,13 +173,14 @@ public class RoomAPIController extends RoomController{
             for(Participant p : participants){
                 entityManager.remove(p);
             }
+            betService.deleteRoomBets(room);
             entityManager.remove(room);
             log.info(format("Game saved for users {0} and {1} successfully", whites.getUsername(), blacks.getUsername()));
 
             Map<String, String> response = new HashMap<>();
             response.put("okay", "okay");
             return response;
-        } catch(RoomException | ParticipantException e){
+        } catch(RoomException | BetException | ParticipantException e){
             log.error(format("[save room]: Failed to save room {0} \n {1}", packet, e.getMessage()));
             return null;
         }
@@ -190,20 +191,12 @@ public class RoomAPIController extends RoomController{
     public Map<String, String> listRooms(){
         try{
             Map<String, String> response = new HashMap<>();
-            List<Room> rooms = roomService.getAllRooms();//AvailableRooms(10);
+            List<Room> rooms = roomService.getAvailableRooms(10);
 
             if(rooms.isEmpty())  return null;
 
             String jsonString = JsonConverter.INSTANCE.toJSONString(rooms);
-
-            for(int i=0; i<20; i++){
-//                System.out.println(rooms.get(0));
-                System.out.println("________________________________________________");
-                System.out.println(jsonString);
-            }
-            System.out.println(jsonString);
             response.put("rooms", jsonString);
-
             log.info("List of rooms retrieved successfully");
             return response;
 

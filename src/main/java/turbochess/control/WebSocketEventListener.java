@@ -1,8 +1,7 @@
 package turbochess.control;
 
-import turbochess.model.messaging.client.ClientPacket;
-import turbochess.model.messaging.client.LeavePacket;
-import turbochess.model.messaging.client.PacketType;
+import turbochess.model.messaging.ClientPacket;
+import turbochess.model.messaging.LeavePacket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

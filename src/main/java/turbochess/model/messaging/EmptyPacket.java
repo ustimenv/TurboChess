@@ -1,4 +1,4 @@
-package turbochess.model.messaging.client;
+package turbochess.model.messaging;
 
 public class EmptyPacket extends ClientPacket{
     protected PacketType type = PacketType.EMPTY;

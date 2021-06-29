@@ -1,4 +1,4 @@
-package turbochess.model.messaging.client;
+package turbochess.model.messaging;
 
 /*
 *       Base class for packets emitted by the client. Up to individual subclasses to add additional fields as needed

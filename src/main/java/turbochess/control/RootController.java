@@ -20,7 +20,6 @@ import javax.persistence.Query;
 import javax.servlet.http.HttpSession;
 import javax.transaction.Transactional;
 import java.util.List;
-import java.util.Map;
 
 @Controller
 public class RootController {
@@ -91,18 +90,6 @@ public class RootController {
         return "game";
     }
 
-//    @GetMapping("/history")
-//    public String history(Model model) {
-//        model.addAttribute("username", ((User) session.getAttribute("u")).getUsername());
-//        return "history";
-//    }
-//    @GetMapping("/history")
-//    public String history(Model model) {
-//        model.addAttribute("username", ((User) session.getAttribute("u")).getUsername());
-//        return "history";
-//    }
-
-
     @GetMapping("/history")
     public String history(Model model) {
         if (session.getAttribute("u") != null){
@@ -124,14 +111,6 @@ public class RootController {
     public String othersProfile(Model model) {
         return "othersProfile";
     }
-
-//
-//    @GetMapping("/ranks")
-//    public String ranks(Model model) {
-////        List<User> rankings = GeneralUtils.JSONtoList("src/main/resources/examples/rankings.json");
-////        model.addAttribute("rankings", rankings);
-//        return "ranks";
-//    }
 
     @GetMapping(path = "/users/{username}")
     public String erothersProfileror(Model model, @PathVariable(value = "username", required = true) String username) {

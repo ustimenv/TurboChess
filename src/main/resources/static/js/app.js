@@ -161,18 +161,15 @@ function sendMove(movementJSON){
 }
 
 function sendBetRaise(e){
-     if(betInputBox && stompClient) {
-         var colourBettedOn = null;
-         if(bettedOnWhitesRadio.checked){
-            colourBettedOn = 'whites';
-         } else if(bettedOnDrawRadio.checked){
-            colourBettedOn = 'draw';
-         } else if(bettedOnBlacksRadio.checked){
-            colourBettedOn = 'blacks';
-         } else{
-            console.log("To bet, gotta pick a side to bet on");
-            return;
-         }
+    var colourBettedOn = null;
+    if(bettedOnWhitesRadio.checked){
+        colourBettedOn = 'whites';
+    } else if(bettedOnDrawRadio.checked){
+        colourBettedOn = 'draw';
+    } else if(bettedOnBlacksRadio.checked){
+        colourBettedOn = 'blacks';
+    }
+    if(colourBettedOn && betInputBox && stompClient) {
          var packet = {
             from: username,
             betAmount: betInputBox.value,
@@ -180,7 +177,6 @@ function sendBetRaise(e){
             type: 'BET_RAISE',
             context: roomCode
          };
-
          stompClient.send(`/app/${roomCode}.sys.placeBet`, {}, JSON.stringify(packet));
          totalBet += parseInt(betInputBox.value);
          betInputBox.value = 0;
@@ -284,6 +280,7 @@ function handleJoinRoom(e){
                 data : JSON.stringify(data),
                 url : '/api/join_room',
                 success : function(response) {
+                    console.log(response);
                     myColour = response.colourAssigned;
                     fen = response.fen;
                     totalBet = response.accumulatedBet;

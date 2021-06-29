@@ -104,15 +104,4 @@ public class Room{                           // includes two players and an unde
             return this.code.equals(((Room) other).getCode());
         }
     }
-
-//    public User getPlayer1(){
-//        Participant p =participants.stream().filter(u->u.getRole().equals(Participant.Role.PLAYER1)).findFirst()
-//                .orElse(null);
-//        return p.getUser();
-//    }
-//    public User getPlayer2(){
-//        Participant p =participants.stream().filter(u->u.getRole().equals(Participant.Role.PLAYER2)).findFirst()
-//                .orElse(null);
-//        return p.getUser();
-//    }
 }
