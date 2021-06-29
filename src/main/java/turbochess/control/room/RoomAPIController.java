@@ -60,9 +60,10 @@ public class RoomAPIController extends RoomController{
             entityManager.persist(createdRoom);
             log.info(format("Room {0} created successfully by {1}", createdRoom.getCode(), p.getUser().getUsername()));
 
-            return (Map<String, String>) Stream.of("roomCodeAssigned", createdRoom.getCode(),
-                          "colourAssigned", p.getColourString()
-                         );
+            Map <String, String> response = new HashMap<>();
+            response.put("roomCodeAssigned", createdRoom.getCode());
+            response.put("colourAssigned", p.getColourString());
+            return response;
 
         } catch(RoomException e){
             log.error(format("[create room]: failed to create room {0}", (Object) e.getMessage()));
@@ -100,10 +101,11 @@ public class RoomAPIController extends RoomController{
             entityManager.persist(p);
             entityManager.persist(room);
             log.info(format("User {0} joined room {1} successfully", userFrom.getUsername(), room.getCode()));
-            return (Map<String, String>) Stream.of("colourAssigned", p.getColourString(),
-                          "fen",            "",
-                          "accumulatedBet", String.valueOf(0)
-                         );
+            Map<String, String> response = new HashMap<>();
+            response.put("colourAssigned", p.getColourString());
+            response.put("fen",            "");
+            response.put("accumulatedBet", String.valueOf(0));
+            return response;
 
         } catch(RoomException e){
             log.error(format("[join room]: User failed to join room. Packet:\n {0}\n" +
@@ -124,10 +126,11 @@ public class RoomAPIController extends RoomController{
         } catch(BetException e){
             log.info(e);
         }
-        return (Map<String, String>) Stream.of("colourAssigned", p.getColourString(),
-                      "fen",            room.getFen(),
-                      "accumulatedBet", String.valueOf(participantAccumulatedBet)
-                     );
+        Map<String, String> response = new HashMap<>();
+        response.put("colourAssigned", p.getColourString());
+        response.put("fen",            "");
+        response.put("accumulatedBet", String.valueOf(participantAccumulatedBet));
+        return response;
     }
 
     @RequestMapping(value = "/api/game_over", method=RequestMethod.POST, produces = "application/json")
@@ -172,7 +175,10 @@ public class RoomAPIController extends RoomController{
             }
             entityManager.remove(room);
             log.info(format("Game saved for users {0} and {1} successfully", whites.getUsername(), blacks.getUsername()));
-            return (Map<String, String>) Stream.of("okay", "okay");
+
+            Map<String, String> response = new HashMap<>();
+            response.put("okay", "okay");
+            return response;
         } catch(RoomException | ParticipantException e){
             log.error(format("[save room]: Failed to save room {0} \n {1}", packet, e.getMessage()));
             return null;
