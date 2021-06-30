@@ -4,27 +4,88 @@
         <meta charset="UTF-8"/>
     </head>
     <body>
-        <a>Vistas del proyecto Turboches. La página no es funcional, pero se puede navegar por las distintas vistas pulsando en los botones</a>
-        <ol>
-            <li>Pantalla de Inicio: 
-                <a href="http://localhost:8080/">Inicio</a>
-                </li>
-            </li>
-            <li><a href="http://localhost:8080/spect">Spectate</a>
-            </li>
-            <li><a href="http://localhost:8080/profile">Profile</a>
-            </li>
-            <li><a href="http://localhost:8080/game">Game</a>
-            </li>
-            <li><a href="http://localhost:8080/login">Login</a>
-            </li>
-            </li>
-            <li><a href="https://commons.wikimedia.org/w/index.php?search=chess&title=Special:Search&go=Go&ns0=1&ns6=1&ns12=1&ns14=1&ns100=1&ns106=1&searchToken=9bum721acn8h5drg0bwnxa8nr#%2Fmedia%2FFile%3ADeus_Chess_game.png">URL imagen pefil (wiki commons)</a>
-            </li>
-          </ol>
-            <h2>Nombres de usuario de prueba: </h2>
+    <h1>Turbochess</h1>
+    <p> Turbochess es una plataforma que permite jugar ajedrez online,
+    </p>
+    <h2>Autores</h2>
+    <ul>
+        <li>
+            Roxanne Caiafa
+        </li>
+        <li>
+            Vladimir Ustimenko
+        </li>
+    </ul>
+
+    <h2>¿Cómo jugar?</h2>
+    <p>En la barra superior la pestaña "Room" permite crear una partida o unirte a una ya creada.
+    al crear una partida tienes la opción de poner un límite de participantes, ya que en cada partida se pueden
+        tener espectadores y dichos espectadores pueden hacer apuestas.
+
+        Existe la posibilidad de abandonar la partida, esta acción se traduce como haber perdido el juego.
+        Si hay problemas de conexión el juego de para y puedes retomarlo volviendo a unirte a esta sala, en la misma pestaña "Room".
+    </p>
+
+
+    <h2>Amigos</h2>
+    <p>
+        Puedes hacer amigos!
+        En la barra superior puedes buscar usuarios y entrar en su perfil.
+        Si el usuario no es tu amigo aún, hay un botón para enviar una petición de amista,
+        si ya habías enviado una petición de amistad, se informará que la petición ya ha sido enviada.
+        La lista de amigos está disponible en la página principal "home" a un lateral.
+        En la barra lateral donde aparece la lista de amigos, también se lista las peticiones de amistad aún no contestadas.
+
+
+    </p>
+
+    <h2> Perfil </h2>
+    <p>En el perfil de usuario se puede ver toda la información como:
+    <ul>
+        <li>Partidas ganadas</li>
+        <li>Partidas jugadas</li>
+        <li>ELO (puntuación)</li>
+        <li>Coins(ganancias de apuestas)</li>
+        <li>historial de partidas anteriores</li>
+    </ul>
+
+    <h2> Historial de partidas</h2>
+    <p> En la pestaña "History" hay una lista de las partidas ya jugadas
+    si le das al boton del play puedes reproducirla movimiento por movimiento.
+    </p>
+
+    <h2>ELO</h2>
+    <p>El sistema de puntuación se mide en base al jugador en contra,
+    por lo que si ganas a un usuario mas experto esto te subirá mas el ELO.
+    la base de puntos es 100 y 150 es el maximo que se puede ganar
+    </p>
+
+    <h2>Apuestas</h2>
+    <p>En cada partida se pueden hacer apuestas, al final de la partida
+        las personas que hayan apostado por el ganador ganará lo que ha apostado
+        en funcion de cuando haya hecho la apuesta(movimientos en la partida), por ejemplo si faltan pocos turnos para terminar la partida
+        tu ganancia será muy pequeña.
+    </p>
+
+    <h2>Cambios realizados sobre entregas anteriores</h2>
+    <ul>
+        <li>Dos jugadores pueden jugar, antes solo se podia jugar con una IA</li>
+        <li>Puede haber espectadores de las partidas</li>
+        <li>listado de partidas</li>
+        <li>Comunicarse con el admin</li>
+        <li>Guardar el estado del juego por si se cae la conexion a algún jugador</li>
+        <li>Sistema de ELO actualizad</li>
+        <li>Sistema de apuestas actualizadas</li>
+        <li>Reproducir partidas anteriores</li>
+        <li>Recursos en local</li>
+
+    </ul>
+
+    </p>
+            <h2>Usuarios de prueba </h2>
             <ul>
-            <li>username: pepa
+            <li>Admin
+                username: pepa
                 password: pepa
             </li>
                 <p>Pepa además de usuario, es admin,
@@ -32,7 +93,7 @@
                     con el que podrá gestionar la aplicación.
                     En el panel lateral se encuentran la lista de amigos
                     y de peticiones de amistad,
-                    puede aceptar o rechazar la petición de amistad de ana, entrando al link
+                    puede aceptar o rechazar la petición de amistad de pepito, entrando al link
                     del nombre de usuario que le ha enviado la invitacion. </p>
             <li>
                 username: ana
@@ -43,15 +104,22 @@
                 el cambio se verá reflejado, e incluso si rechaza dicha peticion, podría buscar
                     al usuario en el buscador de usuarios en el nav de la parte superior de la pagina
                 </p>
-        </ul>
-    <h2>Partida</h2>
-    <p>En el link "game" en el nav situado en la parte superior, se puede jugar una partida de ajedrez contra una IA</p>
 
-    <h2>Cosas que no funcionan del todo</h2>
-        <p>Juego online con un amigo o un user random
-            en ella se pueden hacer apuestas, incluso los observadores y poder ganar coins,
-            hay un chat integrado en cada sala de juegos.
-            En /room se puede uintuir algo de la idea con el chat integrado.
-        </p>
+                <li>
+                    username: juanito
+                    password: juanito
+                </li>
+                <li>
+                    username: pepito
+                    password: pepito
+                </li>
+        </ul>
+
+<h2> Cosas que no funcionan bien del todo</h2>
+    <p>Los recursos en local, como font-awesome no pudimos conseguir hacerlo funcionar.
+    Dar la posibilidad a un admin de echar a alguien de una partida tampoco funciona.
+    </p>
+
+
     </body>
 </html>
