@@ -4,6 +4,7 @@ import java.util.List;
 import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
 
+import turbochess.model.AdminMessage;
 import turbochess.service.friendship.FriendshipService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -41,7 +42,9 @@ public class AdminController {
 	 @GetMapping("")
 	 public String index(Model model) {
 		 List<User> users = entityManager.createNamedQuery("User.findAll").getResultList();
+		List<AdminMessage> messages = entityManager.createNamedQuery("Message.findAll").getResultList();
 		 model.addAttribute("usersList", users);
+		 model.addAttribute("messages", messages);
 	 	model.addAttribute("activeProfiles", env.getActiveProfiles());
 	 	model.addAttribute("basePath", env.getProperty("es.ucm.fdi.base-path"));
 	 	model.addAttribute("debug", env.getProperty("es.ucm.fdi.debug"));

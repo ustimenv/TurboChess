@@ -10,9 +10,9 @@
                 <li class="upBar">
                    <a class="upBar" href="/">Home</a> 
                 </li>
-               <li class="upBar">
+              <!-- <li class="upBar">
                     <a class="upBar" href="/rooms">Rooms</a>
-                </li>
+                </li>-->
                 <li class="upBar">
                     <a class="upBar" href="/history">History</a>
                 </li>
@@ -20,9 +20,7 @@
                 <li class="upBar">
                     <a class="upBar" href="/profile">Profile</a>
                 </li>
-                <li class="upBar">
-                    <a class="upBar" href="/game">Game</a> 
-                </li>
+
                 <li class="upBar">
                     <form id="myform" method="post" th:action="@{/logout}"></form>
                     <a th:if="${session.u}"  class="upBar" onclick="document.getElementById('myform').submit();">Logout</a>
@@ -33,7 +31,7 @@
                     <a th:unless="${session.u}" class="upBar" href="/register">Sign Up</a>
                 </li>
                 <li class="upBar">
-                    <a class="upBar" href="/room">room</a>
+                    <a class="upBar" href="/room">Rooms</a>
                 </li>
                 <li class="upBar">
                     <a th:if="(${session.u} and ${session.u.hasRole('ADMIN')})" class="upBar" href="/admin/" >Admin</a>

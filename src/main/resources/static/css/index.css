@@ -52,7 +52,7 @@ a.button:active {
   position: relative;
 }
 
-.login-box .user-box input {
+.login-box .user-box  input {
   width: 100%;
   padding: 10px 0;
   font-size: 16px;
@@ -63,7 +63,7 @@ a.button:active {
   outline: none;
   background: transparent;
 }
-.login-box .user-box label {
+.login-box .user-box  label {
   position: absolute;
   top:0;
   left: 0;
@@ -121,7 +121,10 @@ border-radius:.25rem}
 .alert-danger hr{border-top-color:#f1b0b7}
 .alert-danger .alert-link{color:#491217}
 .alert-success{background-color:#1195ea}
-
+.admMessage{
+    margin-top: 5%;
+    margin-left: 5%;
+}
 .endGame{
     display: none;
 }

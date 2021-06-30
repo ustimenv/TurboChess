@@ -6,6 +6,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import turbochess.configurations.IwUserDetailsService;
+import turbochess.model.AdminMessage;
 import turbochess.model.Friendship;
 import turbochess.model.User;
 import turbochess.model.chess.Game;
@@ -142,6 +143,23 @@ public class RootController {
         return "/";
     }
 
+    @PostMapping("/send_to_admin")
+    @Transactional
+    public String sendMessageToAdmin(User user, Model model,HttpSession session,
+                                     @RequestParam(value = "adminMsg", required = false) String adminMsg) {
+
+       String username = ((User) session.getAttribute("u")).getUsername();
+        AdminMessage message = new AdminMessage(username, adminMsg);
+        try{
+            entityManager.persist(message);
+            model.addAttribute("msg", "Your message have been sended");
+
+        }catch (Exception e){
+            model.addAttribute("msg", "Sorry, message not sended.Try it again! ");
+        }
+
+        return index( model,  session);
+    }
     @PostMapping("/signup_form")
     @Transactional
     public String processRegister(User user, Model model) {
