@@ -323,10 +323,15 @@ function requestAvailableRooms(){
                 var rooms = JSON.parse(response.rooms);
 
                 for(var i=0; i<rooms.length; i++){
-                    $('#rooms-table > tbody:first').append(`<tr><td>${dateToString(rooms[i].dateCreated)}</td><td>${rooms[i].code}</td><td>${rooms[i].numParticipants}</td><td>${rooms[i].capacity}</td></tr>`);
+                    $('#rooms-table > tbody:first').append(`<tr><td>${dateToString(rooms[i].dateCreated)}</td><td>${rooms[i].code}</td><td>${rooms[i].numParticipants}</td><td>${rooms[i].capacity}</td><td> 
+            <button class="join-room-submit" onclick="handleJoinRoom()">Join</button>
+        
+        </td></tr>`);
                     availableRoomsTableBody.rows[i].onclick = function() {
                           prepareToJoinRoom(this);
+
                         };
+
                 }
             },
             error : function(e) {
@@ -339,6 +344,7 @@ function requestAvailableRooms(){
 }
 function prepareToJoinRoom(tableRow){
     document.getElementById("roomcode").value = tableRow.childNodes[1].innerHTML;
+
 }
 
 function handleCreateRoom(e){

@@ -1,7 +1,11 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.w3.org/1999/xhtml">
+<html  xmlns:th="http://www.thymeleaf.org">
 <head th:replace="head.html">
    <!-- <link th:href="@{/static/bootstrap/css/bootstrap.min.css}" rel="stylesheet" type="text/css" /-->
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap.css"/></link>
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap-grid.css"/></link>
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap-reboot.css"/></link>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 </head>
 <body>
 <div th:replace="frags/barraSuperior :: barraSuperior"></div>
@@ -9,10 +13,10 @@
 
 <div class="container-fluid">
     <div class="row">
-        <div class="col-md-12">
+        <div class="col-12">
             <h4>(👤) Users Details</h4>
-            <div class="table-responsive">
-                <table id="mytable" class="table table-bordred table-striped">
+
+            <table class="table table-bordered">
 
                     <thead>
 
@@ -53,24 +57,14 @@
                     </tbody>
 
                 </table>
-
-              <!--
-                <ul class="pagination pull-right">
-                    <li class="disabled"><a href="#"><span class="glyphicon glyphicon-chevron-left"></span></a></li>
-                    <li class="active"><a href="#">1</a></li>
-                    <li><a href="#">2</a></li>
-                    <li><a href="#">3</a></li>
-                    <li><a href="#">4</a></li>
-                    <li><a href="#">5</a></li>
-                    <li><a href="#"><span class="glyphicon glyphicon-chevron-right"></span></a></li>
-                </ul>
--->
             </div>
 
         </div>
-    </div>
+
 </div>
-<footer th:replace="frags/footer.html"> </footer>
+<footer th:replace="frags/footer.html">
+    <script src="js/libs/jquery-3.4.1.min.js"> </script>
+</footer>
 
 </body>
 </html>

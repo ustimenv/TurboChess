@@ -7,7 +7,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
     <title>Chat</title>
     <link rel="stylesheet" href="/css/room.css" />
-
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap.css"/></link>
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap-grid.css"/></link>
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap-reboot.css"/></link>
     <script th:inline="javascript">
     /*<![CDATA[*/
         var username = /*[[${username}]]*/ 'default';
@@ -31,7 +34,10 @@
             <input type="text" id="roomcode" placeholder="Enter the room code here" autocomplete="off" class="form-control" />
             <button type="submit" class="join-room-submit">Join</button>
         </form>
-    <table id="rooms-table" style="width:100%">
+
+            <div class="row">
+                <div class="col-12">
+    <table id="rooms-table" style="width:99%">
         <thead>
             <tr>
                 <th>Creation date</th>
@@ -41,10 +47,13 @@
                 <th>Join</th>
             </tr>
         </thead>
-        <tbody id="rooms-table-body"></tbody>
+        <tbody id="rooms-table-body">
+        </tbody>
     </table>
+                </div>
+            </div>
+        </div>
 
-    </div>
 </div>
 
 <div id="root-container">

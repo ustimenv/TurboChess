@@ -66,9 +66,10 @@
                 </tr>
                 <tr th:each="r: ${rooms}">
                     <th scope="row" th:value="${r.getCode()}" th:text="${r.getCode()}"></th>
-                    <td th:text="${r.getPlayer1().getUsername()}"></td>
-                    <!--th:text="${r.getPlayer2().getUsername()} ?: 'default value'"-->
+                   <!-- <td th:text="${r.getPlayer1().getUsername()}"></td>
+                    th:text="${r.getPlayer2().getUsername()} ?: 'default value'"-->
                     <!--<td th:unless="${r.getPlayer2() eq null}"> wait</td>-->
+                    <td> <span ></span>waiting</td>
                     <td> <span ></span>waiting</td>
                     <td><span th:text="${r.getCapacity()}" /> / <span th:text="${r.getNumParticipants()}" /></td>
                     <td>
