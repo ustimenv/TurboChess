@@ -168,6 +168,8 @@ function sendBetRaise(e){
         colourBettedOn = 'draw';
     } else if(bettedOnBlacksRadio.checked){
         colourBettedOn = 'blacks';
+    } else{
+        alert("To bet, first pick the colour");
     }
     if(colourBettedOn && betInputBox && stompClient) {
          var packet = {
@@ -214,6 +216,7 @@ function onMessageReceived(messageReceived) {
         var usernameText = document.createTextNode(message.from);       // the actual text will be appended afterwards
         usernameElement.appendChild(usernameText);                  // the initial setup is done here to place the text
         messageElement.appendChild(usernameElement);    // in the correct div (we want to keep events & chats separate)
+        messageToShow = message.from;
     break;
     case 'BET_RAISE':
         messageElement.classList.add('event-message');
