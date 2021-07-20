@@ -1,7 +1,5 @@
 package turbochess.control;
 
-import turbochess.model.messaging.ClientPacket;
-import turbochess.model.messaging.LeavePacket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,10 +33,7 @@ public class WebSocketEventListener{
 
             logger.info("[ROOM " + room +"]: User Disconnected : " + username);
 
-            ClientPacket clientPacket = new LeavePacket();
-            clientPacket.setFrom(username);
-
-            messagingTemplate.convertAndSend("/queue/{room}", clientPacket);
+//            messagingTemplate.convertAndSend("/queue/{room}", null);
         }
     }
 }

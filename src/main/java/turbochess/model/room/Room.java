@@ -62,7 +62,8 @@ public class Room{                           // includes two players and an unde
     }
 
     public enum GameState{
-        NOT_STARTED, WHITE_TURN, BLACK_TURN
+        NOT_STARTED, WHITE_TURN, BLACK_TURN,
+        DRAW_PROPOSED
     }
 
     public Participant.Role assignRole(Participant p) throws RoomException {

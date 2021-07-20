@@ -22,19 +22,17 @@ public class Bet{
     private Participant better;
 
     @Column(name = "value")
-    private int value = 0;
+    private int amount = 0;
 
     @Column(name = "turn_placed")
     private int turnPlaced = 0;
 
     @Enumerated(EnumType.STRING)
-    private Game.Result result;                      // we'll store the roles as strings for clarity
+    private Game.Result result;
 
 
-    public Bet(Participant better, int value, int turnPlaced, Game.Result result){
-        this.better = better;
-        this.value = value;
-        this.turnPlaced = turnPlaced;
+    public Bet(int amount, Game.Result result){
+        this.amount = amount;
         this.result = result;
     }
 

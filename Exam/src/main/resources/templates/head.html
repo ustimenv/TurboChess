@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html
+        xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title> TurboChess</title>
+    <link rel="stylesheet" type="text/css" href="/css/estilos.css"/></link>
+    <link rel="stylesheet" type="text/css" href="/css/index.css"/></link>
+    <link rel="stylesheet" type="text/css" href="/css/profile.css"/></link>
+    <link rel="stylesheet" type="text/css" href="/css/chessboard-1.0.0.min.css"/></link>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="icon" href="img/chess.jpg" type="image/x-icon" />
+
+    <script type="text/javascript">
+        const config = {
+            socketUrl: "[[${session.ws}?:'']]",	// vacío indica falso
+            rootUrl: "[[${session.ws}?@{/}:'']]",
+            csrf: {
+                name: "[[${_csrf.parameterName}]]",
+                value: "[[${_csrf.token}]]"
+            },
+            admin: [[${session.u != null && session.u.hasRole('ADMIN')}?true:false]],
+            userId: [[${session.u != null}?${session.u.id}:-1]]
+        };
+    </script>
+    </th:block>
+</head>
+</html>

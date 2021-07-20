@@ -13,57 +13,46 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-
-/**
- * A user; can be an Admin, a User, or a Moderator
- *
- * Users can log in and send each other messages.
- *
- * @author mfreire
- */
-/**
- * An authorized user of the system.
- */
 @Entity
 @Data
 @NoArgsConstructor
 
-@NamedQueries({
-		@NamedQuery(name = "User.search_result",
-				query = "SELECT u FROM User u WHERE u.username LIKE :username AND u.enabled = 1"),
-
-		@NamedQuery(name = "User.byUsername",
-				query = "SELECT u FROM User u WHERE u.username = :username AND u.enabled = 1"),
-
-		@NamedQuery(name = "User.hasUsername",
-				query = "SELECT COUNT(u) FROM User u WHERE u.username = :username"),
-
-		@NamedQuery(name = "User.byId",
-				query = "SELECT u FROM User u WHERE u.id = :id"),
-
-		@NamedQuery(name = "User.findAll",
-				query = "SELECT u FROM User u "),
-
-		@NamedQuery(name = "User.getBalanceByUsername",
-				query = "SELECT u.coins FROM User u WHERE u.username = :username")
-})
-@NamedNativeQueries({
-		@NamedNativeQuery(name = "User.friends", query = "SELECT * FROM user_friends " +
-		"LEFT JOIN user on user_friends.friends_id =user.id WHERE user_id= :userid " +
-		"UNION ALL" +
-		" SELECT  * FROM user_friends LEFT JOIN user on user_friends.user_id=user.id WHERE friends_id= :userid", resultClass = User.class),
-		@NamedNativeQuery(name="User.byUsernameNative",
-						  query= "SELECT * FROM User WHERE username LIKE :username AND enabled = 1", resultClass=User.class),
-
-
-})
-public class User implements Transferable<User.Transfer> {
-	private static Logger log = LogManager.getLogger(User.class);	
+//@NamedQueries({
+//		@NamedQuery(name = "User.search_result",
+//				query = "SELECT u FROM User u WHERE u.username LIKE :username AND u.enabled = 1"),
+//
+//		@NamedQuery(name = "User.byUsername",
+//				query = "SELECT u FROM User u WHERE u.username = :username AND u.enabled = 1"),
+//
+//		@NamedQuery(name = "User.hasUsername",
+//				query = "SELECT COUNT(u) FROM User u WHERE u.username = :username"),
+//
+//		@NamedQuery(name = "User.byId",
+//				query = "SELECT u FROM User u WHERE u.id = :id"),
+//
+//		@NamedQuery(name = "User.findAll",
+//				query = "SELECT u FROM User u "),
+//
+//		@NamedQuery(name = "User.getBalanceByUsername",
+//				query = "SELECT u.coins FROM User u WHERE u.username = :username")
+//})
+//@NamedNativeQueries({
+//		@NamedNativeQuery(name = "User.friends", query = "SELECT * FROM user_friends " +
+//		"LEFT JOIN user on user_friends.friends_id =user.id WHERE user_id= :userid " +
+//		"UNION ALL" +
+//		" SELECT  * FROM user_friends LEFT JOIN user on user_friends.user_id=user.id WHERE friends_id= :userid", resultClass = User.class),
+//		@NamedNativeQuery(name="User.byUsernameNative",
+//						  query= "SELECT * FROM User WHERE username LIKE :username AND enabled = 1", resultClass=User.class),
+//
+//
+//})
+public class User{//} implements Transferable<User.Transfer> {
+	private static Logger log = LogManager.getLogger(User.class);
 
 	public enum Role {
-		USER,			// used for logged-in, non-priviledged users
-		ADMIN,			// used for maximum priviledged users
-		MODERATOR,		// remove or add roles as needed
+		USER,			// used for logged-in, non-privileged users
+		ADMIN,			// used for maximum privileged users
+		MODERATOR,		// between user and admin privilege-wise
 	}
 
 	@Id
@@ -110,7 +99,7 @@ public class User implements Transferable<User.Transfer> {
 			inverseJoinColumns=@JoinColumn(name = "friend_id"))
 	List<User> friends;
 	// utility methods
-	
+
 	/**
 	 * Checks whether this user has a given role.
 	 * @param role to check
@@ -134,15 +123,15 @@ public class User implements Transferable<User.Transfer> {
 //    public Transfer toTransfer() {
 //		return new Transfer(id,	username, received.size(), sent.size());
 //	}
-	@Override
-    public Transfer toTransfer() {
-		return new Transfer(id,	username, 0, 0);
-	}
+//	@Override
+//    public Transfer toTransfer() {
+//		return new Transfer(id,	username, 0, 0);
+//	}
 
-	@Override
-	public String toString() {
-		return toTransfer().toString();
-	}
+//	@Override
+//	public String toString() {
+//		return toTransfer().toString();
+//	}
 
 	public boolean samePasword(){
 		return this.password.equals(this.passwordConfirm);

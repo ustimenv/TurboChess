@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import lombok.SneakyThrows;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +17,8 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 import org.springframework.stereotype.Component;
 
 import turbochess.model.User;
+import turbochess.service.user.UserException;
+import turbochess.service.user.UserService;
 
 /**
  * Called when a user is first authenticated (via login).
@@ -31,33 +34,24 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler {
 
     @Autowired 
     private HttpSession session;
-    
+
     @Autowired
-    private EntityManager entityManager;    
-    
+	private UserService userService;
+
 	private static Logger log = LogManager.getLogger(LoginSuccessHandler.class);
 	
     /**
      * Called whenever a user authenticates correctly.
      */
-    @Override
-	public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
-			Authentication authentication) throws IOException, ServletException {
-	    String username = ((org.springframework.security.core.userdetails.User)
-			authentication.getPrincipal()).getUsername();
-	    
-	    // add a 'u' session variable, accessible from thymeleaf via ${session.u}
-		User u = entityManager.createNamedQuery("User.byUsername", User.class)
-			.setParameter("username", username)
-			.getSingleResult();		
+    @SneakyThrows
+	@Override
+	public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication){
+
+	    String username = ((org.springframework.security.core.userdetails.User) authentication.getPrincipal()).getUsername();
+		// add a 'u' session variable, accessible from thymeleaf via ${session.u}
+	    User u = userService.getUserByUsername(username);
 		session.setAttribute("u", u);
 
-		// find count of unread messages
-//		long unread = entityManager.createNamedQuery("Message.countUnread", Long.class)
-//			.setParameter("userId", u.getId())
-//			.getSingleResult();
-//		session.setAttribute("unread", unread);
-		
 		// add a 'ws' session variable
 		String ws = request.getRequestURL().toString()
 				.replaceFirst("[^:]*", "ws")		// http[s]://... => ws://...

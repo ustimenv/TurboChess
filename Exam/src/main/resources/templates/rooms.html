@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html
+        xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title> TurboChess</title>
+
+    <link rel="stylesheet" type="text/css" href="/css/profile.css"/></link>
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap.css"/></link>
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap-grid.css"/></link>
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap-reboot.css"/></link>
+    <link rel="stylesheet" type="text/css" href="/css/estilos.css"/></link>
+    <link rel="stylesheet" type="text/css" href="/css/index.css"/></link>
+    <!--<link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="/css/font-awesome-all.min.css"/></link>-->
+    <link rel="icon" href="img/chess.jpg" type="image/x-icon" />
+
+    <script type="text/javascript">
+        const config = {
+            socketUrl: "[[${session.ws}?:'']]",	// vacío indica falso
+            rootUrl: "[[${session.ws}?@{/}:'']]",
+            csrf: {
+                name: "[[${_csrf.parameterName}]]",
+                value: "[[${_csrf.token}]]"
+            },
+            admin: [[${session.u != null && session.u.hasRole('ADMIN')}?true:false]],
+            userId: [[${session.u != null}?${session.u.id}:-1]]
+        };
+    </script>
+    </th:block>
+</head>
+
+<body>
+<div th:replace="frags/barraSuperior :: barraSuperior"></div>
+
+
+<div class="roomcontainer">
+    <div class="row">
+        <div class="col-12">
+            <table class="table table-bordered">
+                <thead>
+                <tr>
+                    <th scope="col">Room code</th>
+                    <th scope="col">Player White</th>
+                    <th scope="col">Player Black</th>
+                    <th scope="col">Max participants</th>
+                    <th scope="col">Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <th scope="row">XXXXXXX</th>
+                    <form id="createRoomForm" name="createRoomForm">
+                        <td>Player white</td>
+                        <td>Player Black</td>
+                        <td><input type="number" value="2" /></td>
+                        <td>
+                            <button type="submit" class="btn btn-success create-room-button"><i class="fa fa-chess-pawn"></i>Create</button>
+                    </form>
+
+
+
+
+                    </td>
+
+                </tr>
+                <tr th:each="r: ${rooms}">
+                    <th scope="row" th:value="${r.getCode()}" th:text="${r.getCode()}"></th>
+                   <!-- <td th:text="${r.getPlayer1().getUsername()}"></td>
+                    th:text="${r.getPlayer2().getUsername()} ?: 'default value'"-->
+                    <!--<td th:unless="${r.getPlayer2() eq null}"> wait</td>-->
+                    <td> <span ></span>waiting</td>
+                    <td> <span ></span>waiting</td>
+                    <td><span th:text="${r.getCapacity()}" /> / <span th:text="${r.getNumParticipants()}" /></td>
+                    <td>
+                        <form id="roomCodeForm" name="roomCodeForm">
+                            <input type="hidden" id="roomcode"  autocomplete="off" class="form-control" />
+                            <button type="submit" class="btn btn-primary"><i class="far fa-eye"></i>Join</button>
+                        </form>
+                        <button type="button" class="btn btn-danger"><i class="fa fa-trash"></i>Drop(ADMIN)</button>
+                    </td>
+                </tr>
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<footer th:replace="frags/footer.html">
+    <script src="js/libs/jquery-3.4.1.min.js"> </script>
+    <script src="js/libs/chessboard-1.0.0.min.js"></script>
+
+    <script src="js/chess.js"></script>
+    <script th:src="@{/js/app.js}" src="js/app.js" type="text/javascript"></script>
+
+</footer>
+
+</body>
+</html>

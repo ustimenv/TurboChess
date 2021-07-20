@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="head.html"> </head>
+
+<body>
+    <header>
+        <div th:fragment="barraSuperior">
+            <ul class="upBar">
+                <li class="upBar">
+                   <a class="upBar" href="/">Home</a> 
+                </li>
+              <!-- <li class="upBar">
+                    <a class="upBar" href="/rooms">Rooms</a>
+                </li>-->
+                <li class="upBar">
+                    <a class="upBar" href="/history">History</a>
+                </li>
+
+                <li class="upBar">
+                    <a class="upBar" href="/profile">Profile</a>
+                </li>
+
+                <li class="upBar">
+                    <form id="myform" method="post" th:action="@{/logout}"></form>
+                    <a th:if="${session.u}"  class="upBar" onclick="document.getElementById('myform').submit();">Logout</a>
+                    <a th:unless="${session.u}"
+                     class="upBar" th:href="@{/login}">Login</a>
+                </li>
+                <li class="upBar">
+                    <a th:unless="${session.u}" class="upBar" href="/register">Sign Up</a>
+                </li>
+                <li class="upBar">
+                    <a class="upBar" href="/room">Rooms</a>
+                </li>
+                <li class="upBar">
+                    <a th:if="(${session.u} and ${session.u.hasRole('ADMIN')})" class="upBar" href="/admin/" >Admin</a>
+                </li>
+
+                <li>
+                    <form action="#" th:action="@{/search}" th:object="${search}">
+                        <input type="text" name="search" placeholder="Player Username.."></input>
+                        <a class="search"  for="search_input">Search user:</a>
+                    </form>
+                </li>
+
+            </ul>
+       
+        </div>
+    </header>
+</body>
+
+</html>

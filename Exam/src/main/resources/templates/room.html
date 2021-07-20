@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta th:name="_csrf" th:content="${_csrf.token}"/>
+    <meta th:name="_csrf_header" th:content="${_csrf.headerName}"/>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
+    <title>Chat</title>
+    <link rel="stylesheet" href="/css/room.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap.css"/></link>
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap-grid.css"/></link>
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap-reboot.css"/></link>
+    <script th:inline="javascript">
+    /*<![CDATA[*/
+        var username = /*[[${username}]]*/ 'default';
+    /*]]>*/
+
+    </script>
+</head>
+<body>
+<div id="username-page">
+    <div class="username-page-container">
+        <h1 class="title">Create a room or join an existing one </h1>
+
+        <form id="createRoomForm" name="createRoomForm">
+            <input type="number" value="2" />
+            <button type="submit" class="create-room-button">Create</button>
+        </form>
+
+        <h2>OR</h2>
+
+        <form id="roomCodeForm" name="roomCodeForm">
+            <input type="text" id="roomcode" placeholder="Enter the room code here" autocomplete="off" class="form-control" />
+            <button type="submit" class="join-room-submit">Join</button>
+        </form>
+
+            <div class="row">
+                <div class="col-12">
+    <table id="rooms-table" style="width:99%">
+        <thead>
+            <tr>
+                <th>Creation date</th>
+                <th>Room code</th>
+                <th>Participants</th>
+                <th>Capacity</th>
+                <th>Join</th>
+            </tr>
+        </thead>
+        <tbody id="rooms-table-body">
+        </tbody>
+    </table>
+                </div>
+            </div>
+        </div>
+
+</div>
+
+<div id="root-container">
+    <div class="board hidden">
+<!--        <div id="myBoard" style="width: 800px"></div>-->
+        <div id="myBoard" style="width: 800px; height: 600px"></div>
+    </div>
+
+    <div id="room-page" class="hidden flex-item">
+        <div class="chat-container">
+            <div class="chat-header">
+                <form id="betForm" name="betForm">
+                    <div class="form-group">
+                        <div class="input-group clearfix">
+                            <input type="radio" name="predicition" id="whites-win"   value="whites win"/>
+                            <label for="whites-win">whites win</label><br>
+                            <input type="radio" name="predicition" id="draw"         value="draw"/>
+                            <label for="draw">draw</label><br>
+                            <input type="radio" name="predicition" id="blacks-win"   value="blacks win"/>
+                            <label for="blacks-win">blacks win</label><br>
+
+                            <input type="text" id="bet-input-box"  class="form-control"/>
+                            <button type="submit" class="primary">Raise bet</button>
+                            <input type="button" onclick="handleIncreaseBet()" value="5" />
+                        </div>
+                    </div>
+                </form>
+
+            </div>
+
+
+            <div class="connecting-to-room">
+                Connecting to the room...
+            </div>
+            <ul id="messages-box">
+            </ul>
+
+            <div id="actions" style="height: 50px;">
+                <img src="img/cheer.jpg" style="width: 50px;" title="Cheer" onclick="sendCheer()"/>
+                <img src="img/surrender.jpg" style="width: 50px;" title="Surrender" onclick="surrender()"/>
+                <img src="img/goodbye.png" style="width: 50px; " title="Leave" onclick="leave()"/>
+                <img src="img/cheat.jpg" style="width: 50px;" title="Hacer Trampa" onclick="hacerTrampaPreguntaB()"/>
+            </div>
+
+            <form id="messageForm" name="messageForm">
+                <div class="form-group">
+                    <div class="input-group clearfix">
+                        <input type="text" id="message-input-box"  class="form-control"/>
+                        <button type="submit" class="primary">Send</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+</div>
+<link rel="stylesheet"  href="css/chessboard-1.0.0.min.css">
+
+<script src="js/libs/jquery-3.4.1.min.js"> </script>
+<script src="js/libs/chessboard-1.0.0.min.js"></script>
+
+<script src="js/chess.js"></script>
+<script th:src="@{/js/app.js}" src="js/app.js" type="text/javascript"></script>
+
+
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.1.4/sockjs.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+
+</body>
+</html>

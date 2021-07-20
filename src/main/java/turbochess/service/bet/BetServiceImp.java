@@ -23,7 +23,7 @@ public class BetServiceImp implements BetService{
 
     @Override
     public int getParticipantTotalBet(Participant p) throws BetException{
-        return getParticipantBets(p).stream().mapToInt(Bet::getValue).sum();
+        return getParticipantBets(p).stream().mapToInt(Bet::getAmount).sum();
     }
 
     @Override

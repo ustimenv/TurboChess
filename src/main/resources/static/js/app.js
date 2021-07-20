@@ -126,8 +126,7 @@ function connect() {
 function onConnected() {
     stompClient.subscribe(`/queue/${roomCode}`, onMessageReceived);             // subscribe to the room's channe;
                                                                                 // inform the room that you've subbed
-    stompClient.send(`/app/${roomCode}.chat.addUser`, {},
-                     JSON.stringify({from: username, type: 'JOIN_ROOM', roomToJoin: roomCode}));
+    stompClient.send(`/app/${roomCode}.chat.addUser`, {}, {});
 
     connecting.classList.add('hidden');                                         // remove the 'Connecting...'
     boardDiv.classList.remove('hidden');                                        // and show the board
@@ -140,10 +139,7 @@ function sendMessage(e) {
     var messageContent = messageInputBox.value.trim();
     if(messageContent && stompClient) {
         var packet = {
-            from: username,
-            text: messageInputBox.value,
-            type: 'TEXT',
-            context: roomCode
+            text: messageInputBox.value
         };
         stompClient.send(`/app/${roomCode}.chat.sendMessage`, {}, JSON.stringify(packet));
         messageInputBox.value = '';
@@ -152,32 +148,26 @@ function sendMessage(e) {
 }
 
 function sendMove(movementJSON){
-    var packet = JSON.stringify({from: username, context: roomCode, type: 'MOVE', fen: game.fen(),
-                                origin: movementJSON["from"], destination: movementJSON["to"],
-                                colour: movementJSON["color"]
-                                });
-    console.log("SENDING MOVE " + packet);
+    var packet = JSON.stringify({fen: game.fen(), from: movementJSON["from"], to: movementJSON["to"]});
     stompClient.send(`/app/${roomCode}.sys.sendMove`, {}, packet);
 }
 
 function sendBetRaise(e){
     var colourBettedOn = null;
     if(bettedOnWhitesRadio.checked){
-        colourBettedOn = 'whites';
+        colourBettedOn = 'WHITES_WON';
     } else if(bettedOnDrawRadio.checked){
-        colourBettedOn = 'draw';
+        colourBettedOn = 'DRAW';
     } else if(bettedOnBlacksRadio.checked){
-        colourBettedOn = 'blacks';
+        colourBettedOn = 'BLACKS_WON';
     } else{
         alert("To bet, first pick the colour");
     }
+
     if(colourBettedOn && betInputBox && stompClient) {
          var packet = {
-            from: username,
-            betAmount: betInputBox.value,
-            bettingOn: colourBettedOn,
-            type: 'BET_RAISE',
-            context: roomCode
+            amount: betInputBox.value,
+            result: colourBettedOn,
          };
          stompClient.send(`/app/${roomCode}.sys.placeBet`, {}, JSON.stringify(packet));
          totalBet += parseInt(betInputBox.value);
@@ -186,71 +176,54 @@ function sendBetRaise(e){
      e.preventDefault();
 }
 
-function sendCheer(e){
-     var packet = {
-         from: username,
-         payload: null,
-         type: 'CHEER',
-         context: roomCode
-     };
-     stompClient.send(`/app/${roomCode}.chat.cheer`, {}, JSON.stringify(packet));
-}
-
-function onMessageReceived(messageReceived) {
-    var message = JSON.parse(messageReceived.body);
-
+function onMessageReceived(message) {
     var messageElement = document.createElement('li');
     // by the end of the switch, we will have initialised either an event msg or a chat msg
     var messageToShow="";
-
-    switch(message.type){
-    // CHAT
-    case 'TEXT':
+    console.log(message);
+    switch(message.headers["TYPE"]){
+    case 'TEXT_MESSAGE':
         messageElement.classList.add('chat-message');                       // make a pretty avatar &  display the msg
         var avatarElement = document.createElement('i');
-        avatarElement.appendChild(document.createTextNode(message.from[0]));        // user's initials
-        avatarElement.style['background-color'] = colours[Math.abs(hashString(message.from) % colours.length)]; //user's avatar colour
+        avatarElement.appendChild(document.createTextNode(message.headers["FROM"][0]));        // user's initials
+        avatarElement.style['background-color'] = colours[Math.abs(hashString(message.headers["FROM"]) % colours.length)]; //user's avatar colour
         messageElement.appendChild(avatarElement);     // msgElem contains avatar & 1st letter
 
         var usernameElement = document.createElement('span');           // now display username
-        var usernameText = document.createTextNode(message.from);       // the actual text will be appended afterwards
+        var usernameText = document.createTextNode(message.headers["FROM"]);       // the actual text will be appended afterwards
         usernameElement.appendChild(usernameText);                  // the initial setup is done here to place the text
         messageElement.appendChild(usernameElement);    // in the correct div (we want to keep events & chats separate)
-        messageToShow = message.from;
-    break;
-    case 'BET_RAISE':
-        messageElement.classList.add('event-message');
-        messageToShow = message.from + ' has increased their bet to ' + message.betAmount + '!';
-    break;
-    case 'CHEER':
-        messageElement.classList.add('event-message');
-        messageToShow = message.text;
+        messageToShow = message.body;
     break;
 
-    case 'CREATE_ROOM':
-//        alert('creating room?');
+    case 'BET_PLACED':
+        messageElement.classList.add('event-message');
+        messageToShow = message.body;
     break;
 
-    case 'JOIN_ROOM':
-        numPeopleInRoom=parseInt(message.numParticipants);
+    case 'USER_JOINED':
+        numPeopleInRoom=parseInt(message.headers["NUM_PARTICIPANTS"]);
         messageElement.classList.add('event-message');
-        messageToShow = message.from + ' joined!';
+        messageToShow = message.body;
     break;
+
     case 'LEAVE_ROOM':
         numPeopleInRoom--;
         messageElement.classList.add('event-message');
-        messageToShow = message.from + ' left!';
+        messageToShow = message.headers["FROM"] + ' left!';
     break;
-    case 'MOVE':
+
+    case 'CHESS_MOVE':
         console.log(message);
-        if(message.from !== username){
-            game.move({from: message.origin, to: message.destination});
+        if(message.headers["FROM"] !== username){
+            var moveJSON = JSON.parse(message.body);
+            game.move({from: moveJSON.from, to: moveJSON.to});
             board.position(game.fen());
         }
         return;
     break;
-    default:
-        alert('Unexpected arg ' + message.type);
+
+    default: return;
     }
 
     var textElement = document.createElement('p');
@@ -261,9 +234,6 @@ function onMessageReceived(messageReceived) {
     messagesBox.scrollTop = messagesBox.scrollHeight;
 }
 
-/**
-*           AJAX
-*/
 function handleJoinRoom(e){
     e.preventDefault();
     var code = document.getElementById("roomcode").value;
@@ -271,31 +241,25 @@ function handleJoinRoom(e){
     if(code){
         setCSRFtoken();
         var data = {}
-        data['from'] = username;
-        data['type']='JOIN_ROOM';
-        data['roomToJoin']=code;
-        data['context']='';   // at this point the context hasn't been set or 'approved' by the server
+        data['room_code']=code;
 
         $.ajax({
                 type : 'POST',
                 contentType : 'application/json',
                 dataType : 'json',
                 data : JSON.stringify(data),
-                url : '/api/join_room',
+                url : '/api/room/join',
                 success : function(response) {
-                    console.log(response);
-                    myColour = response.colourAssigned;
+                    myColour = response.colour_assigned;
+                    totalBet = response.accumulated_bet;
                     fen = response.fen;
-                    totalBet = response.accumulatedBet;
                     game.load(fen);
                     board.position(game.fen());
-                    roomCode = code;                        // set the room 'context'
+                    roomCode = code;
                     connect();
-
                 },
                 error : function(e) {
-                    alert("Room " + code + " doesn't exist!");
-                    console.log('ERROR: ', e);
+                    alert("Room " + code + " doesn't exist or is not longer available");
                 },
                 done : function(e) {
                     console.log('done...');
@@ -308,33 +272,28 @@ function clearAvailableRoomsTable(){
     $("#rooms-table-body").empty();
 }
 
-function selectRoomFromTable(){
+function prepareToJoinRoom(tableRow){
+    document.getElementById("roomcode").value = tableRow.childNodes[1].innerHTML;
 }
+
 function requestAvailableRooms(){
     setCSRFtoken();
     var data = {}
-    data['from'] = username;
-    console.log("Sending the request");
-    console.log(data);
+
     $.ajax({
             type : 'GET',
             contentType : 'application/json',
 
-            url : '/api/list_rooms',
+            url : '/api/room/list_available',
             success : function(response) {
                 clearAvailableRoomsTable();
                 var rooms = JSON.parse(response.rooms);
 
                 for(var i=0; i<rooms.length; i++){
-                    $('#rooms-table > tbody:first').append(`<tr><td>${dateToString(rooms[i].dateCreated)}</td><td>${rooms[i].code}</td><td>${rooms[i].numParticipants}</td><td>${rooms[i].capacity}</td><td> 
-            <button class="join-room-submit" onclick="handleJoinRoom()">Join</button>
-        
-        </td></tr>`);
+                    $('#rooms-table > tbody:first').append(`<tr><td>${dateToString(rooms[i].dateCreated)}</td><td>${rooms[i].code}</td><td>${rooms[i].numParticipants}</td><td>${rooms[i].capacity}</td><td><button class="join-room-submit" onclick="handleJoinRoom()">Join</button></td></tr>`);
                     availableRoomsTableBody.rows[i].onclick = function() {
                           prepareToJoinRoom(this);
-
                         };
-
                 }
             },
             error : function(e) {
@@ -345,10 +304,7 @@ function requestAvailableRooms(){
             }
         });
 }
-function prepareToJoinRoom(tableRow){
-    document.getElementById("roomcode").value = tableRow.childNodes[1].innerHTML;
 
-}
 
 function handleCreateRoom(e){
     e.preventDefault();
@@ -360,21 +316,18 @@ function handleCreateRoom(e){
 
     setCSRFtoken();
     var data = {}
-    data['from'] = username;
-    data['type']='CREATE_ROOM';
-    data['capacity']=capacity;
-    data['context']='';
+    data['capacity'] = capacity;
 
     $.ajax({
         type : 'POST',
         contentType : 'application/json',
         dataType : 'json',
         data : JSON.stringify(data),
-        url : '/api/create_room',
+        url : '/api/room/create',
         success : function(response) {
+            myColour = response.colour_assigned;
+            roomCode = response.room_code_assigned;
             isRoomOwner=true;
-            myColour = response.colourAssigned;
-            roomCode = response.roomCodeAssigned;
             connect();
         },
         error : function(e) {
@@ -385,6 +338,7 @@ function handleCreateRoom(e){
         }
     });
 }
+
 function leave(){
     if(myColour === 'w' || myColour === 'b'){
         surrender();
@@ -395,9 +349,7 @@ function leave(){
 function surrender(){
     setCSRFtoken();
     var data = {}
-    data['from'] = username;
-    data['type'] = 'GAME_OVER';
-    data['context'] = roomCode;
+
     data['result']='LOSS';
 
     $.ajax({
@@ -405,10 +357,9 @@ function surrender(){
         contentType : 'application/json',
         dataType : 'json',
         data : JSON.stringify(data),
-        url : '/api/game_over',
+        url : '/api/room/game_over',
         success : function(response) {
             surrendered=true;
-            alert("You have successfully surrendered!");
             leave();
         },
         error : function(e) {
@@ -423,9 +374,6 @@ function surrender(){
 function declareGameOver(gameResult){
     setCSRFtoken();
     var data = {}
-    data['from'] = username;
-    data['type'] = 'GAME_OVER';
-    data['context'] = roomCode;
     switch(gameResult){
     case -1:
         data['result']='LOSS';
@@ -444,9 +392,9 @@ function declareGameOver(gameResult){
         contentType : 'application/json',
         dataType : 'json',
         data : JSON.stringify(data),
-        url : '/api/game_over',
+        url : '/api/room/game_over',
         success : function(response) {
-            alert("Game over!");
+//            alert("Game over!");
         },
         error : function(e) {
             console.log('ERROR: ', e);
@@ -464,10 +412,6 @@ function handleIncreaseBet(){
     betInputBox.value = value;
 }
 
-
-/**
-*           UTILITY METHODS
-*/
 function dateToString(D){
     return D.hour + ":" + D.minute + ", " + D.dayOfMonth + "/" + D.monthValue +"/"+ D.year;
 }

@@ -1,0 +1,162 @@
+
+a.button {
+	box-shadow: 0px 10px 14px -7px #276873;
+	background:linear-gradient(to bottom, #599bb3 5%, #408c99 100%);
+	background-color:#599bb3;
+	border-radius:8px;
+	display:inline-block;
+	cursor:pointer;
+	color:#ffffff;
+	font-family:Arial;
+	font-size:20px;
+	font-weight:bold;
+	padding:13px 32px;
+	text-decoration:none;
+	text-shadow:0px 1px 0px #3d768a;
+    margin: 10px;
+}
+a.button {
+	background:linear-gradient(to bottom, #408c99 5%, #599bb3 100%);
+	background-color:#408c99;
+}
+a.button:active {
+	position:relative;
+	top:1px;
+}
+.Inicio-menu{
+    margin-left:10%;
+}
+
+/*login test*/
+.login-box {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 400px;
+  padding: 40px;
+  transform: translate(-50%, -50%);
+  background: rgba(0,0,0,.5);
+  box-sizing: border-box;
+  box-shadow: 0 15px 25px rgba(0,0,0,.6);
+  border-radius: 10px;
+}
+
+.login-box h2 h4 {
+  margin: 0 0 30px;
+  padding: 0;
+  color: #fff;
+  text-align: center;
+}
+
+.login-box .user-box {
+  position: relative;
+}
+
+.login-box .user-box  input {
+  width: 100%;
+  padding: 10px 0;
+  font-size: 16px;
+  color: #fff;
+  margin-bottom: 30px;
+  border: none;
+  border-bottom: 1px solid #fff;
+  outline: none;
+  background: transparent;
+}
+.login-box .user-box  label {
+  position: absolute;
+  top:0;
+  left: 0;
+  padding: 10px 0;
+  font-size: 16px;
+  color: #fff;
+  pointer-events: none;
+  transition: .5s;
+}
+
+.login-box .user-box input:focus ~ label,
+.login-box .user-box input:valid ~ label {
+  top: -20px;
+  left: 0;
+  color: #03e9f4;
+  font-size: 12px;
+}
+
+button {
+	display: inline-block;
+	position: relative;
+	padding: 10px 0;
+	width: 80px;
+	margin: 30px 0;
+	border-radius: 25px;
+	border: none;
+	font-size: 20px;
+	letter-spacing: 0.2px;
+	font-weight: 500;
+	background-color: #4069E2;
+	color: #E6EBEE;
+}
+
+button:focus {
+	display: none;
+}
+
+button:hover {
+	transform: scale(1.03);
+	cursor: pointer;
+	transition: all 0.2s ease-in-out;
+}
+alert{
+position:relative;
+padding:.75rem 1.25rem;
+margin-bottom:1rem;
+border:1px solid transparent;
+border-radius:.25rem}
+.alert-heading{color:inherit}
+.alert-link{font-weight:700}
+
+.alert-dismissible{padding-right:4rem}
+.alert-dismissible .close{position:absolute;top:0;right:0;padding:.75rem 1.25rem;color:inherit}
+.alert-danger{color:#721c24;background-color:#f8d7da;border-color:#f5c6cb}
+.alert-danger hr{border-top-color:#f1b0b7}
+.alert-danger .alert-link{color:#491217}
+.alert-success{background-color:#1195ea}
+.admMessage{
+    margin-top: 5%;
+    margin-left: 5%;
+}
+.endGame{
+    display: none;
+}
+.win{
+    display: none;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 400px;
+    padding: 40px;
+    transform: translate(-50%, -50%);
+    background: rgba(0,0,0,.5);
+    box-sizing: border-box;
+    box-shadow: 0 15px 25px rgba(0,0,0,.6);
+    border-radius: 10px;
+    color: red;
+}
+.loose{
+    display: none;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 400px;
+    padding: 40px;
+    transform: translate(-50%, -50%);
+    background: rgba(0,0,0,.5);
+    box-sizing: border-box;
+    box-shadow: 0 15px 25px rgba(0,0,0,.6);
+    border-radius: 10px;
+    color: red;
+}
+
+
+
+

@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head th:replace="head.html"> </head>
+    <body>
+        <div th:replace="frags/barraSuperior :: barraSuperior"></div>
+
+        <%if (personas.length>0) {%>
+        <h2 >Lista de personas encontradas</h2>
+        <div class="panelSolocitudAmistad">
+            <div class="solicitudes">
+                <ul class="indentacion">
+                    <li th:each="result: ${friends}" th:text="${result.username}" >
+                        <div class="solicitudesAmigos">
+                            <a href="user_profile?id=<%=per.id%>">
+                                <img src="/imagen/<%=per.email%>" class="imagenListaUsuarios">
+                            </a>
+                            <a href="user_profile?id=<%=per.id%>" class="enlacePersona">
+                                <p class="nombreUsuario"><%=per.nombre%>, <%= per.apellidos%></p>
+                            </a>
+                            <%if (per.amigos==0) {%>
+                            <a href="makeFriends?id=<%=per.id%>" class="boton botonVerde">Agregar</a>
+                            <%}%>
+                        </div>
+                    </li>
+                    <% }); %>
+                </ul>
+            </div>
+        </div>
+        <%}%>
+        <%if (personas.length==0) {%>
+        <h2>No existe ningún usuario que contenga " <%=busqueda%>" </h2>
+        <footer th:replace="frags/footer.html"> footer</footer>
+    </body>
+</html>
