@@ -128,9 +128,9 @@ function onConnected() {
                                                                                 // inform the room that you've subbed
     connecting.classList.add('hidden');                                         // remove the 'Connecting...'
     boardDiv.classList.remove('hidden');                                        // and show the board
-    if(isRoomOwner){
-        actionsDiv.insertAdjacentHTML('afterbegin', '<img src="img/save.jpg" style="width: 50px;" title="Save game" onclick="handleSaveRoom()"/>');
-    }
+//    if(isRoomOwner){
+//        actionsDiv.insertAdjacentHTML('afterbegin', '<img src="img/save.jpg" style="width: 50px;" title="Save game" onclick="handleSaveRoom()"/>');
+//    }
 }
 
 function sendMessage(e) {
@@ -200,9 +200,9 @@ function onMessageReceived(message) {
     break;
 
     case 'USER_JOINED':
-        numPeopleInRoom=parseInt(message.headers["NUM_PARTICIPANTS"]);
         messageElement.classList.add('event-message');
         messageToShow = message.body;
+        numPeopleInRoom+=1;
     break;
 
     case 'PLAYER DISCONNECTED':
@@ -253,7 +253,7 @@ function handleJoinRoom(e){
                     myColour = response.colour_assigned;
                     totalBet = response.accumulated_bet;
                     fen = response.fen;
-                    alert(fen);
+                    numPeopleInRoom=response.num_participants;
                     game.load(fen);
                     board.position(game.fen());
                     roomCode = code;
@@ -328,6 +328,7 @@ function handleCreateRoom(e){
         success : function(response) {
             myColour = response.colour_assigned;
             roomCode = response.room_code_assigned;
+            numPeopleInRoom=response.num_participants;
             isRoomOwner=true;
             connect();
         },
@@ -340,28 +341,20 @@ function handleCreateRoom(e){
     });
 }
 
-function leave(){
-    if(myColour === 'w' || myColour === 'b'){
-        surrender();
-    }
-    location.href = "/";
-}
 
-function surrender(){
+function sendLoss(){
     setCSRFtoken();
     var data = {}
-
-    data['result']='LOSS';
+    data["room_code"] = roomCode;
 
     $.ajax({
         type : 'POST',
         contentType : 'application/json',
         dataType : 'json',
         data : JSON.stringify(data),
-        url : '/api/room/game_over',
+        url : '/api/room/loss',
         success : function(response) {
-            surrendered=true;
-            leave();
+            alert("Game lost!");
         },
         error : function(e) {
             console.log('ERROR: ', e);
@@ -372,30 +365,42 @@ function surrender(){
     });
 }
 
-function declareGameOver(gameResult){
+function sendDraw(){
     setCSRFtoken();
     var data = {}
-    switch(gameResult){
-    case -1:
-        data['result']='LOSS';
-        break;
-    case 1:
-        data['result']='WIN';
-        break;
-    case 0:
-    default:
-        data['result']='DRAW';
-        break;
-    }
+    data["room_code"] = roomCode;
 
     $.ajax({
         type : 'POST',
         contentType : 'application/json',
         dataType : 'json',
         data : JSON.stringify(data),
-        url : '/api/room/game_over',
+        url : '/api/room/draw',
         success : function(response) {
-//            alert("Game over!");
+//            alert("Game won!");
+        },
+        error : function(e) {
+            console.log('ERROR: ', e);
+        },
+        done : function(e) {
+            console.log('done...');
+        }
+    });
+}
+
+function sendVictory(){
+    setCSRFtoken();
+    var data = {}
+    data["room_code"] = roomCode;
+
+    $.ajax({
+        type : 'POST',
+        contentType : 'application/json',
+        dataType : 'json',
+        data : JSON.stringify(data),
+        url : '/api/room/victory',
+        success : function(response) {
+            alert("Game won!");
         },
         error : function(e) {
             console.log('ERROR: ', e);

@@ -39,14 +39,17 @@ public class WebSocketEventListener{
     private SimpMessageSendingOperations messagingTemplate;
 
     @EventListener
+    @Transactional
     public void handleWebSocketConnectListener(SessionConnectedEvent event) throws ParticipantException{
         // in order to subscribe to this room's channel, the user must have joined the room via api/room/join
         StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
-        Participant subscriber = participantService.getParticipantBySessionId(headerAccessor.getSessionId());
+        Participant subscriber = participantService.getUnsubscribedParticipantInstance(headerAccessor.getUser().getName());
         // if the line above doesn't throw, we known the subscriber had joined the room legally and can therefore subscribe
+        subscriber.setSessionId(headerAccessor.getSessionId());
+        subscriber.setLastActiveTime(null);
+        participantService.save(subscriber);
 
         SimpMessageHeaderAccessor responseHeader = SimpMessageHeaderAccessor.create(SimpMessageType.MESSAGE);
-        responseHeader.setHeader("NUM_PARTICIPANTS", String.valueOf(subscriber.getRoom().getNumParticipants()));
         responseHeader.setHeader("FROM", Objects.requireNonNull(headerAccessor.getUser()).getName());
         responseHeader.setHeader("TYPE", "USER_JOINED");
         responseHeader.setUser(headerAccessor.getUser());

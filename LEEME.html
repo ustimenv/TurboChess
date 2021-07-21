@@ -115,11 +115,59 @@
                 </li>
         </ul>
 
-<h2> Cosas que no funcionan bien del todo</h2>
-    <p>Los recursos en local, como font-awesome no pudimos conseguir hacerlo funcionar.
-    Dar la posibilidad a un admin de echar a alguien de una partida tampoco funciona.
-    </p>
+<h2> Mejoras post-examen y cambios corespondientes</h2>
+    <li>
+        <p>Mejora:  Todos mensajes enviados entre el cliente y el servidor se han reducido.</p>
+        <p>Cambios: Utilizando Principal y @DestinationVariable room se puede identificar el usuario y la sala a la cual pertenece el
+        mensaje. Como resultado no es posible enviar mensajes fingiendo ser una otra persona.
+        </p>
+        <p>Ficheros: RoomAPIController y RoomMessagingController</p>
 
+    </li>
+    <li>
+        <p>Mejora:  No se puede ganar la partida mandando una declaración de victoria por AJAX</p>
+        <p>Cambios: Un usuario puede ganar la partida mandando una declaración de victoria a api/room/game_over. Si su openente había desconectado, es permisible.
+                    Tambien puede ganar de modo normal, por consiguir jaque mate. En este caso es el perdedor que declara su pérdida.
+        </p>
+        <p>Ficheros: RoomAPIController y app.js</p>
+    </li>
 
+    <li>
+        <p>Mejora: El acceso a todas las entidades es estandar. Cada entidad tiene su propio Repository y Service.
+            He quitado *ServiceImp clases porque no tenían sentido.</p>
+        <p>Cambios: No hay SQL crudo fuera de las clases Repository. Tampoco hay EntityManager magia, toda la persistencia
+            se hace de exactamente misma manera que ayuda con la legibilidad de los métodos que modifican varias tablas.</p>
+        <p>Ficheros: service/</p>
+    </li>
+
+    <li>
+        <p>Mejora: Ya no es posible suscribirse a las salas a través de modificar el Javascript.</p>
+        <p>Cambios: De forma similar a Principal, he aprovachado de la información guardada en STOMP headers, sessionId especificamente.
+           Sólo los usuarios que se habían unido a la sala por una llamada a api/room/join 0 api/room/create pueden suscribirse con éxito.</p>
+        <p>Ficheros: RoomAPIController y WebSocketEventListener</p>
+    </li>
+
+    <li>
+        <p>Mejora: Validación basica de jugadas</p>
+        <p>Cambios: Antes de retransmitirse las jugadas deben aprobar un regex.</p>
+        <p>Ficheros: Move y RoomMessagingController</p>
+    </li>
+
+    <li>
+        <p>Mejora: Actualización de ELO para victorias, pérdidas y empates</p>
+        <p>Cambios: Una fórmula simplificada</p>
+        <p>Ficheros: User</p>
+    </li>
+
+    <li>
+        <p>Mejora: Pruebas de condiciones para victorias, pérdidas y empates</p>
+        <p>Cambios: He añadido 3 endpoints para declarar victoria (cuando el oponente sale de la sala);
+                    pérdidas(cualquier jugador puede declarar su pérdida);
+                    o empate(sugerirlo o aceptarlo si el openente lo ha sugerido) </p>
+        <p>Ficheros: app.js, roomApiController</p>
+    </li>
+    <h2>Mejoras que no he hecho</h2>
+    <li>Karate: he intentado escribir algunas pruebas pero no consegí autentificación más básica</li>
+    <li>Reloj: no he tenido suficiente tiempo</li>
     </body>
 </html>

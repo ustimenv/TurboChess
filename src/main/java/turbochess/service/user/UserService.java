@@ -22,7 +22,7 @@ public class UserService{
     }
 
     public User getUserByUsername(String username) throws UserException{
-        User u =  repository.getByUsername(username);
+        User u = repository.getByUsername(username);
         if(u != null){
             return u;
         } else	throw new UserException(format("Unable to find user {0}", username));

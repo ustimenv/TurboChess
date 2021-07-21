@@ -61,35 +61,38 @@ public class RoomMessagingController{
     @Transactional
     public void sendMove(@DestinationVariable String room, Move move, SimpMessageHeaderAccessor accessor) throws ParticipantException{
         Participant p = getParticipantByRoomCodeAndPrincipal(room, accessor.getUser());
+        if(Move.isValid(move)){
+            SimpMessageHeaderAccessor responseHeader = SimpMessageHeaderAccessor.create(SimpMessageType.MESSAGE);
+            responseHeader.setUser(accessor.getUser());
+            responseHeader.setHeader("TYPE", "CHESS_MOVE");
+            responseHeader.setHeader("FROM", Objects.requireNonNull(accessor.getUser()).getName());
 
-        SimpMessageHeaderAccessor responseHeader = SimpMessageHeaderAccessor.create(SimpMessageType.MESSAGE);
-        responseHeader.setUser(accessor.getUser());
-        responseHeader.setHeader("TYPE", "CHESS_MOVE");
-        responseHeader.setHeader("FROM", Objects.requireNonNull(accessor.getUser()).getName());
 
+            boolean isValidWhites = (p.getColour() == Participant.Colour.WHITE &&
+                                    (p.getRoom().getGameState() == Room.GameState.WHITES_TURN) ||
+                                            (p.getRoom().getGameState() == Room.GameState.NOT_STARTED));
 
-        boolean isValidWhites = (p.getColour() == Participant.Colour.WHITE &&
-                                (p.getRoom().getGameState() == Room.GameState.WHITES_TURN) ||
-                                        (p.getRoom().getGameState() == Room.GameState.NOT_STARTED));
+            boolean isValidBlacks = (p.getColour() == Participant.Colour.BLACK &&
+                                     p.getRoom().getGameState() == Room.GameState.BLACKS_TURN);
 
-        boolean isValidBlacks = (p.getColour() == Participant.Colour.BLACK &&
-                                 p.getRoom().getGameState() == Room.GameState.BLACKS_TURN);
+            if(isValidWhites){
+                p.getRoom().setGameState(Room.GameState.BLACKS_TURN);
+            } else if(isValidBlacks){
+                p.getRoom().setGameState(Room.GameState.WHITES_TURN);
+            } else{
+                throw new ParticipantException(format("Participant {0} can't move for {1} in room {2} at this time",
+                                            p.getUser().getUsername(), p.getRoom().getGameState(), p.getRoom().getCode()));
+            }
+            p.getRoom().setCurrentTurn(p.getRoom().getCurrentTurn()+1);
 
-        if(isValidWhites){
-            p.getRoom().setGameState(Room.GameState.BLACKS_TURN);
-        } else if(isValidBlacks){
-            p.getRoom().setGameState(Room.GameState.WHITES_TURN);
-        } else{
-            throw new ParticipantException(format("Participant {0} can't move for {1} in room {2} at this time",
-                                        p.getUser().getUsername(), p.getRoom().getGameState(), p.getRoom().getCode()));
+            String fen = move.getFen();
+            if(fen != null && !fen.isEmpty())    p.getRoom().setFen(fen);
+            p.getRoom().setMoves(p.getRoom().getMoves() + Move.DELIM + move);
+            p.getRoom().setDrawProposer(null);
+            roomService.save(p.getRoom());
+            template.convertAndSend("/queue/"+room, move, responseHeader.toMap());
+
         }
-        p.getRoom().setCurrentTurn(p.getRoom().getCurrentTurn()+1);
-
-        String fen = move.getFen();
-        if(fen != null && !fen.isEmpty())    p.getRoom().setFen(fen);
-        p.getRoom().setMoves(p.getRoom().getMoves() + Move.DELIM + move);
-        roomService.save(p.getRoom());
-        template.convertAndSend("/queue/"+room, move, responseHeader.toMap());
     }
 
     @MessageMapping("/{room}.sys.placeBet")

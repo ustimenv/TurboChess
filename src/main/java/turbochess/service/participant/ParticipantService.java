@@ -61,8 +61,8 @@ public class ParticipantService{
         return repository.getUserIdsInRoomWithRole(roomCode, role);
     }
 
-    public Participant getUnsubscribedParticipantInstance(User user) throws ParticipantException{
-        return repository.getUnsubscribedParticipantWithName(user.getUsername());
+    public Participant getUnsubscribedParticipantInstance(String username) throws ParticipantException{
+        return repository.getUnsubscribedParticipantWithName(username);
     }
 
 }

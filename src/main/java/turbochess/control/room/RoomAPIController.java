@@ -10,10 +10,13 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import turbochess.control.JsonConverter;
 import turbochess.model.User;
+import turbochess.model.room.Bet;
+import turbochess.model.room.Game;
 import turbochess.model.room.Participant;
 import turbochess.model.room.Room;
 import turbochess.service.bet.BetException;
 import turbochess.service.bet.BetService;
+import turbochess.service.game.GameService;
 import turbochess.service.participant.ParticipantException;
 import turbochess.service.participant.ParticipantService;
 import turbochess.service.room.RoomException;
@@ -22,6 +25,7 @@ import turbochess.service.user.UserException;
 import turbochess.service.user.UserService;
 
 import java.security.Principal;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -39,6 +43,9 @@ public class RoomAPIController{
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private GameService gameService;
 
     @Autowired
     private ParticipantService participantService;
@@ -67,7 +74,8 @@ public class RoomAPIController{
         participantService.save(p);
 
         return Map.of("room_code_assigned", roomCreated.getCode(),
-                      "colour_assigned",   p.getColourString());
+                      "colour_assigned",   p.getColourString(),
+                      "num_participants", String.valueOf(roomCreated.getNumParticipants()));
 
     }
 
@@ -87,7 +95,8 @@ public class RoomAPIController{
 
             return Map.of("colour_assigned", p.getColourString(),
                           "fen",             roomToJoin.getFen(),
-                          "accumulated_bet", String.valueOf(participantAccumulatedBet));
+                          "accumulated_bet", String.valueOf(participantAccumulatedBet),
+                          "num_participants", String.valueOf(roomToJoin.getNumParticipants()));
         }
 
         if(!roomToJoin.isBelowCapacity())	throw new RoomException(format("Capacity exceeded for room {0)", roomToJoin.getCode()));
@@ -105,61 +114,123 @@ public class RoomAPIController{
         roomService.save(roomToJoin);
         return Map.of("colour_assigned", p.getColourString(),
                       "fen",            "",
-                      "accumulated_bet", String.valueOf(0));
+                      "accumulated_bet", String.valueOf(0),
+                      "num_participants", String.valueOf(roomToJoin.getNumParticipants()));
     }
-
 
     /**
      *  @param args: room_code : String
      * */
-    @PostMapping(value = "/game_over", produces = "application/json")
+    @PostMapping(value = "/draw", produces = "application/json")
     @Transactional
-    public Map<String, String> endGame(@RequestBody Map<String, String> args, Principal principal) throws RoomException{
-//            LocalDateTime currentTime = LocalDateTime.now();
-//            User requestSender = getUserByUsername(principal.getName());
-//            Room room = roomService.getRoomByCode(roomCode);
-//            Participant.Colour senderColour = participantService.getParticipantByUsernameAndRoom(room, userFrom).getColour();
-//
-//            long whitesId = participantService.getUserIdsInRoomWithRole(room.getCode(), Participant.Role.PLAYER1).get(0);
-//            long blacksId = participantService.getUserIdsInRoomWithRole(room.getCode(), Participant.Role.PLAYER2).get(0);
-//            User whites = getUserByID(whitesId);
-//            User blacks = getUserByID(blacksId);
-//
-//            Game.Result result;
-//            if("WIN".equals(packet.getResult()) && senderColour == Participant.Colour.WHITE ||
-//              "LOSS".equals(packet.getResult()) && senderColour == Participant.Colour.BLACK){
-//                result = Game.Result.WHITES_WON;
-//            } else if("WIN".equals(packet.getResult()) && senderColour == Participant.Colour.BLACK ||
-//                     "LOSS".equals(packet.getResult()) && senderColour == Participant.Colour.WHITE){
-//                result = Game.Result.BLACKS_WON;
-//            } else{
-//                result = Game.Result.DRAW;
-//            }
-//
-//            Game game = new Game(whites, blacks, currentTime, result, room.getMoves());
-//
-//            List<Bet> winningBets = betService.getRoomBetsByResult(room.getCode(), result);
-//            for(Bet B : winningBets){
-//                User u = B.getBetter().getUser();
-//                setUserCoins(u.getId(), u.getCoins()+Bet.returnOnBet(B.getValue(), B.getTurnPlaced(), room.getCurrentTurn()/2));
-//                entityManager.remove(B);
-//            }
-//
-//            entityManager.persist(game);
-//
-////            List <Participant> participants = participantService.getRoomParticipants(room);
-////            for(Participant p : participants){
-////                entityManager.remove(p);
-////            }
-//            participantService.deleteRoomParticipants(room.getCode());
-//            entityManager.remove(room);
-//            //betService.deleteRoomBets(room);
-//            log.info(format("Game saved for users {0} and {1} successfully", whites.getUsername(), blacks.getUsername()));
+    public Map<String, String> draw(@RequestBody Map<String, String> args, Principal principal) throws RoomException, UserException, ParticipantException{
+        LocalDateTime currentTime = LocalDateTime.now();
+        Room room = roomService.getRoomByCode(args.get("room_code"));
+        Participant p = participantService.getParticipantByUsernameAndRoom(room, userService.getUserByUsername(principal.getName()));
+        Participant opponent;
 
-            Map<String, String> response = new HashMap<>();
-            response.put("okay", "okay");
-            return response;
+        if(p.getRole() == Participant.Role.PLAYER1 || p.getRole() == Participant.Role.PLAYER2){
+            User whites = userService.getUserById(participantService.getUserIdsInRoomWithRole(room.getCode(), Participant.Role.PLAYER1).get(0));
+            User blacks = userService.getUserById(participantService.getUserIdsInRoomWithRole(room.getCode(), Participant.Role.PLAYER2).get(0));
+            if(p.getUser().getId() == whites.getId()){
+                opponent = participantService.getParticipantByUsernameAndRoom(room, blacks);
+            } else  opponent = participantService.getParticipantByUsernameAndRoom(room, whites);
 
+            if(room.getDrawProposer() == null){                     // first player to offer draw
+                room.setDrawProposer(p.getUser().getId());
+                roomService.save(room);
+            } else if(room.getDrawProposer() == opponent.getUser().getId()){    // p accepting draw proposed by opponent
+                p.getUser().updateScoreOnDraw(opponent.getUser());
+                opponent.getUser().updateScoreOnDraw(p.getUser());
+
+            }
+            userService.save(p.getUser());
+            userService.save(opponent.getUser());
+            gameService.save(new Game(whites, blacks, currentTime, Game.Result.DRAW, room.getMoves()));
+            log.info(format("Game saved for users {0} and {1} successfully", whites.getUsername(), blacks.getUsername()));
+        }
+        return Map.of("okay", "okay");
+    }
+
+    @PostMapping(value = "/victory", produces = "application/json")
+    @Transactional
+    public Map<String, String> winGame(@RequestBody Map<String, String> args, Principal principal) throws RoomException, UserException, ParticipantException{
+        LocalDateTime currentTime = LocalDateTime.now();
+        Room room = roomService.getRoomByCode(args.get("room_code"));
+        Participant winner = participantService.getParticipantByUsernameAndRoom(room, userService.getUserByUsername(principal.getName()));
+        if(winner.getRole() == Participant.Role.PLAYER1 || winner.getRole() == Participant.Role.PLAYER2){
+
+            User whites = userService.getUserById(participantService.getUserIdsInRoomWithRole(room.getCode(), Participant.Role.PLAYER1).get(0));
+            User blacks = userService.getUserById(participantService.getUserIdsInRoomWithRole(room.getCode(), Participant.Role.PLAYER2).get(0));
+
+            Participant loser;
+            Game.Result gameResult;
+            if(winner.getUser().getId() == whites.getId()){
+                gameResult = Game.Result.WHITES_WON;
+                loser = participantService.getParticipantByUsernameAndRoom(room, blacks);
+            } else{
+                gameResult = Game.Result.BLACKS_WON;
+                loser = participantService.getParticipantByUsernameAndRoom(room, whites);
+            }
+            // in order to declare victory, the 'loser' must be inactive, having left the match
+
+            if(loser.getLastActiveTime() == null){
+                throw new UserException(format("User {0} is attempting to illegally claim victory over {1}",
+                        winner.getUser().getUsername(), loser.getUser().getUsername()));
+            }
+            winner.getUser().updateScoreOnVictory(loser.getUser());
+            loser.getUser().updateScoreOnVictory(winner.getUser());
+            userService.save(winner.getUser());
+            userService.save(loser.getUser());
+            gameService.save(new Game(whites, blacks, currentTime, gameResult, room.getMoves()));
+
+            closeRoom(room, gameResult);
+        }
+        return Map.of("okay", "okay");
+    }
+
+    @PostMapping(value = "/loss", produces = "application/json")
+    @Transactional
+    public Map<String, String> loseGame(@RequestBody Map<String, String> args, Principal principal) throws RoomException, UserException, ParticipantException{
+        LocalDateTime currentTime = LocalDateTime.now();
+
+        Room room = roomService.getRoomByCode(args.get("room_code"));
+        Participant loser = participantService.getParticipantByUsernameAndRoom(room, userService.getUserByUsername(principal.getName()));
+        if(loser.getRole() == Participant.Role.PLAYER1 || loser.getRole() == Participant.Role.PLAYER2){
+            User whites = userService.getUserById(participantService.getUserIdsInRoomWithRole(room.getCode(), Participant.Role.PLAYER1).get(0));
+            User blacks = userService.getUserById(participantService.getUserIdsInRoomWithRole(room.getCode(), Participant.Role.PLAYER2).get(0));
+            Participant winner;
+            Game.Result gameResult;
+
+            if(loser.getUser().getId() == whites.getId()){
+                gameResult = Game.Result.BLACKS_WON;
+                winner = participantService.getParticipantByUsernameAndRoom(room, blacks);
+            } else{
+                gameResult = Game.Result.WHITES_WON;
+                winner = participantService.getParticipantByUsernameAndRoom(room, whites);
+            }
+
+            winner.getUser().updateScoreOnVictory(loser.getUser());
+            loser.getUser().updateScoreOnVictory(winner.getUser());
+            userService.save(winner.getUser());
+            userService.save(loser.getUser());
+            gameService.save(new Game(whites, blacks, currentTime, gameResult, room.getMoves()));
+            closeRoom(room, gameResult);
+        }
+        return Map.of("okay", "okay");
+    }
+
+//    @Transactional
+    private void closeRoom(Room room, Game.Result gameResult){
+        List<Bet> winningBets = betService.getRoomBetsByResult(room.getCode(), gameResult);
+        for(Bet B : winningBets){
+            User u = B.getBetter().getUser();
+            u.setCoins(u.getCoins() + Bet.returnOnBet(B.getAmount(), B.getTurnPlaced(), room.getCurrentTurn()/2));
+            userService.save(u);
+            betService.delete(B);
+        }
+        participantService.getRoomParticipants(room).forEach(participant -> participantService.delete(participant));
+        roomService.delete(room);
     }
 
     @GetMapping(value = "/list_available", produces = "application/json")

@@ -51,6 +51,9 @@ public class Room{                           // includes two players and an unde
     @JsonProperty("dateCreated")
     private LocalDateTime dateCreated;
 
+    @Column(name="draw_proposer")
+    private Long drawProposer=null;
+
     @Column(name="current_turn", nullable = false)
     @JsonProperty("currentTurn")
     private int currentTurn=0;                         // json string containing serialised participants (ids, roles, bets)
@@ -63,7 +66,7 @@ public class Room{                           // includes two players and an unde
 
     public enum GameState{
         NOT_STARTED, WHITES_TURN, BLACKS_TURN,
-        DRAW_PROPOSED, WHITES_VICTORY_ALLEGED, BLACKS_VICTORY_ALLEGED
+        DRAW_PROPOSED
     }
 
     public Participant.Role assignRole(Participant p) throws RoomException {
