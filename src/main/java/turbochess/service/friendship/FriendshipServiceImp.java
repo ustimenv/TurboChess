@@ -1,10 +1,10 @@
 package turbochess.service.friendship;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import turbochess.model.Friendship;
 import turbochess.model.User;
 import turbochess.repository.FriendshipRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -20,32 +20,21 @@ public class FriendshipServiceImp implements FriendshipService {
     private FriendshipRepository friendshipRepository;
 
     @Override
-    public Friendship createFriendshipRequest(User sender, User receiver)
-            throws FriendshipException {
+    public Friendship createFriendshipRequest(User sender, User receiver) throws FriendshipException {
         if (sender.getFriends().contains(receiver)) {
             throw new FriendshipException("Users are friends already");
-        } else if (!friendshipRepository
-                .findBySenderAndReceiverAndState(sender, receiver, Friendship.State.OPEN).isEmpty()) {
-            throw new FriendshipException("A pending request exists");
-        } else if (!friendshipRepository
-                .findBySenderAndReceiverAndState(receiver, sender, Friendship.State.OPEN).isEmpty()) {
-            throw new FriendshipException("A pending request exists");
+        } else if (friendshipRepository.findBySenderAndReceiverAndState(sender, receiver, Friendship.State.OPEN) != null ||
+                   friendshipRepository.findBySenderAndReceiverAndState(receiver, sender, Friendship.State.OPEN) == null){
+                                    throw new FriendshipException("A pending request exists");
         }
         Friendship request;
         //ya existe un decline en alguna peticion previa
-        if(!friendshipRepository
-                .findBySenderAndReceiverAndState(sender, receiver, Friendship.State.DECLINED).isEmpty()){
-             request = friendshipRepository
-                    .findBySenderAndReceiverAndState(sender, receiver, Friendship.State.DECLINED).get(0);
-        } else
-        if(!friendshipRepository
-                .findBySenderAndReceiverAndState(receiver, sender, Friendship.State.DECLINED).isEmpty()){
-            request = friendshipRepository
-                    .findBySenderAndReceiverAndState(receiver, sender, Friendship.State.DECLINED).get(0);
+        if(friendshipRepository.findBySenderAndReceiverAndState(sender, receiver, Friendship.State.DECLINED) != null){
+             request = friendshipRepository.findBySenderAndReceiverAndState(sender, receiver, Friendship.State.DECLINED);
+        } else if(friendshipRepository.findBySenderAndReceiverAndState(receiver, sender, Friendship.State.DECLINED) != null){
+            request = friendshipRepository.findBySenderAndReceiverAndState(receiver, sender, Friendship.State.DECLINED);
+        }else   request = new Friendship();
 
-        }else {
-            request = new Friendship();
-        }
         request.setSender(sender);
         request.setReceiver(receiver);
         request.setState(Friendship.State.OPEN);
@@ -79,8 +68,7 @@ public class FriendshipServiceImp implements FriendshipService {
     }
 
     @Override
-    public void declineFriendshipRequest(Friendship request, User receiver)
-            throws FriendshipException {
+    public void declineFriendshipRequest(Friendship request, User receiver) throws FriendshipException {
         if(request.getReceiver() == receiver){
             request.setState(Friendship.State.DECLINED);
             friendshipRepository.save(request);
@@ -88,12 +76,12 @@ public class FriendshipServiceImp implements FriendshipService {
     }
 
     @Override
-    public List<Friendship> findByReceiverAndState(User user, Friendship.State open) {
-        return friendshipRepository.findByReceiverAndState(user, Friendship.State.OPEN);
+    public List<Friendship> findByReceiverAndState(User receiver, Friendship.State state) {
+        return friendshipRepository.findByReceiverAndState(receiver, state);
     }
 
     @Override
-    public Friendship findRequest(User sender, User receiver) {
-        return friendshipRepository.findBySenderAndReceiverAndState(sender,receiver,Friendship.State.OPEN ).get(0);
+    public Friendship findOpenRequestBetween(User sender, User receiver) {
+        return friendshipRepository.findBySenderAndReceiverAndState(sender,receiver,Friendship.State.OPEN);
     }
 }

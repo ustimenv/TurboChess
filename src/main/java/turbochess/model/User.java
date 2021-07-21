@@ -133,8 +133,8 @@ public class User{//} implements Transferable<User.Transfer> {
 //		return toTransfer().toString();
 //	}
 
-	public boolean samePasword(){
-		return this.password.equals(this.passwordConfirm);
+	public boolean isPasswordValid(){
+		return password != null && !password.isEmpty() && password.equals(passwordConfirm);
 	}
 
 	public void updateScoreOnVictory(User loser){ // somewhat based on https://en.wikipedia.org/wiki/Chess_rating_system

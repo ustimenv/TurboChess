@@ -10,6 +10,6 @@ import java.util.List;
 public interface UserService{
     User getUserByUsername(String username) throws UserException;
     User getUserById(long id) throws UserException;
-
+    boolean doesUserExists(String username);
     List <User> getUserFriends(User user) throws UserException;
 }

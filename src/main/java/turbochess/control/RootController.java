@@ -233,7 +233,7 @@ public class RootController {
     public String answerFriendshipRequest(@RequestParam Long requestId, @RequestParam String action, Model model) throws FriendshipException {
         User u=(User) session.getAttribute("u");
         User sender= entityManager.find(User.class, requestId);
-        Friendship response = friendshipservice.findRequest(sender,u);
+        Friendship response = friendshipservice.findOpenRequestBetween(u, sender);
 
         if(action.equals("Accept") ){
             response.setState(Friendship.State.ACCEPTED);

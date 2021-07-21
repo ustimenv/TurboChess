@@ -18,7 +18,9 @@ import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBo
 import turbochess.LocalData;
 import turbochess.model.Friendship;
 import turbochess.model.User;
-import turbochess.repository.FriendshipRepository;
+import turbochess.service.friendship.FriendshipService;
+import turbochess.service.user.UserException;
+import turbochess.service.user.UserService;
 
 import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletResponse;
@@ -52,8 +54,11 @@ public class UserController {
 	private PasswordEncoder passwordEncoder;
 
 	@Autowired
-	private FriendshipRepository friendshipRepository;
-	
+	private FriendshipService friendshipService;
+
+	@Autowired
+	private UserService userService;
+
 	/**
 	 * Tests a raw (non-encoded) password against the stored one.
 	 * @param rawPassword to test against
@@ -77,37 +82,35 @@ public class UserController {
 	public String encodePassword(String rawPassword) {
 		return passwordEncoder.encode(rawPassword);
 	}
-		private List<Long> f;
+//		private List<Long> f;
 	@GetMapping("/{id}")
-	public String getUser(@PathVariable long id, Model model, HttpSession session) 			
-			throws JsonProcessingException {		
+	public String getUser(@PathVariable long id, Model model, HttpSession session) throws JsonProcessingException, UserException{
 		User u = entityManager.find(User.class, id);
 		model.addAttribute("user", u);
 
 		// construye y envía mensaje JSON
-		User requester = (User)session.getAttribute("u");
+		User requester = (User) session.getAttribute("u");
 
 		// carga la lista de amigos
-		List<User> friends = (List<User>) entityManager.createNativeQuery("SELECT * FROM Friends " +
-				"LEFT JOIN User on Friends.friend_id =User.id WHERE Friends.SUBJECT_ID= :userid " +
-				"UNION ALL" +
-				" SELECT  * FROM Friends LEFT JOIN User on Friends.SUBJECT_ID=User.id WHERE friend_id= :userid", User.class)
-				.setParameter("userid", requester.getId()).getResultList();
-		f = new ArrayList<>();
-		for (User name : friends) {
-			f.add(name.getId());
+//		List<User> friends = (List<User>) entityManager.createNativeQuery("SELECT * FROM Friends " +
+//				"LEFT JOIN User on Friends.friend_id =User.id WHERE Friends.SUBJECT_ID= :userid " +
+//				"UNION ALL" +
+//				" SELECT  * FROM Friends LEFT JOIN User on Friends.SUBJECT_ID=User.id WHERE friend_id= :userid", User.class)
+//				.setParameter("userid", requester.getId()).getResultList();
+		List<User> friends = userService.getUserFriends(requester);
+
+		if(friends.stream().anyMatch(friend -> friend.getId() == id)){
+			model.addAttribute("isFriend", true);
 		}
-
-		if(f.contains(id))	model.addAttribute("isFriend",true );
-
 		model.addAttribute("friends", friends);
+
 		//para saber si se ha enviado peticion de amistad o no
-		List<Friendship> requests = friendshipRepository.findBySenderAndReceiverAndState(requester, u, Friendship.State.OPEN);
-		if (!requests.isEmpty()) {
+		Friendship request = friendshipService.findOpenRequestBetween(requester, u);
+		if (request != null) {
 			model.addAttribute("request", "sender");
 		} else {
-			requests = friendshipRepository.findBySenderAndReceiverAndState(u, requester, Friendship.State.OPEN);
-			if (!requests.isEmpty()) {
+			request = friendshipService.findOpenRequestBetween(u, requester);
+			if (request != null) {
 				model.addAttribute("request", "receiver");
 			} else {
 				model.addAttribute("request", null);
@@ -121,58 +124,58 @@ public class UserController {
 		String json = mapper.writeValueAsString(rootNode);
 		
 		messagingTemplate.convertAndSend("/topic/admin", json);
-
 		return "user";
 	}	
 	
-	@ResponseStatus(
-		value=HttpStatus.FORBIDDEN, 
-		reason="No eres administrador, y éste no es tu perfil")  // 403
+	@ResponseStatus(value=HttpStatus.FORBIDDEN, reason="No eres administrador, y éste no es tu perfil")  // 403
 	public static class NoEsTuPerfilException extends RuntimeException {}
 
 	@PostMapping("/{id}")
 	@Transactional
-	public String postUser(
-			HttpServletResponse response,
-			@PathVariable long id, 
-			@ModelAttribute User edited, 
-			@RequestParam(required=false) String pass2,
-			Model model, HttpSession session) throws IOException {
-		boolean samePassw = true;
+	public String postUser(	@PathVariable long id, @ModelAttribute User editedCredentials, Model model, HttpSession session) throws UserException{
+//			HttpServletResponse response,
 		List<String> msgError = new ArrayList<>();
+		List<String> msgSuccess = new ArrayList<>();
+		User currentUser = (User) session.getAttribute("u");
+		User editingTarget = userService.getUserById(id);
 
-		User target = entityManager.find(User.class, id);
-		model.addAttribute("user", target);
-		
-		User requester = (User)session.getAttribute("u");
-		if (requester.getId() != target.getId() &&
-				! (requester.hasRole(User.Role.ADMIN))) {
-			throw new NoEsTuPerfilException();
-		}
-		
-		if (edited.getPassword() != null && !edited.getPassword().isEmpty() && edited.getPassword().equals(edited.getPasswordConfirm())) {
-			// save encoded version of password
-			target.setPassword(encodePassword(edited.getPassword()));
-		}else if (!edited.getPassword().isEmpty() && !edited.getPassword().equals(edited.getPasswordConfirm())){
-			samePassw = false;
+		boolean atLeastOneEditSuccessful = false;
+		boolean atLeastOneEditFailed = false;
+
+		// Should an admin wish to edit their own profile, we will treat them a normal user
+		boolean editingOwnProfile = currentUser.getId() == editingTarget.getId();
+		boolean editingAsAdmin = currentUser.hasRole(User.Role.ADMIN);
+
+		if(!(editingOwnProfile || editingAsAdmin))	throw new NoEsTuPerfilException();
+
+		// UPDATING THE PASSWORD
+		if(editedCredentials.isPasswordValid()) {
+			editingTarget.setPassword(encodePassword(editedCredentials.getPassword()));// save the encoded version of password
+			msgSuccess.add("Password updated!");
+			entityManager.merge(editingTarget);
+			atLeastOneEditSuccessful=true;
+		} else{
 			msgError.add("The password should be the same");
+			atLeastOneEditFailed=true;
 		}
-		List<User> result = entityManager.createNamedQuery("User.byUsername").setParameter("username", edited.getUsername()).getResultList();
-		if (samePassw && (result.isEmpty() || result.get(0).getUsername().equals(target.getUsername()))) {
-			if(!target.getUsername().equals(edited.getUsername()) || !edited.getPassword().isEmpty()) {
-				target.setUsername(edited.getUsername());
-				entityManager.persist(target);
-				model.addAttribute("msgInfo", "Changes saved!");
-			}
 
-		} else if (!result.isEmpty() && !result.get(0).getUsername().equals(target.getUsername())){
-			msgError.add(edited.getUsername() + " already exists");
-
+		// UPDATING THE USERNAME
+		if(editingTarget.getUsername().equals(editedCredentials.getUsername())){
+			// no changes made to the username
+		} else if(userService.doesUserExists(editedCredentials.getUsername())){
+			msgError.add(editedCredentials.getUsername() + " already exists");
+			atLeastOneEditFailed=true;
+		} else{
+			editingTarget.setUsername(editedCredentials.getUsername());
+			entityManager.merge(editingTarget);
+			msgSuccess.add("Username updated!");
+			atLeastOneEditSuccessful=true;
 		}
-		// update user session so that changes are persisted in the session, too
-		session.setAttribute("u", target);
-		model.addAttribute("msg",msgError);
 
+		if(atLeastOneEditSuccessful)	model.addAttribute("msgSuccess", msgSuccess);
+		if(atLeastOneEditFailed)		model.addAttribute("msgError", msgError);
+
+		if(editingOwnProfile)			session.setAttribute("u", editingTarget);
 		return "user";
 	}	
 	
@@ -193,7 +196,7 @@ public class UserController {
 			}
 		};
 	}
-	
+
 //	@PostMapping("/{id}/msg")
 //	@ResponseBody
 //	@Transactional
@@ -230,12 +233,10 @@ public class UserController {
 //		messagingTemplate.convertAndSend("/user/"+u.getUsername()+"/queue/updates", json);
 //		return "{\"result\": \"message sent.\"}";
 //	}
-	
+
 	@PostMapping("/{id}/photo")
-	public String postPhoto(
-			HttpServletResponse response,
-			@RequestParam("photo") MultipartFile photo,
-			@PathVariable("id") String id, Model model, HttpSession session) throws IOException {
+	public String postPhoto(HttpServletResponse response, @RequestParam("photo") MultipartFile photo,
+							@PathVariable("id") String id, Model model, HttpSession session) throws IOException {
 		User target = entityManager.find(User.class, Long.parseLong(id));
 		model.addAttribute("user", target);
 		

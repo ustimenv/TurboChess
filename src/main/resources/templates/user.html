@@ -11,11 +11,11 @@
                 <!-- <img th:src="@{/user/{id}/photo(id=${user.id})}"  class="imagenPerfil">-->
                 <img id="avatar" src="http://pngimg.com/uploads/simpsons/simpsons_PNG95.png"></img>
             </div>
-            <div id="alertInfo" class="alert alert-success"  role="alert">
-                <p th:text="${msgInfo}" id="msgSuccess"></p>
+            <div th:each="msg: ${msgSuccess}" id="alertInfo" class="alert alert-success"  role="alert">
+                <p th:text="${msg}" id="msgSuccess"></p>
             </div>
-            <div th:each="result: ${msg}" id="alertError" class="alert alert-danger">
-                <p th:text="${result}" id="msgError"></p>
+            <div th:each="msg: ${msgError}" id="alertError" class="alert alert-danger">
+                <p th:text="${msg}" id="msgError"></p>
             </div>
 
             <form  id="form-editInfo" class="form-editInfo" method="post" th:action="@{/user/{id}(id=${user.id})}" th:object="${user}" >

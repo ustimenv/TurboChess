@@ -3,11 +3,7 @@ package turbochess.service.user;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import turbochess.model.User;
-import turbochess.model.room.Participant;
-import turbochess.model.room.Room;
-import turbochess.repository.ParticipantRepository;
 import turbochess.repository.UserRepository;
-import turbochess.service.room.RoomException;
 
 import java.util.List;
 
@@ -32,6 +28,11 @@ public class UserServiceImp implements UserService{
         if(u != null){
             return u;
         } else	throw new UserException(format("Unable to find user with id {0}", id));
+    }
+
+    @Override
+    public boolean doesUserExists(String username){
+        return repository.countUsersWithUsername(username)>0;
     }
 
     @Override

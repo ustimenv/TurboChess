@@ -59,7 +59,13 @@ public class RoomAPIController{
      * */
     @PostMapping(value="/create", produces = "application/json")
     @Transactional
-    public Map<String, String> createRoom(@RequestBody Map<String, Integer> args, Principal principal) throws Exception{
+    public Map<String, String> createRoom(@RequestHeader Map<String, String> headers,
+                                          @RequestBody Map<String, Integer> args, Principal principal) throws Exception{
+        headers.forEach((key, value) -> {
+            log.info(String.format("Header '%s' = %s", key, value));
+        });
+
+
         User requestSender = userService.getUserByUsername(principal.getName());
         Room roomCreated = roomService.createRoom(generateRoomCode(), args.getOrDefault("capacity", 2));
         Participant p = participantService.createParticipant(roomCreated, requestSender);
