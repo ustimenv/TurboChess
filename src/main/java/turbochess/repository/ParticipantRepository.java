@@ -11,6 +11,9 @@ public interface ParticipantRepository extends CrudRepository<Participant, Long>
     @Query(value = "SELECT p FROM Participant p WHERE p.user.id = :user_id AND p.room.code = :roomCode")
     Participant getParticipant(@Param("roomCode") String roomCode, @Param("user_id") long userID);
 
+    @Query(value = "SELECT p FROM Participant p WHERE session_id = :sessionId")
+    Participant getBySessionId(@Param("sessionId") String sessionId);
+
     @Query(value = "SELECT COUNT(p) FROM Participant p WHERE room_code = :roomCode AND p.user.id = :user_id")
     int countParticipants(@Param("roomCode") String roomCode, @Param("user_id") long userID);
 
@@ -20,5 +23,7 @@ public interface ParticipantRepository extends CrudRepository<Participant, Long>
     @Query(value = "SELECT p.user.id FROM Participant p WHERE p.room.code = :roomCode AND p.role = :role")
     List <Long> getUserIdsInRoomWithRole(@Param("roomCode") String roomCode, @Param("role") Participant.Role role);
 
+    @Query(value = "SELECT p FROM Participant p WHERE p.username = :username AND p.session_id = 'null'")
+    Participant getUnsubscribedParticipantWithName(@Param("username") String username);
 }
 

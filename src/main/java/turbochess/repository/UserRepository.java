@@ -8,8 +8,11 @@ import turbochess.model.User;
 import java.util.List;
 
 public interface UserRepository extends CrudRepository<User, Long>{
-    @Query(value = "SELECT u FROM User u WHERE u.username LIKE :username AND u.enabled = 1")
+    @Query(value = "SELECT u FROM User u WHERE u.username = :username AND u.enabled = 1")
     User getByUsername(@Param("username") String username);
+
+    @Query(value = "SELECT u FROM User u WHERE u.username LIKE :username AND u.enabled = 1")
+    List<User> getByLikeUsername(@Param("username") String username);
 
     @Query(value = "SELECT u FROM User u WHERE u.id = :id")
     User getByUserId(@Param("id") long userId);
@@ -23,4 +26,6 @@ public interface UserRepository extends CrudRepository<User, Long>{
             " SELECT  * FROM Friends LEFT JOIN User on Friends.SUBJECT_ID=User.id WHERE friend_id= :userid", nativeQuery = true)
     List<User> getFriendsByUserId(@Param("userid") long userId);
 
+    @Query(value = "SELECT u from User u")
+    List<User> getAllUsers();
 }

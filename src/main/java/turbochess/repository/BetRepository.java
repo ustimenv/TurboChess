@@ -4,8 +4,8 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
-import turbochess.model.chess.Bet;
-import turbochess.model.chess.Game;
+import turbochess.model.room.Bet;
+import turbochess.model.room.Game;
 
 import java.util.List;
 

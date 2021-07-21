@@ -12,4 +12,7 @@ public interface RoomService {
     Room getRoomByCode(String roomCode)             throws RoomException;
     List<Room> getAvailableRooms(int maxRooms);
     boolean roomExists(String roomCode);
+
+    Room save(Room room);
+
 }

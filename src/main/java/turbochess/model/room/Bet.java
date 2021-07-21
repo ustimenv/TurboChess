@@ -1,8 +1,7 @@
-package turbochess.model.chess;
+package turbochess.model.room;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import turbochess.model.room.Participant;
 
 import javax.persistence.*;
 

@@ -1,4 +1,4 @@
-package turbochess.model.chess;
+package turbochess.model.room;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

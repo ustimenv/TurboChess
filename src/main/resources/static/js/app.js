@@ -126,8 +126,6 @@ function connect() {
 function onConnected() {
     stompClient.subscribe(`/queue/${roomCode}`, onMessageReceived);             // subscribe to the room's channe;
                                                                                 // inform the room that you've subbed
-    stompClient.send(`/app/${roomCode}.chat.addUser`, {}, {});
-
     connecting.classList.add('hidden');                                         // remove the 'Connecting...'
     boardDiv.classList.remove('hidden');                                        // and show the board
     if(isRoomOwner){
@@ -207,10 +205,12 @@ function onMessageReceived(message) {
         messageToShow = message.body;
     break;
 
-    case 'LEAVE_ROOM':
+    case 'PLAYER DISCONNECTED':
+        startVictoryTimer=true;
+    case 'OBSERVER DISCONNECTED':
         numPeopleInRoom--;
         messageElement.classList.add('event-message');
-        messageToShow = message.headers["FROM"] + ' left!';
+        messageToShow = message.body;
     break;
 
     case 'CHESS_MOVE':
@@ -253,6 +253,7 @@ function handleJoinRoom(e){
                     myColour = response.colour_assigned;
                     totalBet = response.accumulated_bet;
                     fen = response.fen;
+                    alert(fen);
                     game.load(fen);
                     board.position(game.fen());
                     roomCode = code;

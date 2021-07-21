@@ -3,7 +3,7 @@ package turbochess.repository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
-import turbochess.model.chess.Game;
+import turbochess.model.room.Game;
 
 import java.util.List;
 

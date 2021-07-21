@@ -1,12 +1,13 @@
 package turbochess.model.room;
 
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import turbochess.model.User;
-import turbochess.model.chess.Bet;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,6 +22,13 @@ public class Participant {
     @ManyToOne
     @JoinColumn(name= "room_code")
     private Room room;
+
+    @Column(unique = true)
+    String sessionId;
+
+    @Column(nullable = true)
+    private LocalDateTime lastActiveTime;   // takes a non-null value only when the socket closes
+
 
     @ManyToOne
     @JoinColumn(name = "user_id")
@@ -71,40 +79,4 @@ public class Participant {
                    this.room.getCode().equals(((Participant) other).room.getCode());
         }
     }
-
-//    public String toJSON(){
-//        ObjectMapper mapper = new ObjectMapper();
-//        SimpleModule module =new SimpleModule("ParticipantSerialiser");
-//        module.addSerializer(Participant.class, new ParticipantSerialiser());
-//        mapper.registerModule(module);
-//
-//
-//        try{
-//            return mapper.writeValueAsString(this);
-//        } catch(JsonProcessingException e){
-//            e.printStackTrace();
-//            return null;
-//        }
-//    }
-
-//    private static class ParticipantSerialiser extends StdSerializer<Participant>{
-//        protected ParticipantSerialiser(){
-//            this(null);
-//        }
-//        protected ParticipantSerialiser(Class<Participant> t){
-//            super(t);
-//        }
-//
-//        @Override
-//        public void serialize(Participant participant, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException{
-//            jsonGenerator.writeStartObject();
-//            jsonGenerator.writeNumberField("id", participant.getId());
-//            jsonGenerator.writeStringField("username", participant.user.getUsername());
-//            jsonGenerator.writeStringField("room", participant.room.getCode());
-//            jsonGenerator.writeNumberField("bet", participant.getCurrentBet());
-//            jsonGenerator.writeStringField("role", participant.getRole().toString());   //todo
-//            jsonGenerator.writeStringField("colour", participant.getColour().toString());   //todo
-//            jsonGenerator.writeEndObject();
-//        }
-//    }
 }

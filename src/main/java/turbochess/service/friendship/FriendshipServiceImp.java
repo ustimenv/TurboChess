@@ -84,4 +84,9 @@ public class FriendshipServiceImp implements FriendshipService {
     public Friendship findOpenRequestBetween(User sender, User receiver) {
         return friendshipRepository.findBySenderAndReceiverAndState(sender,receiver,Friendship.State.OPEN);
     }
+
+    @Override
+    public Friendship save(Friendship friendship){
+        return friendshipRepository.save(friendship);
+    }
 }

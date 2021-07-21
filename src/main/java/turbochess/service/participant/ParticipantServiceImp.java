@@ -43,6 +43,14 @@ public class ParticipantServiceImp implements ParticipantService{
     }
 
     @Override
+    public Participant getParticipantBySessionId(String sessionId) throws ParticipantException{
+        Participant p = repository.getBySessionId(sessionId);
+        if(p != null){
+            return p;
+        } else	throw new ParticipantException(format("Unable to find participant wish session id={0}", sessionId));
+    }
+
+    @Override
     public List<Participant> getRoomParticipants(Room room){
         return repository.getRoomParticipants(room.getCode());
     }
@@ -50,5 +58,15 @@ public class ParticipantServiceImp implements ParticipantService{
     @Override
     public List<Long> getUserIdsInRoomWithRole(String roomCode, Participant.Role role) throws ParticipantException{
         return repository.getUserIdsInRoomWithRole(roomCode, role);
+    }
+
+    @Override
+    public Participant save(Participant participant){
+        return repository.save(participant);
+    }
+
+    @Override
+    public Participant getUnsubscribedParticipantInstance(User user) throws ParticipantException{
+        return repository.getUnsubscribedParticipantWithName(user.getUsername());
     }
 }

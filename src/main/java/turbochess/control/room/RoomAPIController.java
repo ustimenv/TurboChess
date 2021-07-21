@@ -21,7 +21,6 @@ import turbochess.service.room.RoomService;
 import turbochess.service.user.UserException;
 import turbochess.service.user.UserService;
 
-import javax.persistence.EntityManager;
 import java.security.Principal;
 import java.util.HashMap;
 import java.util.List;
@@ -50,10 +49,6 @@ public class RoomAPIController{
     @Autowired
     private RoomService roomService;
 
-    @Autowired
-    private EntityManager entityManager;
-
-
     /**
      *  @param args: capacity : int (>=2)
      * */
@@ -61,10 +56,6 @@ public class RoomAPIController{
     @Transactional
     public Map<String, String> createRoom(@RequestHeader Map<String, String> headers,
                                           @RequestBody Map<String, Integer> args, Principal principal) throws Exception{
-        headers.forEach((key, value) -> {
-            log.info(String.format("Header '%s' = %s", key, value));
-        });
-
 
         User requestSender = userService.getUserByUsername(principal.getName());
         Room roomCreated = roomService.createRoom(generateRoomCode(), args.getOrDefault("capacity", 2));
@@ -72,8 +63,8 @@ public class RoomAPIController{
         p.setRole(roomCreated.assignRole(p));
         p.setColour(Participant.Colour.WHITE);
         roomCreated.addParticipant(p);
-        entityManager.persist(p);
-        entityManager.persist(roomCreated);
+        roomService.save(roomCreated);
+        participantService.save(p);
 
         return Map.of("room_code_assigned", roomCreated.getCode(),
                       "colour_assigned",   p.getColourString());
@@ -91,7 +82,12 @@ public class RoomAPIController{
         Room roomToJoin = roomService.getRoomByCode(args.get("room_code"));
 
         if(participantService.isUserInRoom(roomToJoin, requestSender)){
-            return retrieveRoomStateForUser(roomToJoin, requestSender);
+            Participant p = participantService.getParticipantByUsernameAndRoom(roomToJoin, requestSender);
+            int participantAccumulatedBet = betService.getParticipantTotalBet(p);
+
+            return Map.of("colour_assigned", p.getColourString(),
+                          "fen",             roomToJoin.getFen(),
+                          "accumulated_bet", String.valueOf(participantAccumulatedBet));
         }
 
         if(!roomToJoin.isBelowCapacity())	throw new RoomException(format("Capacity exceeded for room {0)", roomToJoin.getCode()));
@@ -105,29 +101,20 @@ public class RoomAPIController{
             p.setColour(Participant.Colour.BLACK);
         }
         roomToJoin.addParticipant(p);
-        entityManager.persist(p);
-        entityManager.persist(roomToJoin);
+        participantService.save(p);
+        roomService.save(roomToJoin);
         return Map.of("colour_assigned", p.getColourString(),
                       "fen",            "",
                       "accumulated_bet", String.valueOf(0));
     }
 
 
-    private Map<String, String> retrieveRoomStateForUser(Room room, User user) throws ParticipantException, BetException{
-        Participant p = participantService.getParticipantByUsernameAndRoom(room, user);
-        int participantAccumulatedBet = betService.getParticipantTotalBet(p);
-
-        return Map.of("colour_assigned", p.getColourString(),
-                      "fen",             room.getFen(),
-                      "accumulated_bet", String.valueOf(participantAccumulatedBet));
-    }
-
     /**
      *  @param args: room_code : String
      * */
     @PostMapping(value = "/game_over", produces = "application/json")
     @Transactional
-    public Map<String, String> endGame(@RequestBody Map<String, String> args,Principal principal) throws RoomException{
+    public Map<String, String> endGame(@RequestBody Map<String, String> args, Principal principal) throws RoomException{
 //            LocalDateTime currentTime = LocalDateTime.now();
 //            User requestSender = getUserByUsername(principal.getName());
 //            Room room = roomService.getRoomByCode(roomCode);

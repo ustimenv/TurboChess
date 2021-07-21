@@ -2,8 +2,8 @@ package turbochess.service.bet;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import turbochess.model.chess.Bet;
-import turbochess.model.chess.Game;
+import turbochess.model.room.Bet;
+import turbochess.model.room.Game;
 import turbochess.model.room.Participant;
 import turbochess.model.room.Room;
 import turbochess.repository.BetRepository;
@@ -34,5 +34,10 @@ public class BetServiceImp implements BetService{
     @Override
     public List<Bet> getRoomBetsByResult(String roomCode, Game.Result result){
         return repository.getRoomBetsByResult(roomCode, result);
+    }
+
+    @Override
+    public Bet save(Bet bet){
+        return repository.save(bet);
     }
 }

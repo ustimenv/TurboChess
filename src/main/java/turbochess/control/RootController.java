@@ -9,15 +9,14 @@ import turbochess.configurations.IwUserDetailsService;
 import turbochess.model.AdminMessage;
 import turbochess.model.Friendship;
 import turbochess.model.User;
-import turbochess.model.chess.Game;
-import turbochess.repository.RoomRepository;
+import turbochess.model.room.Game;
+import turbochess.service.admin_message.AdminMessageService;
 import turbochess.service.friendship.FriendshipException;
 import turbochess.service.friendship.FriendshipService;
 import turbochess.service.game.GameService;
+import turbochess.service.user.UserException;
+import turbochess.service.user.UserService;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
 import javax.servlet.http.HttpSession;
 import javax.transaction.Transactional;
 import java.util.List;
@@ -26,12 +25,15 @@ import java.util.List;
 public class RootController {
     @Autowired
     PasswordEncoder passwordEncoder;
-    @PersistenceContext
-    // @Autowired
-    private EntityManager entityManager;
 
     @Autowired
     private IwUserDetailsService service;
+
+    @Autowired
+    private UserService userService;
+
+    @Autowired
+    private GameService gameService;
 
     @Autowired
     private HttpSession session;
@@ -40,33 +42,28 @@ public class RootController {
     private FriendshipService friendshipservice;
 
     @Autowired
-    private GameService gameService;
-    @Autowired
-    protected RoomRepository roomRepository;
+    private AdminMessageService adminMessageService;
+
 
     @GetMapping("/")
-    public String index(Model model, HttpSession session) {
+    public String index(Model model, HttpSession session) throws UserException{
        if (session.getAttribute("u") != null) {
             User user = (User) session.getAttribute("u");
             if(user.getRoles().contains("ADMIN")){
-                List<User> users = entityManager.createNamedQuery("User.findAll").getResultList();
+                List<User> users = userService.getAllUsers();
                 model.addAttribute("usersList", users);
             }
             if(user.getRoles().contains("USER")) {
-                Query query = entityManager.createNativeQuery("SELECT * FROM Friends " +
-                        "LEFT JOIN User on Friends.friend_id =User.id WHERE Friends.SUBJECT_ID= :userid " +
-                        "UNION ALL" +
-                        " SELECT  * FROM Friends LEFT JOIN User on Friends.SUBJECT_ID=User.id WHERE friend_id= :userid", User.class)
-                        .setParameter("userid", user.getId());
+                List<User> friends = userService.getUserFriends(user);
+//                .createNativeQuery("SELECT * FROM Friends " +
+//                        "LEFT JOIN User on Friends.friend_id =User.id WHERE Friends.SUBJECT_ID= :userid " +
+//                        "UNION ALL" +
+//                        " SELECT  * FROM Friends LEFT JOIN User on Friends.SUBJECT_ID=User.id WHERE friend_id= :userid", User.class)
+//                        .setParameter("userid", user.getId());
 
-                List<User> friends = (List<User>) query.getResultList();
                 List<Friendship> friendsRequest = friendshipservice.findByReceiverAndState(user, Friendship.State.OPEN);
                 if (!friendsRequest.isEmpty()) model.addAttribute("peticiones", friendsRequest);
-                // model.addAttribute("peticiones", friendsRequest);
-            /*
-            friends.stream().forEach((n) -> {
-                System.out.println(n.getUsername());
-            });*/
+
                 model.addAttribute("friends", friends);
             }
         }
@@ -97,7 +94,6 @@ public class RootController {
             User user = (User) session.getAttribute("u");
             List <Game> games = gameService.getGamesByUser(user);
             model.addAttribute("games", games);
-
         }
         return "history";
     }
@@ -145,21 +141,14 @@ public class RootController {
 
     @PostMapping("/send_to_admin")
     @Transactional
-    public String sendMessageToAdmin(User user, Model model,HttpSession session,
-                                     @RequestParam(value = "adminMsg", required = false) String adminMsg) {
-
-       String username = ((User) session.getAttribute("u")).getUsername();
-        AdminMessage message = new AdminMessage(username, adminMsg);
-        try{
-            entityManager.persist(message);
-            model.addAttribute("msg", "Your message have been sended");
-
-        }catch (Exception e){
-            model.addAttribute("msg", "Sorry, message not sended.Try it again! ");
-        }
-
-        return index( model,  session);
+    public String sendMessageToAdmin(Model model,HttpSession session, @RequestParam(value = "adminMsg", required = false) String adminMsg)
+            throws UserException{
+        String username = ((User) session.getAttribute("u")).getUsername();
+        adminMessageService.save(new AdminMessage(username, adminMsg));
+        model.addAttribute("msg", "Your message has been sent");
+        return index(model,  session);
     }
+
     @PostMapping("/signup_form")
     @Transactional
     public String processRegister(User user, Model model) {
@@ -173,20 +162,16 @@ public class RootController {
             user.setMatches_played(0);
             user.setEnabled((byte) 1);
 
-            List result = entityManager.createNamedQuery("User.byUsername").setParameter("username", user.getUsername()).getResultList();
-            if (result.isEmpty()) {
-                entityManager.persist(user);
+
+            if (!userService.doesUserExists(user.getUsername())) {
+                userService.save(user);
                 model.addAttribute("name", user.getUsername());
                 return "register_success";
-            } else {
-                model.addAttribute("msg", user.getUsername() + " already exists");
-                return "signup_form";
-            }
-        } else {
-            model.addAttribute("msg", "The password should be the same");
-            return "signup_form";
-        }
+            } else  model.addAttribute("msg", user.getUsername() + " already exists");
 
+        } else  model.addAttribute("msg", "The password should be the same");
+
+        return "signup_form";
     }
 
     @GetMapping("/room")
@@ -197,18 +182,16 @@ public class RootController {
 
     @RequestMapping(value = "/search", method = RequestMethod.GET)
     public String search(@RequestParam(value = "search", required = false) String username, Model model) {
-        List<User> searchResults = (List<User>) entityManager.createNamedQuery("User.search_result", User.class)
-                .setParameter("username", "%" + username + "%").getResultList();
-
+        List<User> searchResults = userService.getByLikeUsername(username);
         model.addAttribute("search", searchResults);
         return "userlist";
     }
 
     @PostMapping("/requestFriendship")
     @Transactional
-    public String requestFriendship(@RequestParam Long userId, Model model) {
+    public String requestFriendship(@RequestParam Long userId, Model model) throws UserException{
         User sender = (User) session.getAttribute("u");
-        User receiver = entityManager.find(User.class, userId);
+        User receiver = userService.getUserById(userId);
             try {
                 friendshipservice.createFriendshipRequest(sender, receiver);
             } catch (FriendshipException e) {
@@ -230,9 +213,9 @@ public class RootController {
      */
     @PostMapping(path = "/answerFriendshipRequest")
     @Transactional
-    public String answerFriendshipRequest(@RequestParam Long requestId, @RequestParam String action, Model model) throws FriendshipException {
-        User u=(User) session.getAttribute("u");
-        User sender= entityManager.find(User.class, requestId);
+    public String answerFriendshipRequest(@RequestParam Long requestId, @RequestParam String action, Model model) throws FriendshipException, UserException{
+        User u= (User) session.getAttribute("u");
+        User sender= userService.getUserById(requestId);
         Friendship response = friendshipservice.findOpenRequestBetween(u, sender);
 
         if(action.equals("Accept") ){
@@ -245,7 +228,6 @@ public class RootController {
             model.addAttribute("decline", true);
         }
         return "redirect:/";
-
     }
 
     @GetMapping("/editProfile")

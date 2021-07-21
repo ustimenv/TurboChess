@@ -23,6 +23,11 @@ public class UserServiceImp implements UserService{
     }
 
     @Override
+    public List<User> getByLikeUsername(String username){
+        return repository.getByLikeUsername(username);
+    }
+
+    @Override
     public User getUserById(long id) throws UserException{
         User u = repository.getByUserId(id);
         if(u != null){
@@ -38,6 +43,16 @@ public class UserServiceImp implements UserService{
     @Override
     public List<User> getUserFriends(User user) throws UserException{
         return repository.getFriendsByUserId(user.getId());
+    }
+
+    @Override
+    public List<User> getAllUsers(){
+        return repository.getAllUsers();
+    }
+
+    @Override
+    public User save(User user){
+        return repository.save(user);
     }
 
 

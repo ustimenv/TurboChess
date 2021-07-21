@@ -1,9 +1,9 @@
 package turbochess.service.room;
 
-import turbochess.model.room.Room;
-import turbochess.repository.RoomRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import turbochess.model.room.Room;
+import turbochess.repository.RoomRepository;
 
 import java.util.List;
 
@@ -29,6 +29,11 @@ public class RoomServiceImp implements RoomService{
     @Override
     public boolean roomExists(String roomCode){
         return roomCode != null && repository.countByCode(roomCode) > 0;
+    }
+
+    @Override
+    public Room save(Room room){
+        return repository.save(room);
     }
 
 

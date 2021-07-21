@@ -16,4 +16,5 @@ public interface FriendshipService {
 
     Friendship findOpenRequestBetween(User sender, User receiver);
 
+    Friendship save(Friendship friendship);
 }
