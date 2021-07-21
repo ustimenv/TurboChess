@@ -1,4 +1,4 @@
-package turbochess.repository;
+package turbochess.service.game;
 
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;

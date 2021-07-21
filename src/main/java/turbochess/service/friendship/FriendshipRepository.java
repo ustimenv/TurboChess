@@ -1,4 +1,4 @@
-package turbochess.repository;
+package turbochess.service.friendship;
 
 import org.springframework.data.repository.CrudRepository;
 import turbochess.model.Friendship;
